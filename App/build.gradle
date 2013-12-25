@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.6.+'
+        classpath 'com.android.tools.build:gradle:0.7.+'
     }
 }
 apply plugin: 'android'
@@ -42,4 +42,5 @@ dependencies {
     compile 'com.google.http-client:google-http-client-jackson2:1.17.0-rc'
     compile 'com.google.inject:guice:3.0:no_aop'
     compile 'com.github.chrisbanes.actionbarpulltorefresh:extra-abc:+'
+    compile 'com.github.chrisbanes.photoview:library:1.2.2'
 }

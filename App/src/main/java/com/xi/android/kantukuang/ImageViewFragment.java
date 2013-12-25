@@ -1,6 +1,7 @@
 package com.xi.android.kantukuang;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -10,21 +11,17 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
+
+import uk.co.senab.photoview.PhotoViewAttacher;
 
 
-/**
- * A simple {@link android.support.v4.app.Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ImageViewFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ImageViewFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class ImageViewFragment extends Fragment {
     private static final String ARG_IMAGE_URL = "image url";
     private OnFragmentInteractionListener mListener;
     private ImageLoader mImageLoader;
     private String mImageUrl;
+    private PhotoViewAttacher mPhotoViewAttacher;
 
     public ImageViewFragment() {
         // Required empty public constructor
@@ -56,6 +53,13 @@ public class ImageViewFragment extends Fragment {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        mPhotoViewAttacher.cleanup();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -63,16 +67,18 @@ public class ImageViewFragment extends Fragment {
 
         assert view != null;
         ImageView imageView = (ImageView) view.findViewById(android.R.id.content);
-        mImageLoader.displayImage(mImageUrl, imageView);
+
+        mImageLoader.displayImage(mImageUrl, imageView, new SimpleImageLoadingListener() {
+            @Override
+            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                ImageView imageView = (ImageView) view;
+                imageView.setImageBitmap(loadedImage);
+
+                mPhotoViewAttacher = new PhotoViewAttacher(imageView);
+            }
+        });
 
         return view;
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onImageViewFragmentInteraction(uri);
-        }
     }
 
     @Override
