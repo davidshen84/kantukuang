@@ -133,7 +133,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
         ActionBarPullToRefresh
                 .from(getActivity())
-//                .allChildrenArePullable()
                 .theseChildrenArePullable(mListView)
                 .listener(this)
                 .setup(mPullToRefreshLayout);
