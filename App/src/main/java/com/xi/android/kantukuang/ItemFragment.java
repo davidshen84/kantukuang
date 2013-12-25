@@ -20,7 +20,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.inject.Injector;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboTimelineAsyncTaskLoader;
@@ -32,16 +34,8 @@ import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLa
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
-/**
- * A fragment representing a list of Items.
- * <p/>
- * Large screen devices (such as tablets) are supported by replacing the ListView
- * with a GridView.
- * <p/>
- * Activities containing this fragment MUST implement the {@link ItemFragment.OnFragmentInteractionListener}
- * interface.
- */
-public class ItemFragment extends Fragment implements AbsListView.OnItemClickListener, LoaderManager.LoaderCallbacks<List<String>>, OnRefreshListener, Loader.OnLoadCompleteListener<List<String>> {
+
+public class ItemFragment extends Fragment implements AbsListView.OnItemClickListener, LoaderManager.LoaderCallbacks<List<String>>, OnRefreshListener {
 
     private static final int FORCE_TOP_PADDING = 256;
     private static final String ARG_TAG = "tag";
@@ -162,7 +156,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         ((IRefreshEventDispatcher) getActivity()).unregisterOnRefreshListener();
 
         if (weiboTimelineAsyncTaskLoader != null) {
-//            weiboTimelineAsyncTaskLoader.unregisterListener(this);
             weiboTimelineAsyncTaskLoader.abandon();
         }
     }
@@ -199,7 +192,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             weiboTimelineAsyncTaskLoader = new WeiboTimelineAsyncTaskLoader(
                     getActivity(), mWeiboClient, tag);
 
-//            weiboTimelineAsyncTaskLoader.registerListener(i, this);
             Log.d(TAG, "created new loader");
         }
 
@@ -223,7 +215,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             mListView.setVisibility(View.VISIBLE);
             setEmptyText(null);
         } else if (mListView.getCount() == 0) {
-            setEmptyText("nothing");
+            setEmptyText(getResources().getString(R.string.emptyListMessage));
             mListView.setVisibility(View.INVISIBLE);
         }
 
@@ -239,11 +231,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     @Override
     public void onRefreshStarted(View view) {
         weiboTimelineAsyncTaskLoader.onContentChanged();
-    }
-
-    @Override
-    public void onLoadComplete(Loader<List<String>> listLoader, List<String> strings) {
-        onLoadFinished(listLoader, strings);
     }
 
 
@@ -262,14 +249,19 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     }
 
     private class WeiboItemViewArrayAdapter extends ArrayAdapter<String> {
-        private LayoutInflater mInflater;
-        private ImageLoader mImageLoader;
+        private final DisplayImageOptions displayImageOptions;
+        private final LayoutInflater mInflater;
+        private final ImageLoader mImageLoader;
 
         public WeiboItemViewArrayAdapter(Context context, List<String> strings) {
             super(context, R.layout.fragment_item_image_view, strings);
             mInflater = (LayoutInflater) getContext().getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
             mImageLoader = ((MyApplication) getActivity().getApplication()).getImageLoader();
+            displayImageOptions = new DisplayImageOptions.Builder()
+                    .imageScaleType(ImageScaleType.IN_SAMPLE_POWER_OF_2)
+                    .cacheOnDisc(true)
+                    .build();
         }
 
         @Override
@@ -282,6 +274,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             }
 
             mImageLoader.displayImage(getItem(position), (ImageView) convertView,
+                                      displayImageOptions,
                                       new SimpleImageLoadingListener() {
                                           @Override
                                           public void onLoadingComplete(String imageUri,

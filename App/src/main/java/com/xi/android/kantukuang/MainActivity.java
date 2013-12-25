@@ -82,21 +82,20 @@ public class MainActivity extends ActionBarActivity
             default:
                 Log.d(TAG, "default not ready");
                 break;
-/*            case 1:
-
-                itemFragment = ItemFragment.newInstance(R.array.url_for_test2, position);
-                break;
-            case 2:
-
-                itemFragment = ItemFragment.newInstance(R.array.url_for_test3, position);
-                break;*/
         }
 
         // update the main content by replacing fragments
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, itemFragment)
-                .addToBackStack("drawer")
-                .commit();
+        if (position == 0) {
+            // do not put HOME into back stack
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container, itemFragment)
+                    .commit();
+        } else {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container, itemFragment)
+                    .addToBackStack("drawer")
+                    .commit();
+        }
     }
 
     public void onSectionAttached(String section) {

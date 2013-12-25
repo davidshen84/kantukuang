@@ -4,5 +4,4 @@
            android:layout_width="fill_parent"
            android:layout_height="128dp"
            android:scaleType="centerCrop"
-           android:paddingTop="256dp"
            android:id="@android:id/content"/>

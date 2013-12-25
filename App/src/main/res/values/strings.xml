@@ -11,6 +11,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="title_bind_weibo">Bind with Weibo</string>
     <string name="loadingMessage">loading</string>
+    <string name="emptyListMessage">nothing</string>
 
     <string-array name="default_sections">
         <item>公共空间</item>
