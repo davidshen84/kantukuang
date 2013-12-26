@@ -47,7 +47,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
      */
     private AbsListView mListView;
     private WeiboClient mWeiboClient;
-    private WeiboTimelineAsyncTaskLoader weiboTimelineAsyncTaskLoader;
     private ArrayAdapter<String> mWeiboItemViewArrayAdapter;
     private List<String> mImageUrlArrayList = new ArrayList<String>();
     private String mTag;
@@ -101,10 +100,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             ((MainActivity) getActivity()).onSectionAttached(mTag);
         }
 
-        Bundle loaderBundle = new Bundle();
-        loaderBundle.putString(ARG_TAG, mTag);
-        getLoaderManager().initLoader(0, loaderBundle, this);
-        Log.d(TAG, "started loader");
+        getLoaderManager().initLoader(0, arguments, this);
     }
 
     @Override
@@ -141,7 +137,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            ((IRefreshEventDispatcher) activity).registerOnRefreshListener(this);
+            ((RefreshEventDispatcher) activity).registerOnRefreshListener(this);
             mFragmentInteractionListener = (OnFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
@@ -153,11 +149,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     public void onDetach() {
         super.onDetach();
         mFragmentInteractionListener = null;
-        ((IRefreshEventDispatcher) getActivity()).unregisterOnRefreshListener();
-
-        if (weiboTimelineAsyncTaskLoader != null) {
-            weiboTimelineAsyncTaskLoader.abandon();
-        }
+        ((RefreshEventDispatcher) getActivity()).unregisterOnRefreshListener();
     }
 
     @Override
@@ -187,50 +179,58 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
     @Override
     public Loader<List<String>> onCreateLoader(int i, Bundle bundle) {
-        if (weiboTimelineAsyncTaskLoader == null) {
-            String tag = bundle.getString(ARG_TAG);
-            weiboTimelineAsyncTaskLoader = new WeiboTimelineAsyncTaskLoader(
-                    getActivity(), mWeiboClient, tag);
+        Log.v(TAG, "created new loader");
+        String tag = bundle.getString(ARG_TAG);
 
-            Log.d(TAG, "created new loader");
-        }
-
-        return weiboTimelineAsyncTaskLoader;
+        return new WeiboTimelineAsyncTaskLoader(
+                getActivity(), mWeiboClient, tag);
     }
 
     @Override
     public void onLoadFinished(Loader<List<String>> listLoader, List<String> strings) {
-        if (strings != null && strings.size() > 0) {
-            Log.d(TAG, String.format("append %d entries", strings.size()));
-            Toast.makeText(getActivity(), String.format("loaded %d items", strings.size()),
-                           Toast.LENGTH_SHORT).show();
 
-            // insert in front
-            mImageUrlArrayList.addAll(0, strings);
-            // clear reference
-            strings.clear();
+        WeiboTimelineAsyncTaskLoader loader = (WeiboTimelineAsyncTaskLoader) listLoader;
+        if (loader.takeHasError()) {
+            // display error message
+            Toast.makeText(getActivity(), R.string.loadErrorMessage, Toast.LENGTH_SHORT).show();
+        } else {
+            int newDataCount = loader.takeNewDataCount();
+            if (newDataCount > 0) {
+                Toast.makeText(getActivity(),
+                               getResources().getString(R.string.newDataFormat, newDataCount),
+                               Toast.LENGTH_SHORT)
+                        .show();
 
-            mWeiboItemViewArrayAdapter.notifyDataSetChanged();
-            mListView.scrollTo(0, 0);
-            mListView.setVisibility(View.VISIBLE);
-            setEmptyText(null);
-        } else if (mListView.getCount() == 0) {
-            setEmptyText(getResources().getString(R.string.emptyListMessage));
-            mListView.setVisibility(View.INVISIBLE);
+                // insert data to top
+                mImageUrlArrayList.addAll(0, strings);
+                mWeiboItemViewArrayAdapter.notifyDataSetChanged();
+
+                // update view state
+                mListView.setVisibility(View.VISIBLE);
+                setEmptyText(null);
+            } else if (mListView.getCount() == 0) {
+                // display empty view
+                setEmptyText(getResources().getString(R.string.emptyListMessage));
+                mListView.setVisibility(View.INVISIBLE);
+            }
         }
 
-        if (mPullToRefreshLayout.isRefreshing())
-            mPullToRefreshLayout.setRefreshComplete();
+        // stop loading animation in action bar
+        mPullToRefreshLayout.setRefreshComplete();
     }
 
     @Override
     public void onLoaderReset(Loader<List<String>> listLoader) {
-        Log.d(TAG, "reset loader");
+        Log.v(TAG, "reset loader");
+        listLoader.reset();
     }
 
     @Override
     public void onRefreshStarted(View view) {
-        weiboTimelineAsyncTaskLoader.onContentChanged();
+        if (!mPullToRefreshLayout.isRefreshing())
+            mPullToRefreshLayout.setRefreshing(true);
+
+        getLoaderManager().getLoader(0).onContentChanged();
     }
 
 
@@ -255,6 +255,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
         public WeiboItemViewArrayAdapter(Context context, List<String> strings) {
             super(context, R.layout.fragment_item_image_view, strings);
+
             mInflater = (LayoutInflater) getContext().getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
             mImageLoader = ((MyApplication) getActivity().getApplication()).getImageLoader();

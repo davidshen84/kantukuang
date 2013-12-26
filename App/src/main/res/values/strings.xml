@@ -4,14 +4,13 @@
     <string name="app_name">看图狂</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="action_example">Example action</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_web">WebActivity</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="title_bind_weibo">Bind with Weibo</string>
-    <string name="loadingMessage">loading</string>
-    <string name="emptyListMessage">nothing</string>
+    <string name="title_bind_weibo">绑定微薄</string>
+    <string name="loadingMessage">加载中。。。</string>
+    <string name="emptyListMessage">无内容</string>
+    <string name="loadErrorMessage">加载失败。。。</string>
+    <string name="newDataFormat">loaded %d items</string>
 
     <string-array name="default_sections">
         <item>公共空间</item>

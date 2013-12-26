@@ -20,7 +20,7 @@ import java.util.Stack;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks, ItemFragment.OnFragmentInteractionListener, ImageViewFragment.OnFragmentInteractionListener, IRefreshEventDispatcher {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, ItemFragment.OnFragmentInteractionListener, ImageViewFragment.OnFragmentInteractionListener, RefreshEventDispatcher {
 
     private static final int BIND_WEIBO = 0x000A;
     private static final String TAG = MainActivity.class.getName();
@@ -159,7 +159,7 @@ public class MainActivity extends ActionBarActivity
             intent.putExtra(WebActivity.LANDING_URL, mWeiboClient.getAuthorizeUrl());
 
             startActivityForResult(intent, BIND_WEIBO);
-        } else if (id == R.id.action_update) {
+        } else if (id == R.id.action_refresh) {
             if (mUpdateListenerStack.size() > 0)
                 mUpdateListenerStack.peek().onRefreshStarted(null);
         }

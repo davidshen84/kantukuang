@@ -5,6 +5,7 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> {
@@ -12,6 +13,8 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
     private final String mTag;
     private WeiboClient mWeiboClient;
     private String mSinceId = null;
+    private int newDataCount;
+    private boolean hasError;
 
     public WeiboTimelineAsyncTaskLoader(Context context, WeiboClient weiboClient,
                                         String tag) {
@@ -23,8 +26,16 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
     }
 
     @Override
+    protected void onReset() {
+        stopLoading();
+        newDataCount = 0;
+        mSinceId = null;
+        hasError=false;
+    }
+
+    @Override
     protected void onStartLoading() {
-        if (takeContentChanged() || mSinceId == null) {
+        if (mSinceId == null) {
             forceLoad();
         }
     }
@@ -33,15 +44,17 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
     public List<String> loadInBackground() {
 
         WeiboTimeline weiboTimeline = null;
-        List<String> stringList = null;
+        List<String> stringList;
 
         if (isAbandoned()) {
-            mSinceId = null;
+            reset();
             return null;
         }
 
         Log.v(TAG, String.format("start loading weibo timeline: %s", mTag));
 
+        // make sure do not return null ref.
+        stringList = new ArrayList<String>();
         try {
             if (mTag.equalsIgnoreCase("public")) {
                 weiboTimeline = mWeiboClient.getPublicTimeline(mSinceId);
@@ -52,7 +65,6 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
             }
 
             if (weiboTimeline != null && weiboTimeline.statuses.size() > 0) {
-                stringList = new ArrayList<String>();
                 Log.v(TAG, String.format("received %d statuses.", weiboTimeline.statuses.size()));
                 if (!weiboTimeline.statuses.get(0).id.equalsIgnoreCase(mSinceId)) {
                     mSinceId = weiboTimeline.statuses.get(0).id;
@@ -65,11 +77,28 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
                         stringList.add(status.thumbnailUrl);
                     }
                 }
+
+                newDataCount = stringList.size();
             }
         } catch (WeiboTimelineException ignored) {
             Log.v(TAG, "there's an error when loading timeline");
+            hasError = true;
         }
 
         return stringList;
+    }
+
+    public int takeNewDataCount() {
+        int result = newDataCount;
+        newDataCount = 0;
+
+        return result;
+    }
+
+    public boolean takeHasError() {
+        boolean result = hasError;
+        hasError = false;
+
+        return result;
     }
 }

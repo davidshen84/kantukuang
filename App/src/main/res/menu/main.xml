@@ -3,18 +3,18 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.xi.android.kantukuang.MainActivity">
     <item
+        android:id="@+id/action_refresh"
+        android:title="Refresh"
+        android:icon="@drawable/ic_action_refresh"
+        app:showAsAction="ifRoom"/>
+    <item
         android:id="@+id/action_bind_weibo"
         android:title="@string/title_bind_weibo"
-        android:icon="@drawable/abc_ic_menu_share_holo_dark"
+        android:icon="@drawable/ic_action_new"
         app:showAsAction="ifRoom"/>
-    <item
-        android:id="@+id/action_update"
-        android:title="Update"
-        android:icon="@drawable/abc_ic_go"
-        app:showAsAction="ifRoom"/>
-    <item
-        android:id="@+id/action_settings"
-        android:title="@string/action_settings"
-        android:orderInCategory="100"
-        app:showAsAction="never"/>
+    <!--    <item
+            android:id="@+id/action_settings"
+            android:title="@string/action_settings"
+            android:orderInCategory="100"
+            app:showAsAction="never"/>-->
 </menu>
