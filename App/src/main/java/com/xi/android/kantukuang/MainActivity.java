@@ -3,6 +3,7 @@ package com.xi.android.kantukuang;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -27,12 +28,8 @@ public class MainActivity extends ActionBarActivity
     private final Stack<OnRefreshListener> mUpdateListenerStack = new Stack<OnRefreshListener>();
     private final Injector mInjector;
     private WeiboClient mWeiboClient;
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-     */
-    private NavigationDrawerFragment mNavigationDrawerFragment;
     private String mAccessToken;
-    private Integer mCurrentPosition = null;
+    private boolean mShowActionBarOptions = true;
 
     public MainActivity() {
         mInjector = KanTuKuangModule.getInjector();
@@ -46,10 +43,13 @@ public class MainActivity extends ActionBarActivity
         setContentView(R.layout.activity_main);
 
         // TODO remove this
-        mAccessToken = mInjector.getInstance(Key.get(String.class, Names.named("access_token")));
+        mAccessToken = mInjector.getInstance(Key.get(String.class, Names.named("access token")));
         mWeiboClient.setAccessToken(mAccessToken);
 
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
+
+//      Fragment managing the behaviors, interactions and presentation of the navigation drawer.
+
+        NavigationDrawerFragment mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
 
         // Set up the drawer.
@@ -62,13 +62,6 @@ public class MainActivity extends ActionBarActivity
     public void onNavigationDrawerItemSelected(int position) {
         ItemFragment itemFragment = null;
 
-        if (mCurrentPosition != null && mCurrentPosition == position) {
-            ((OnRefreshListener) getSupportFragmentManager().findFragmentById(
-                    R.id.container)).onRefreshStarted(null);
-            return;
-        }
-
-        mCurrentPosition = position;
         switch (position) {
             case 0:
                 // Public Home
@@ -78,9 +71,11 @@ public class MainActivity extends ActionBarActivity
             case 1:
                 // Private Home
                 itemFragment = ItemFragment.newInstance("home", mAccessToken);
+
                 break;
             default:
                 Log.d(TAG, "default not ready");
+
                 break;
         }
 
@@ -114,7 +109,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
+        if (mShowActionBarOptions) {
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
@@ -191,5 +186,10 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void unregisterOnRefreshListener() {
         mUpdateListenerStack.pop();
+    }
+
+    public void showActionBarOptions(boolean showOptions) {
+        mShowActionBarOptions = showOptions;
+        supportInvalidateOptionsMenu();
     }
 }

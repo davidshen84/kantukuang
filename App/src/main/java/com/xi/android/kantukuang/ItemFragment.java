@@ -136,18 +136,19 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+
         try {
             ((RefreshEventDispatcher) activity).registerOnRefreshListener(this);
             mFragmentInteractionListener = (OnFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                                                 + " must implement OnFragmentInteractionListener");
+            throw new ClassCastException(activity.toString());
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+
         mFragmentInteractionListener = null;
         ((RefreshEventDispatcher) getActivity()).unregisterOnRefreshListener();
     }
@@ -182,8 +183,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         Log.v(TAG, "created new loader");
         String tag = bundle.getString(ARG_TAG);
 
-        return new WeiboTimelineAsyncTaskLoader(
-                getActivity(), mWeiboClient, tag);
+        return new WeiboTimelineAsyncTaskLoader(getActivity(), mWeiboClient, tag);
     }
 
     @Override
@@ -208,15 +208,18 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
                 // update view state
                 mListView.setVisibility(View.VISIBLE);
                 setEmptyText(null);
-            } else if (mListView.getCount() == 0) {
-                // display empty view
-                setEmptyText(getResources().getString(R.string.emptyListMessage));
-                mListView.setVisibility(View.INVISIBLE);
             }
+        }
+
+        if (mListView.getCount() == 0) {
+            // display empty view
+            setEmptyText(getResources().getString(R.string.emptyListMessage));
+            mListView.setVisibility(View.INVISIBLE);
         }
 
         // stop loading animation in action bar
         mPullToRefreshLayout.setRefreshComplete();
+
     }
 
     @Override

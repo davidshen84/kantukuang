@@ -52,7 +52,7 @@ public class KanTuKuangModule extends AbstractModule {
         bind(String.class).annotatedWith(Names.named("authorization_server_encoded_url"))
                 .toInstance("https://api.weibo.com/oauth2/authorize");
 
-        bind(String.class).annotatedWith(Names.named("access_token"))
+        bind(String.class).annotatedWith(Names.named("access token"))
                 .toInstance("2.00uOPaHD1JlHSDcc83013405KD6O9D");
 
         bind(String.class).annotatedWith(Names.named("redirect uri")).toInstance("kantukuang.com/");
