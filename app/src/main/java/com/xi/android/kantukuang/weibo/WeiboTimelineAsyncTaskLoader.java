@@ -27,7 +27,6 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
 
     @Override
     protected void onReset() {
-        stopLoading();
         newDataCount = 0;
         mSinceId = null;
         hasError=false;

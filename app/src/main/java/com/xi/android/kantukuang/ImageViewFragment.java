@@ -53,10 +53,9 @@ public class ImageViewFragment extends Fragment {
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
+    public void onStop() {
         mPhotoViewAttacher.cleanup();
+        super.onStop();
     }
 
     @Override

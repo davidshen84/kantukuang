@@ -52,6 +52,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     private String mTag;
     private View mEmptyView;
     private PullToRefreshLayout mPullToRefreshLayout;
+    private Bundle mArguments;
 
 
     /**
@@ -85,7 +86,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Bundle arguments = getArguments();
+        mArguments = getArguments();
 
         if (!mWeiboClient.IsAuthenticated()) {
             Log.v(TAG, "weibo client is not authenticated.");
@@ -95,12 +96,30 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             return;
         }
 
-        if (arguments != null) {
-            mTag = arguments.getString(ARG_TAG);
+        if (mArguments != null) {
+            mTag = mArguments.getString(ARG_TAG);
             ((MainActivity) getActivity()).onSectionAttached(mTag);
         }
 
-        getLoaderManager().initLoader(0, arguments, this);
+    }
+
+    @Override
+    public void onStop() {
+        getLoaderManager().getLoader(0).reset();
+        super.onStop();
+    }
+
+    @Override
+    public void onStart() {
+
+        ActionBarPullToRefresh
+                .from(getActivity())
+                .theseChildrenArePullable(mListView)
+                .listener(this)
+                .setup(mPullToRefreshLayout);
+        getLoaderManager().getLoader(0).startLoading();
+        super.onStart();
+
     }
 
     @Override
@@ -121,14 +140,10 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
 
-        ActionBarPullToRefresh
-                .from(getActivity())
-                .theseChildrenArePullable(mListView)
-                .listener(this)
-                .setup(mPullToRefreshLayout);
-
         if (mImageUrlArrayList.size() > 0)
             setEmptyText(null);
+
+        getLoaderManager().initLoader(0, mArguments, this);
 
         return view;
     }
@@ -138,7 +153,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         super.onAttach(activity);
 
         try {
-            ((RefreshEventDispatcher) activity).registerOnRefreshListener(this);
             mFragmentInteractionListener = (OnFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString());
@@ -150,7 +164,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         super.onDetach();
 
         mFragmentInteractionListener = null;
-        ((RefreshEventDispatcher) getActivity()).unregisterOnRefreshListener();
     }
 
     @Override
@@ -219,7 +232,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
         // stop loading animation in action bar
         mPullToRefreshLayout.setRefreshComplete();
-
     }
 
     @Override

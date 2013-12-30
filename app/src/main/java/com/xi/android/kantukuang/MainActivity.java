@@ -3,7 +3,6 @@ package com.xi.android.kantukuang;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -16,16 +15,13 @@ import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 
-import java.util.Stack;
-
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks, ItemFragment.OnFragmentInteractionListener, ImageViewFragment.OnFragmentInteractionListener, RefreshEventDispatcher {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, ItemFragment.OnFragmentInteractionListener, ImageViewFragment.OnFragmentInteractionListener {
 
-    private static final int BIND_WEIBO = 0x000A;
+    private static final int ACTIVITY_REQUEST_CODE_BIND_WEIBO = 0x000A;
     private static final String TAG = MainActivity.class.getName();
-    private final Stack<OnRefreshListener> mUpdateListenerStack = new Stack<OnRefreshListener>();
     private final Injector mInjector;
     private WeiboClient mWeiboClient;
     private String mAccessToken;
@@ -56,6 +52,15 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // set up action bar title
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle(getTitle());
     }
 
     @Override
@@ -95,8 +100,6 @@ public class MainActivity extends ActionBarActivity
 
     public void onSectionAttached(String section) {
         setTitle(section);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle(section);
     }
 
     public void restoreActionBar() {
@@ -126,7 +129,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == BIND_WEIBO) {
+        if (requestCode == ACTIVITY_REQUEST_CODE_BIND_WEIBO) {
             if (resultCode == RESULT_OK) {
                 // get authorize code
                 String code = data.getStringExtra(WebActivity.AUTHORIZE_CODE);
@@ -147,16 +150,25 @@ public class MainActivity extends ActionBarActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        } else if (id == R.id.action_bind_weibo) {
-            Intent intent = new Intent(this, WebActivity.class);
-            intent.putExtra(WebActivity.LANDING_URL, mWeiboClient.getAuthorizeUrl());
+        switch (id) {
+            case R.id.action_settings:
+                return true;
+            case R.id.action_bind_weibo:
+                Intent intent = new Intent(this, WebActivity.class);
+                intent.putExtra(WebActivity.LANDING_URL, mWeiboClient.getAuthorizeUrl());
 
-            startActivityForResult(intent, BIND_WEIBO);
-        } else if (id == R.id.action_refresh) {
-            if (mUpdateListenerStack.size() > 0)
-                mUpdateListenerStack.peek().onRefreshStarted(null);
+                startActivityForResult(intent, ACTIVITY_REQUEST_CODE_BIND_WEIBO);
+
+                return true;
+            case R.id.action_refresh:
+                OnRefreshListener refreshListener = (OnRefreshListener) getSupportFragmentManager().findFragmentById(
+                        R.id.container);
+                if (refreshListener != null)
+                    refreshListener.onRefreshStarted(null);
+                else
+                    Log.v(TAG, "refresh action has no listener");
+
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -178,18 +190,9 @@ public class MainActivity extends ActionBarActivity
 
     }
 
-    @Override
-    public void registerOnRefreshListener(OnRefreshListener listener) {
-        mUpdateListenerStack.push(listener);
-    }
-
-    @Override
-    public void unregisterOnRefreshListener() {
-        mUpdateListenerStack.pop();
-    }
-
     public void showActionBarOptions(boolean showOptions) {
         mShowActionBarOptions = showOptions;
         supportInvalidateOptionsMenu();
     }
+
 }

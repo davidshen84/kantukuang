@@ -1,10 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             tools:context="com.xi.android.kantukuang.ItemFragment">-->
-
 <uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/ptr_layout"
@@ -30,5 +24,4 @@
 
     </ScrollView>
 </uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout>
-    <!--
-    </FrameLayout>-->
+
