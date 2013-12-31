@@ -2,22 +2,30 @@ package com.xi.android.kantukuang;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.xi.android.kantukuang.weibo.WeiboClient;
+import com.xi.android.kantukuang.weibo.WeiboTimelineAsyncTaskLoader;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks, ItemFragment.OnFragmentInteractionListener {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, ItemFragment.OnFragmentInteractionListener, LoaderManager.LoaderCallbacks<List<String>> {
 
     private static final int ACTIVITY_REQUEST_CODE_BIND_WEIBO = 0x000A;
     private static final String TAG = MainActivity.class.getName();
@@ -25,6 +33,8 @@ public class MainActivity extends ActionBarActivity
     private WeiboClient mWeiboClient;
     private String mAccessToken;
     private NavigationDrawerFragment mNavigationDrawerFragment;
+    private String mSection;
+    private List<String> mImageUrlList = new ArrayList<String>();
 
     public MainActivity() {
         mInjector = KanTuKuangModule.getInjector();
@@ -37,17 +47,14 @@ public class MainActivity extends ActionBarActivity
 
         setContentView(R.layout.activity_main);
 
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-
         // TODO remove this
         mAccessToken = mInjector.getInstance(Key.get(String.class, Names.named("access token")));
         mWeiboClient.setAccessToken(mAccessToken);
 
-
 //      Fragment managing the behaviors, interactions and presentation of the navigation drawer.
+        FragmentManager supportFragmentManager = getSupportFragmentManager();
         mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+                supportFragmentManager.findFragmentById(R.id.navigation_drawer);
 
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
@@ -86,21 +93,14 @@ public class MainActivity extends ActionBarActivity
         }
 
         // update the main content by replacing fragments
-        if (position == 0) {
-            // do not put HOME into back stack
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, itemFragment)
-                    .commit();
-        } else {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, itemFragment)
-                    .addToBackStack("drawer")
-                    .commit();
-        }
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.container, itemFragment)
+                .commit();
     }
 
     public void onSectionAttached(String section) {
         setTitle(section);
+        mSection = section;
     }
 
     public void restoreActionBar() {
@@ -178,14 +178,75 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onItemFragmentInteraction(int position) {
         // load image view activity
-        ItemFragment itemFragment = (ItemFragment)
-                getSupportFragmentManager().findFragmentById(R.id.container);
         Intent intent = new Intent(this, ImageViewActivity.class);
 
-        intent.putStringArrayListExtra(ImageViewActivity.URL_LIST, itemFragment.getItemArrayList());
+        intent.putStringArrayListExtra(ImageViewActivity.URL_LIST,
+                                       (ArrayList<String>) mImageUrlList);
         intent.putExtra(ImageViewActivity.ITEM_POSITION, position);
 
         startActivity(intent);
     }
 
+    @Override
+    public Loader<List<String>> onCreateLoader(int i, Bundle bundle) {
+        Log.v(TAG, "created new loader");
+        return new WeiboTimelineAsyncTaskLoader(this, mWeiboClient);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<String>> listLoader, List<String> strings) {
+        ItemFragment itemFragment = (ItemFragment) getSupportFragmentManager().findFragmentById(
+                R.id.container);
+
+        WeiboTimelineAsyncTaskLoader loader = (WeiboTimelineAsyncTaskLoader) listLoader;
+        if (loader.takeHasError()) {
+            // display error message
+            Toast.makeText(this, R.string.loadErrorMessage, Toast.LENGTH_SHORT).show();
+        } else {
+            int newDataCount = loader.takeNewDataCount();
+            if (newDataCount > 0) {
+                Toast.makeText(this,
+                               getResources().getString(R.string.newDataFormat, newDataCount),
+                               Toast.LENGTH_SHORT)
+                        .show();
+
+                // insert data to top
+                mImageUrlList.addAll(0, strings);
+                itemFragment.setItemList(mImageUrlList);
+            }
+        }
+
+        if (mImageUrlList.size() == 0) {
+            // display empty view
+            itemFragment.setEmptyText(getResources().getString(R.string.emptyListMessage));
+        } else {
+            itemFragment.setEmptyText(null);
+        }
+
+        // stop loading animation in action bar
+        itemFragment.setRefreshComplete();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<String>> listLoader) {
+
+    }
+
+    public String getSetction() {
+        return mSection;
+    }
+
+    public void initLoader() {
+        LoaderManager supportLoaderManager = getSupportLoaderManager();
+        if (supportLoaderManager.getLoader(0) == null)
+            supportLoaderManager.initLoader(0, null, this);
+    }
+
+    public void forceLoad() {
+        getSupportLoaderManager().getLoader(0).forceLoad();
+    }
+
+    public void refreshLoader() {
+        getSupportLoaderManager().getLoader(0).onContentChanged();
+    }
 }

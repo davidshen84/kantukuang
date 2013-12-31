@@ -4,24 +4,24 @@ import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
+import com.xi.android.kantukuang.MainActivity;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> {
     private static final String TAG = WeiboTimelineAsyncTaskLoader.class.getName();
-    private final String mTag;
+    private final MainActivity context;
     private WeiboClient mWeiboClient;
     private String mSinceId = null;
     private int newDataCount;
     private boolean hasError;
 
-    public WeiboTimelineAsyncTaskLoader(Context context, WeiboClient weiboClient,
-                                        String tag) {
+    public WeiboTimelineAsyncTaskLoader(Context context, WeiboClient weiboClient) {
         super(context);
+        this.context =(MainActivity) context;
 
         mWeiboClient = weiboClient;
-        mTag = tag;
         setUpdateThrottle(10000);
     }
 
@@ -29,7 +29,7 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
     protected void onReset() {
         newDataCount = 0;
         mSinceId = null;
-        hasError=false;
+        hasError = false;
     }
 
     @Override
@@ -43,17 +43,18 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
             return null;
         }
 
-        Log.v(TAG, String.format("start loading weibo timeline: %s", mTag));
 
         // make sure do not return null ref.
         stringList = new ArrayList<String>();
+        String tag = context.getSetction();
+        Log.v(TAG, String.format("start loading weibo timeline: %s", tag));
         try {
-            if (mTag.equalsIgnoreCase("public")) {
+            if (tag.equalsIgnoreCase("public")) {
                 weiboTimeline = mWeiboClient.getPublicTimeline(mSinceId);
-            } else if (mTag.equalsIgnoreCase("home")) {
+            } else if (tag.equalsIgnoreCase("home")) {
                 weiboTimeline = mWeiboClient.getHomeTimeline(mSinceId);
             } else {
-                Log.d(TAG, String.format("i don't know how to load %s", mTag));
+                Log.d(TAG, String.format("i don't know how to load %s", tag));
             }
 
             if (weiboTimeline != null && weiboTimeline.statuses.size() > 0) {
@@ -78,6 +79,11 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
         }
 
         return stringList;
+    }
+
+    @Override
+    public void deliverResult(List<String> data) {
+        super.deliverResult(data);
     }
 
     public int takeNewDataCount() {
