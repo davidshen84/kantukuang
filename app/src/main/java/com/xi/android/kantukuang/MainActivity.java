@@ -1,7 +1,6 @@
 package com.xi.android.kantukuang;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -18,14 +17,14 @@ import com.xi.android.kantukuang.weibo.WeiboClient;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks, ItemFragment.OnFragmentInteractionListener, ImageViewFragment.OnFragmentInteractionListener {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, ItemFragment.OnFragmentInteractionListener {
 
     private static final int ACTIVITY_REQUEST_CODE_BIND_WEIBO = 0x000A;
     private static final String TAG = MainActivity.class.getName();
     private final Injector mInjector;
     private WeiboClient mWeiboClient;
     private String mAccessToken;
-    private boolean mShowActionBarOptions = true;
+    private NavigationDrawerFragment mNavigationDrawerFragment;
 
     public MainActivity() {
         mInjector = KanTuKuangModule.getInjector();
@@ -38,14 +37,16 @@ public class MainActivity extends ActionBarActivity
 
         setContentView(R.layout.activity_main);
 
+        mNavigationDrawerFragment = (NavigationDrawerFragment)
+                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+
         // TODO remove this
         mAccessToken = mInjector.getInstance(Key.get(String.class, Names.named("access token")));
         mWeiboClient.setAccessToken(mAccessToken);
 
 
 //      Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-
-        NavigationDrawerFragment mNavigationDrawerFragment = (NavigationDrawerFragment)
+        mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
 
         // Set up the drawer.
@@ -112,7 +113,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        if (mShowActionBarOptions) {
+        if (!mNavigationDrawerFragment.isDrawerOpen()) {
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
@@ -175,24 +176,16 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
-    public void onItemFragmentInteraction(String url) {
-        // load full image view fragment
+    public void onItemFragmentInteraction(int position) {
+        // load image view activity
+        ItemFragment itemFragment = (ItemFragment)
+                getSupportFragmentManager().findFragmentById(R.id.container);
+        Intent intent = new Intent(this, ImageViewActivity.class);
 
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.container, ImageViewFragment.newInstance(url))
-                .addToBackStack("image_view")
-                .commit();
-    }
+        intent.putStringArrayListExtra(ImageViewActivity.URL_LIST, itemFragment.getItemArrayList());
+        intent.putExtra(ImageViewActivity.ITEM_POSITION, position);
 
-    @Override
-    public void onImageViewFragmentInteraction(Uri uri) {
-
-    }
-
-    public void showActionBarOptions(boolean showOptions) {
-        mShowActionBarOptions = showOptions;
-        supportInvalidateOptionsMenu();
+        startActivity(intent);
     }
 
 }

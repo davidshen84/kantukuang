@@ -17,4 +17,6 @@
         <item>我的主页</item>
     </string-array>
 
+    <string name="title_activity_image_view">ImageViewActivity</string>
+
 </resources>

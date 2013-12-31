@@ -54,7 +54,8 @@ public class ImageViewFragment extends Fragment {
 
     @Override
     public void onStop() {
-        mPhotoViewAttacher.cleanup();
+        if (mPhotoViewAttacher != null)
+            mPhotoViewAttacher.cleanup();
         super.onStop();
     }
 
@@ -85,7 +86,6 @@ public class ImageViewFragment extends Fragment {
         super.onAttach(activity);
 
         try {
-            ((MainActivity)getActivity()).showActionBarOptions(false);
             mListener = (OnFragmentInteractionListener) activity;
 
         } catch (ClassCastException e) {
@@ -99,7 +99,6 @@ public class ImageViewFragment extends Fragment {
         super.onDetach();
 
         mListener = null;
-        ((MainActivity)getActivity()).showActionBarOptions(true);
     }
 
 

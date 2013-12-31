@@ -41,6 +41,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     private static final String ARG_TAG = "tag";
     private static final String ARG_ACCESS_TOKEN = "access token";
     private static final String TAG = ItemFragment.class.getName();
+    private static final String URL_LIST = "URL_LIST";
     private OnFragmentInteractionListener mFragmentInteractionListener;
     /**
      * The fragment's ListView/GridView.
@@ -75,14 +76,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        Loader<Object> loader = getLoaderManager().getLoader(0);
-        if (loader != null && loader.isStarted())
-            loader.abandon();
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -104,12 +97,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     }
 
     @Override
-    public void onStop() {
-        getLoaderManager().getLoader(0).reset();
-        super.onStop();
-    }
-
-    @Override
     public void onStart() {
 
         ActionBarPullToRefresh
@@ -120,6 +107,14 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         getLoaderManager().getLoader(0).startLoading();
         super.onStart();
 
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Loader<Object> loader = getLoaderManager().getLoader(0);
+        if (loader != null && loader.isStarted())
+            loader.abandon();
     }
 
     @Override
@@ -140,12 +135,21 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
 
+        startInitLoad();
+
         if (mImageUrlArrayList.size() > 0)
             setEmptyText(null);
 
-        getLoaderManager().initLoader(0, mArguments, this);
-
         return view;
+    }
+
+    private void startInitLoad() {
+        LoaderManager loaderManager = getLoaderManager();
+        loaderManager.initLoader(0, mArguments, this);
+
+
+        mPullToRefreshLayout.setRefreshing(true);
+        loaderManager.getLoader(0).forceLoad();
     }
 
     @Override
@@ -157,6 +161,13 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString());
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putStringArrayList(URL_LIST, getItemArrayList());
     }
 
     @Override
@@ -172,8 +183,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
 
-            String url = (String) parent.getItemAtPosition(position);
-            mFragmentInteractionListener.onItemFragmentInteraction(url);
+            mFragmentInteractionListener.onItemFragmentInteraction(position);
         }
     }
 
@@ -248,6 +258,10 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         getLoaderManager().getLoader(0).onContentChanged();
     }
 
+    public ArrayList<String> getItemArrayList() {
+        return (ArrayList<String>) mImageUrlArrayList;
+    }
+
 
     /**
      * This interface must be implemented by activities that contain this
@@ -260,7 +274,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        public void onItemFragmentInteraction(String position);
+        public void onItemFragmentInteraction(int position);
     }
 
     private class WeiboItemViewArrayAdapter extends ArrayAdapter<String> {

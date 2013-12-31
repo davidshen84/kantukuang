@@ -33,13 +33,6 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
     }
 
     @Override
-    protected void onStartLoading() {
-        if (mSinceId == null) {
-            forceLoad();
-        }
-    }
-
-    @Override
     public List<String> loadInBackground() {
 
         WeiboTimeline weiboTimeline = null;
