@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +34,6 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 public class ItemFragment extends Fragment implements AbsListView.OnItemClickListener, OnRefreshListener {
 
-    public static final String URL_LIST = "URL_LIST";
     public static final String ARG_TAG = "tag";
     private static final int FORCE_TOP_PADDING = 256;
     private static final String ARG_ACCESS_TOKEN = "access token";
@@ -50,6 +48,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     private List<String> mImageUrlList = new ArrayList<String>();
     private View mEmptyView;
     private PullToRefreshLayout mPullToRefreshLayout;
+    private MainActivity mActivity;
 
 
     /**
@@ -73,61 +72,26 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        mActivity = (MainActivity) activity;
+        try {
+            mFragmentInteractionListener = (OnFragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString());
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Bundle mArguments = getArguments();
-
-        if (!mWeiboClient.IsAuthenticated()) {
-            Log.v(TAG, "weibo client is not authenticated.");
-            Toast.makeText(getActivity(), "error", Toast.LENGTH_SHORT).show();
-            getActivity().getSupportFragmentManager().popBackStackImmediate();
-
-            return;
-        }
-
         if (mArguments != null) {
             String mTag = mArguments.getString(ARG_TAG);
-            ((MainActivity) getActivity()).onSectionAttached(mTag);
+            mActivity.onSectionAttached(mTag);
         }
-
-        if (savedInstanceState != null) {
-            ArrayList<String> savedUrlList = savedInstanceState.getStringArrayList(URL_LIST);
-            if (savedUrlList != null && savedUrlList.size() > 0)
-                mImageUrlList.addAll(savedUrlList);
-        }
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        ActionBarPullToRefresh
-                .from(getActivity())
-                .theseChildrenArePullable(mListView)
-                .listener(this)
-                .setup(mPullToRefreshLayout);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        MainActivity activity = (MainActivity) getActivity();
-        activity.initLoader();
-        if (mImageUrlList.size() == 0) {
-            activity.forceLoad();
-        } else {
-            setEmptyText(null);
-        }
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        Loader<Object> loader = getLoaderManager().getLoader(0);
-        if (loader != null && loader.isStarted())
-            loader.abandon();
     }
 
     @Override
@@ -145,34 +109,57 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
                                                                    mImageUrlList);
         ((AdapterView<ListAdapter>) mListView).setAdapter(mWeiboItemViewArrayAdapter);
 
+        // update empty view
+        if (mImageUrlList.size() > 0) {
+            setEmptyText(null);
+        }
+
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
-
-        if (savedInstanceState != null) {
-            ArrayList<String> savedUrlList = savedInstanceState.getStringArrayList(URL_LIST);
-            if (savedUrlList != null && savedUrlList.size() > 0)
-                setItemList(savedUrlList);
-        }
 
         return view;
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-        try {
-            mFragmentInteractionListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString());
+        // TODO wrong logic :(
+        if (!mWeiboClient.IsAuthenticated()) {
+            Log.v(TAG, "weibo client is not authenticated.");
+            Toast.makeText(mActivity, "error", Toast.LENGTH_SHORT).show();
+            mActivity.finish();
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // set up pull to refresh widget
+        ActionBarPullToRefresh
+                .from(mActivity)
+                .theseChildrenArePullable(mListView)
+                .listener(this)
+                .setup(mPullToRefreshLayout);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // trigger refresh
+        if (mImageUrlList.size() == 0)
+            mActivity.forceLoad();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
 
+        // clean ref. to activity
         mFragmentInteractionListener = null;
+        mActivity = null;
     }
 
     @Override
@@ -185,16 +172,12 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         }
     }
 
-    /**
-     * The default content for this Fragment has a TextView that is shown when
-     * the list is empty. If you would like to change the text, call this method
-     * to supply the text it should use.
-     */
-    public void setEmptyText(CharSequence emptyText) {
-        if (emptyText == null && mEmptyView != null) {
+    private void setEmptyText(CharSequence emptyText) {
+        assert mEmptyView != null && mEmptyView instanceof TextView;
+        if (emptyText == null) {
             mEmptyView.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
-        } else if (mEmptyView instanceof TextView) {
+        } else {
             ((TextView) mEmptyView).setText(emptyText);
             mEmptyView.setVisibility(View.VISIBLE);
             mListView.setVisibility(View.INVISIBLE);
@@ -206,18 +189,23 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         if (!mPullToRefreshLayout.isRefreshing())
             mPullToRefreshLayout.setRefreshing(true);
 
-        ((MainActivity)getActivity()).refreshLoader();
+        mActivity.refreshLoader();
     }
 
-    public void setRefreshComplete() {
+    public void onRefreshComplete(List<String> itemList) {
+        if (itemList != null && itemList.size() > 0) {
+            mImageUrlList.addAll(0, itemList);
+            mWeiboItemViewArrayAdapter.notifyDataSetChanged();
+
+            setEmptyText(mImageUrlList.size() == 0 ? getResources().getString(
+                    R.string.emptyListMessage) : null);
+        }
+
         mPullToRefreshLayout.setRefreshComplete();
     }
 
-    public void setItemList(List<String> imageUrlList) {
-        mImageUrlList.clear();
-        mImageUrlList.addAll(imageUrlList);
-
-        mWeiboItemViewArrayAdapter.notifyDataSetChanged();
+    public ArrayList<String> getItemArrayList() {
+        return (ArrayList<String>) mImageUrlList;
     }
 
 

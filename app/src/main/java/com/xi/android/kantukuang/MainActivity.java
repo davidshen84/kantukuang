@@ -19,7 +19,6 @@ import com.google.inject.name.Names;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboTimelineAsyncTaskLoader;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
@@ -34,7 +33,6 @@ public class MainActivity extends ActionBarActivity
     private String mAccessToken;
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private String mSection;
-    private List<String> mImageUrlList = new ArrayList<String>();
 
     public MainActivity() {
         mInjector = KanTuKuangModule.getInjector();
@@ -60,6 +58,13 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        getSupportLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -177,11 +182,13 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onItemFragmentInteraction(int position) {
-        // load image view activity
+        // start image view activity
+        ItemFragment itemFragment = (ItemFragment) getSupportFragmentManager().findFragmentById(
+                R.id.container);
         Intent intent = new Intent(this, ImageViewActivity.class);
 
         intent.putStringArrayListExtra(ImageViewActivity.URL_LIST,
-                                       (ArrayList<String>) mImageUrlList);
+                                       itemFragment.getItemArrayList());
         intent.putExtra(ImageViewActivity.ITEM_POSITION, position);
 
         startActivity(intent);
@@ -189,7 +196,8 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public Loader<List<String>> onCreateLoader(int i, Bundle bundle) {
-        Log.v(TAG, "created new loader");
+        Log.v(TAG, "create new loader");
+
         return new WeiboTimelineAsyncTaskLoader(this, mWeiboClient);
     }
 
@@ -202,6 +210,7 @@ public class MainActivity extends ActionBarActivity
         if (loader.takeHasError()) {
             // display error message
             Toast.makeText(this, R.string.loadErrorMessage, Toast.LENGTH_SHORT).show();
+            itemFragment.onRefreshComplete(null);
         } else {
             int newDataCount = loader.takeNewDataCount();
             if (newDataCount > 0) {
@@ -210,21 +219,10 @@ public class MainActivity extends ActionBarActivity
                                Toast.LENGTH_SHORT)
                         .show();
 
-                // insert data to top
-                mImageUrlList.addAll(0, strings);
-                itemFragment.setItemList(mImageUrlList);
+                // update view
+                itemFragment.onRefreshComplete(strings);
             }
         }
-
-        if (mImageUrlList.size() == 0) {
-            // display empty view
-            itemFragment.setEmptyText(getResources().getString(R.string.emptyListMessage));
-        } else {
-            itemFragment.setEmptyText(null);
-        }
-
-        // stop loading animation in action bar
-        itemFragment.setRefreshComplete();
     }
 
     @Override
@@ -232,14 +230,8 @@ public class MainActivity extends ActionBarActivity
 
     }
 
-    public String getSetction() {
+    public String getSection() {
         return mSection;
-    }
-
-    public void initLoader() {
-        LoaderManager supportLoaderManager = getSupportLoaderManager();
-        if (supportLoaderManager.getLoader(0) == null)
-            supportLoaderManager.initLoader(0, null, this);
     }
 
     public void forceLoad() {

@@ -46,7 +46,7 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
 
         // make sure do not return null ref.
         stringList = new ArrayList<String>();
-        String tag = context.getSetction();
+        String tag = context.getSection();
         Log.v(TAG, String.format("start loading weibo timeline: %s", tag));
         try {
             if (tag.equalsIgnoreCase("public")) {
