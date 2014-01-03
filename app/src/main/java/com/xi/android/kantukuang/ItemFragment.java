@@ -3,6 +3,7 @@ package com.xi.android.kantukuang;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -18,9 +19,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 
@@ -36,8 +37,8 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
     public static final String ARG_TAG = "tag";
     private static final int FORCE_TOP_PADDING = 256;
-    private static final String ARG_ACCESS_TOKEN = "access token";
     private static final String TAG = ItemFragment.class.getName();
+    private static final String ARG_ID = "id";
     private OnFragmentInteractionListener mFragmentInteractionListener;
     /**
      * The fragment's ListView/GridView.
@@ -60,12 +61,13 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         mWeiboClient = mInjector.getInstance(WeiboClient.class);
     }
 
-    public static ItemFragment newInstance(String tag, String accessToken) {
+    public static ItemFragment newInstance(String tag, int id) {
         ItemFragment fragment = new ItemFragment();
         fragment.setRetainInstance(true);
+
         Bundle args = new Bundle();
         args.putString(ARG_TAG, tag);
-        args.putString(ARG_ACCESS_TOKEN, accessToken);
+        args.putInt(ARG_ID, id);
         fragment.setArguments(args);
 
         return fragment;
@@ -89,8 +91,9 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
         Bundle mArguments = getArguments();
         if (mArguments != null) {
-            String mTag = mArguments.getString(ARG_TAG);
-            mActivity.onSectionAttached(mTag);
+            String tag = mArguments.getString(ARG_TAG);
+            int id = mArguments.getInt(ARG_ID);
+            mActivity.onSectionAttached(id);
         }
     }
 
@@ -135,7 +138,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     @Override
     public void onStart() {
         super.onStart();
-
         // set up pull to refresh widget
         ActionBarPullToRefresh
                 .from(mActivity)
@@ -148,9 +150,12 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     public void onResume() {
         super.onResume();
 
+
         // trigger refresh
-        if (mImageUrlList.size() == 0)
+        if (mImageUrlList.size() == 0) {
+//            mPullToRefreshLayout.setRefreshing(true);
             mActivity.forceLoad();
+        }
     }
 
     @Override
@@ -198,7 +203,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             mWeiboItemViewArrayAdapter.notifyDataSetChanged();
 
             setEmptyText(mImageUrlList.size() == 0 ? getResources().getString(
-                    R.string.emptyListMessage) : null);
+                    R.string.message_info_empty_list) : null);
         }
 
         mPullToRefreshLayout.setRefreshComplete();
@@ -234,8 +239,12 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             mInflater = (LayoutInflater) getContext().getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
             mImageLoader = ((MyApplication) getActivity().getApplication()).getImageLoader();
+            BitmapFactory.Options bitmapOptions = KanTuKuangModule.getInjector()
+                    .getInstance(Key.get(BitmapFactory.Options.class));
+
+
             displayImageOptions = new DisplayImageOptions.Builder()
-                    .imageScaleType(ImageScaleType.IN_SAMPLE_POWER_OF_2)
+                    .decodingOptions(bitmapOptions)
                     .cacheOnDisc(true)
                     .build();
         }

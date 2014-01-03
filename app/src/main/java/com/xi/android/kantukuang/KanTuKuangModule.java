@@ -1,5 +1,7 @@
 package com.xi.android.kantukuang;
 
+import android.graphics.BitmapFactory;
+
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
@@ -93,9 +95,18 @@ public class KanTuKuangModule extends AbstractModule {
     }
 
     @Provides
+    @Singleton
     private HttpExecuteInterceptor provideHttpExecuteInterceptor(
             @Named("client_id") String clientId, @Named("client_secret") String clientSecret) {
         return new ClientParametersAuthentication(clientId, clientSecret);
+    }
+
+    @Provides
+    private BitmapFactory.Options provideBitmapOptions() {
+        BitmapFactory.Options imageItemViewDecodingOptions = new BitmapFactory.Options();
+        imageItemViewDecodingOptions.inSampleSize = 2;
+
+        return imageItemViewDecodingOptions;
     }
 
     private static class TypeLiteralCollectionString extends TypeLiteral<Collection<String>> {

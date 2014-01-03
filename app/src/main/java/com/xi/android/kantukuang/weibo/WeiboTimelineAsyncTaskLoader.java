@@ -11,7 +11,7 @@ import java.util.List;
 
 public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> {
     private static final String TAG = WeiboTimelineAsyncTaskLoader.class.getName();
-    private final MainActivity context;
+    private final MainActivity mainActivity;
     private WeiboClient mWeiboClient;
     private String mSinceId = null;
     private int newDataCount;
@@ -19,7 +19,7 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
 
     public WeiboTimelineAsyncTaskLoader(Context context, WeiboClient weiboClient) {
         super(context);
-        this.context =(MainActivity) context;
+        this.mainActivity =(MainActivity) context;
 
         mWeiboClient = weiboClient;
         setUpdateThrottle(10000);
@@ -46,7 +46,7 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
 
         // make sure do not return null ref.
         stringList = new ArrayList<String>();
-        String tag = context.getSection();
+        String tag = mainActivity.getSection();
         Log.v(TAG, String.format("start loading weibo timeline: %s", tag));
         try {
             if (tag.equalsIgnoreCase("public")) {

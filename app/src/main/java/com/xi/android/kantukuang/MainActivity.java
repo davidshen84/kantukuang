@@ -1,7 +1,9 @@
 package com.xi.android.kantukuang;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -11,8 +13,10 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
@@ -28,11 +32,15 @@ public class MainActivity extends ActionBarActivity
 
     private static final int ACTIVITY_REQUEST_CODE_BIND_WEIBO = 0x000A;
     private static final String TAG = MainActivity.class.getName();
+    private static final String PREF_USER_WEIBO_ACCESS_TOKEN = "weibo access token";
+    private static final String STATE_SELECTED_POSITION = "selected navigation drawer position";
     private final Injector mInjector;
     private WeiboClient mWeiboClient;
     private String mAccessToken;
     private NavigationDrawerFragment mNavigationDrawerFragment;
-    private String mSection;
+    private int mSectionId;
+    private int mCurrentPosition;
+    private boolean mRestoreSelectedPosition = false;
 
     public MainActivity() {
         mInjector = KanTuKuangModule.getInjector();
@@ -45,9 +53,11 @@ public class MainActivity extends ActionBarActivity
 
         setContentView(R.layout.activity_main);
 
-        // TODO remove this
-        mAccessToken = mInjector.getInstance(Key.get(String.class, Names.named("access token")));
-        mWeiboClient.setAccessToken(mAccessToken);
+        if (savedInstanceState != null) {
+            mCurrentPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION, -1);
+            if (mCurrentPosition > -1)
+                mRestoreSelectedPosition = true;
+        }
 
 //      Fragment managing the behaviors, interactions and presentation of the navigation drawer.
         FragmentManager supportFragmentManager = getSupportFragmentManager();
@@ -61,19 +71,35 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
-        getSupportLoaderManager().initLoader(0, null, this);
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
 
         // set up action bar title
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(getTitle());
+
+        // restore weibo access token
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        mAccessToken = sp.getString(PREF_USER_WEIBO_ACCESS_TOKEN, "");
+
+        initWeiboClientAndLoader(mAccessToken);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(STATE_SELECTED_POSITION, mCurrentPosition);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .edit()
+                .putString(PREF_USER_WEIBO_ACCESS_TOKEN, mAccessToken)
+                .commit();
     }
 
     @Override
@@ -83,12 +109,12 @@ public class MainActivity extends ActionBarActivity
         switch (position) {
             case 0:
                 // Public Home
-                itemFragment = ItemFragment.newInstance("public", mAccessToken);
+                itemFragment = ItemFragment.newInstance("public", position);
 
                 break;
             case 1:
                 // Private Home
-                itemFragment = ItemFragment.newInstance("home", mAccessToken);
+                itemFragment = ItemFragment.newInstance("home", position);
 
                 break;
             default:
@@ -96,16 +122,17 @@ public class MainActivity extends ActionBarActivity
 
                 break;
         }
-
+        mCurrentPosition = position;
         // update the main content by replacing fragments
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, itemFragment)
                 .commit();
     }
 
-    public void onSectionAttached(String section) {
-        setTitle(section);
-        mSection = section;
+    public void onSectionAttached(int section) {
+//        setTitle(section);
+        mSectionId = section;
+        getSupportLoaderManager().initLoader(mSectionId, null, this);
     }
 
     public void restoreActionBar() {
@@ -142,12 +169,50 @@ public class MainActivity extends ActionBarActivity
                 Log.d(TAG, String.format("authorize code: %s", code));
 
                 // request access token
-                mWeiboClient.requestAccessToken(code);
+                String accessToken = mWeiboClient.requestAccessToken(code);
+                mCurrentPosition=0;
+                mRestoreSelectedPosition=true;
+                initWeiboClientAndLoader(accessToken);
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
 
+    }
+
+    /**
+     * set the access token and initialize the loader
+     * then restore the drawer state
+     *
+     * @param accessToken: weibo client access token
+     */
+    private void initWeiboClientAndLoader(String accessToken) {
+        assert getSupportLoaderManager().getLoader(mSectionId) != null;
+
+        mWeiboClient.setAccessToken(accessToken);
+        if (mWeiboClient.IsAuthenticated()) {
+            restoreNavigationDrawerState();
+        }
+    }
+
+    private void restoreNavigationDrawerState() {
+        assert mWeiboClient.IsAuthenticated();
+
+        // add default private section
+        // this section is only available when the weibo client is authenticated
+
+        // TODO restore user added sections;
+        String[] userSections = {};
+        String sectionPrivate = getString(R.string.default_section_private);
+        mNavigationDrawerFragment.setItems(Lists.asList(sectionPrivate, userSections));
+
+        if (mRestoreSelectedPosition) {
+            findViewById(R.id.main_activity_message).setVisibility(View.GONE);
+            mNavigationDrawerFragment.selectItem(mCurrentPosition);
+            mRestoreSelectedPosition = false;
+        } else {
+            findViewById(R.id.main_activity_message).setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -158,6 +223,13 @@ public class MainActivity extends ActionBarActivity
         int id = item.getItemId();
         switch (id) {
             case R.id.action_settings:
+                // TODO dev code
+                mAccessToken = mInjector.getInstance(Key.get(String.class, Names.named(
+                        "access token")));
+                mCurrentPosition=0;
+                mRestoreSelectedPosition=true;
+                initWeiboClientAndLoader(mAccessToken);
+
                 return true;
             case R.id.action_bind_weibo:
                 Intent intent = new Intent(this, WebActivity.class);
@@ -167,13 +239,17 @@ public class MainActivity extends ActionBarActivity
 
                 return true;
             case R.id.action_refresh:
-                OnRefreshListener refreshListener = (OnRefreshListener) getSupportFragmentManager().findFragmentById(
-                        R.id.container);
-                if (refreshListener != null)
-                    refreshListener.onRefreshStarted(null);
-                else
-                    Log.v(TAG, "refresh action has no listener");
-
+                if (mWeiboClient.IsAuthenticated()) {
+                    OnRefreshListener refreshListener = (OnRefreshListener)
+                            getSupportFragmentManager().findFragmentById(R.id.container);
+                    if (refreshListener != null)
+                        refreshListener.onRefreshStarted(null);
+                    else
+                        Log.v(TAG, "refresh action has no listener");
+                } else {
+                    Toast.makeText(this, getString(R.string.message_warning_bind_weibo),
+                                   Toast.LENGTH_SHORT).show();
+                }
                 return true;
         }
 
@@ -183,8 +259,8 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onItemFragmentInteraction(int position) {
         // start image view activity
-        ItemFragment itemFragment = (ItemFragment) getSupportFragmentManager().findFragmentById(
-                R.id.container);
+        ItemFragment itemFragment = (ItemFragment)
+                getSupportFragmentManager().findFragmentById(R.id.container);
         Intent intent = new Intent(this, ImageViewActivity.class);
 
         intent.putStringArrayListExtra(ImageViewActivity.URL_LIST,
@@ -209,13 +285,14 @@ public class MainActivity extends ActionBarActivity
         WeiboTimelineAsyncTaskLoader loader = (WeiboTimelineAsyncTaskLoader) listLoader;
         if (loader.takeHasError()) {
             // display error message
-            Toast.makeText(this, R.string.loadErrorMessage, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.message_error_load, Toast.LENGTH_SHORT).show();
             itemFragment.onRefreshComplete(null);
         } else {
             int newDataCount = loader.takeNewDataCount();
             if (newDataCount > 0) {
                 Toast.makeText(this,
-                               getResources().getString(R.string.newDataFormat, newDataCount),
+                               getResources().getString(R.string.format_new_data_count,
+                                                        newDataCount),
                                Toast.LENGTH_SHORT)
                         .show();
 
@@ -231,14 +308,22 @@ public class MainActivity extends ActionBarActivity
     }
 
     public String getSection() {
-        return mSection;
+        switch (mSectionId) {
+            case 0:
+                return "public";
+            case 1:
+                return "home";
+            default:
+                Log.d(TAG, "not ready");
+                return "";
+        }
     }
 
     public void forceLoad() {
-        getSupportLoaderManager().getLoader(0).forceLoad();
+        getSupportLoaderManager().getLoader(mSectionId).forceLoad();
     }
 
     public void refreshLoader() {
-        getSupportLoaderManager().getLoader(0).onContentChanged();
+        getSupportLoaderManager().getLoader(mSectionId).onContentChanged();
     }
 }
