@@ -66,7 +66,6 @@ public class WeiboClient {
         try {
             HttpRequest httpRequest = requestFactory.buildGetRequest(url)
                     .setNumberOfRetries(2);
-//                    .setReadTimeout(50000);
             Log.v(TAG, httpRequest.getUrl().toString());
 
             httpResponse = httpRequest.execute();
@@ -80,7 +79,6 @@ public class WeiboClient {
 
             weiboTimeline = httpResponse.parseAs(WeiboTimeline.class);
         } catch (HttpResponseException e) {
-//            e.printStackTrace();
             Log.d(TAG, "there's an error in response when getting timeline");
             hasException = true;
         } catch (IOException e) {
@@ -128,19 +126,21 @@ public class WeiboClient {
                 .toString();
     }
 
-    public void requestAccessToken(String code) {
+    public String requestAccessToken(String code) {
+        String accessToken = "";
+
         try {
-            mAccessToken = mAuthorizationCodeFlow
+            accessToken = mAuthorizationCodeFlow
                     .newTokenRequest(code)
                     .setRedirectUri(mRedirectUri)
                     .execute()
                     .getAccessToken();
+            Log.d(TAG, String.format("%s => %s", code, accessToken));
         } catch (IOException e) {
             e.printStackTrace();
-            mAccessToken = null;
         }
 
-        Log.d(TAG, mAccessToken);
+        return accessToken;
     }
 
     private HttpRequestFactory getRequestFactory() {

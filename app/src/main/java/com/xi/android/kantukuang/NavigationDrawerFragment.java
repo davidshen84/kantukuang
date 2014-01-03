@@ -21,6 +21,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
  * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
@@ -28,10 +32,6 @@ import android.widget.ListView;
  */
 public class NavigationDrawerFragment extends Fragment {
 
-    /**
-     * Remember the position of the selected item.
-     */
-    private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
     /**
      * Per the design guidelines, you should show the drawer on launch until the user manually
      * expands it. This shared preference tracks this.
@@ -48,31 +48,27 @@ public class NavigationDrawerFragment extends Fragment {
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
     private View mFragmentContainerView;
-    private int mCurrentSelectedPosition = 0;
-    private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
+    private List<String> mTitleSectionList = new ArrayList<String>();
+    private ArrayAdapter<String> mTitleSectionListAdapter;
 
     public NavigationDrawerFragment() {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
 
         // Read in the flag indicating whether or not the user has demonstrated awareness of the
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(activity);
         mUserLearnedDrawer = sp.getBoolean(PREF_USER_LEARNED_DRAWER, false);
 
-        if (savedInstanceState != null) {
-            mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
-            mFromSavedInstanceState = true;
+        try {
+            mCallbacks = (NavigationDrawerCallbacks) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException("Activity must implement NavigationDrawerCallbacks.");
         }
-
-        // Select either the default item (0) or the last selected item.
-
-        if (!mFromSavedInstanceState)
-            selectItem(mCurrentSelectedPosition);
     }
 
     @Override
@@ -85,22 +81,20 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mDrawerListView = (ListView) inflater.inflate(
-                R.layout.fragment_navigation_drawer, container, false);
+        mDrawerListView = (ListView)
+                inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
+
+        mTitleSectionListAdapter = new ArrayAdapter<String>(
+                getActionBar().getThemedContext(), android.R.layout.simple_list_item_1,
+                android.R.id.text1, mTitleSectionList);
+        mDrawerListView.setAdapter(mTitleSectionListAdapter);
+
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 selectItem(position);
             }
         });
-        String[] title_sections = getResources().getStringArray(R.array.default_sections);
-
-        mDrawerListView.setAdapter(new ArrayAdapter<String>(
-                getActionBar().getThemedContext(),
-                android.R.layout.simple_list_item_1,
-                android.R.id.text1,
-                title_sections));
-        mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
 
         return mDrawerListView;
     }
@@ -168,7 +162,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         // If the user hasn't 'learned' about the drawer, open it to introduce them to the drawer,
         // per the navigation drawer design guidelines.
-        if (!mUserLearnedDrawer && !mFromSavedInstanceState) {
+        if (!mUserLearnedDrawer) {
             mDrawerLayout.openDrawer(mFragmentContainerView);
         }
 
@@ -183,8 +177,7 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
-    private void selectItem(int position) {
-        mCurrentSelectedPosition = position;
+    public void selectItem(int position) {
         if (mDrawerListView != null) {
             mDrawerListView.setItemChecked(position, true);
         }
@@ -197,25 +190,9 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mCallbacks = (NavigationDrawerCallbacks) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException("Activity must implement NavigationDrawerCallbacks.");
-        }
-    }
-
-    @Override
     public void onDetach() {
         super.onDetach();
         mCallbacks = null;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt(STATE_SELECTED_POSITION, mCurrentSelectedPosition);
     }
 
     @Override
@@ -254,6 +231,15 @@ public class NavigationDrawerFragment extends Fragment {
 
     private ActionBar getActionBar() {
         return ((ActionBarActivity) getActivity()).getSupportActionBar();
+    }
+
+    public void setItems(List<String> items) {
+        String[] defaultSections = getResources().getStringArray(R.array.default_sections);
+
+        mTitleSectionList.clear();
+        mTitleSectionList.addAll(Arrays.asList(defaultSections));
+        mTitleSectionList.addAll(items);
+        mTitleSectionListAdapter.notifyDataSetChanged();
     }
 
     /**

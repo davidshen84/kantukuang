@@ -4,17 +4,17 @@
       tools:context="com.xi.android.kantukuang.MainActivity">
     <item
         android:id="@+id/action_refresh"
-        android:title="Refresh"
+        android:title="@string/action_refresh"
         android:icon="@drawable/ic_action_refresh"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/action_bind_weibo"
-        android:title="@string/title_bind_weibo"
+        android:title="@string/action_bind_weibo"
         android:icon="@drawable/ic_action_new"
-        app:showAsAction="ifRoom"/>
-    <!--    <item
-            android:id="@+id/action_settings"
-            android:title="@string/action_settings"
-            android:orderInCategory="100"
-            app:showAsAction="never"/>-->
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/action_settings"
+        android:orderInCategory="100"
+        app:showAsAction="never"/>
 </menu>

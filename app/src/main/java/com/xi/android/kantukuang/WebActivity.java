@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -62,14 +61,6 @@ public class WebActivity extends ActionBarActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.web, menu);
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -80,7 +71,7 @@ public class WebActivity extends ActionBarActivity {
                 return true;
             case R.id.action_bind_weibo:
 
-                Toast.makeText(this, R.string.title_bind_weibo, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.action_bind_weibo, Toast.LENGTH_SHORT).show();
                 return true;
         }
 
