@@ -82,7 +82,7 @@ public class MainActivity extends ActionBarActivity
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         mAccessToken = sp.getString(PREF_USER_WEIBO_ACCESS_TOKEN, "");
 
-        initWeiboClientAndLoader(mAccessToken);
+        setUpWeiboClientAndLoader(mAccessToken);
     }
 
     @Override
@@ -129,10 +129,22 @@ public class MainActivity extends ActionBarActivity
                 .commit();
     }
 
-    public void onSectionAttached(int section) {
-//        setTitle(section);
-        mSectionId = section;
+    public void onSectionAttached(int sectionId) {
+        setTitle(mapSectionIdToString(sectionId));
+        mSectionId = sectionId;
         getSupportLoaderManager().initLoader(mSectionId, null, this);
+    }
+
+    private String mapSectionIdToString(int sectionId) {
+        switch (sectionId) {
+            case 0:
+                return "public";
+            case 1:
+                return "home";
+            default:
+                Log.d(TAG, "not ready");
+                return "";
+        }
     }
 
     public void restoreActionBar() {
@@ -170,9 +182,12 @@ public class MainActivity extends ActionBarActivity
 
                 // request access token
                 String accessToken = mWeiboClient.requestAccessToken(code);
-                mCurrentPosition=0;
-                mRestoreSelectedPosition=true;
-                initWeiboClientAndLoader(accessToken);
+                mCurrentPosition = 0;
+                mRestoreSelectedPosition = true;
+                setUpWeiboClientAndLoader(accessToken);
+
+                // select public by default
+                onNavigationDrawerItemSelected(0);
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -186,7 +201,7 @@ public class MainActivity extends ActionBarActivity
      *
      * @param accessToken: weibo client access token
      */
-    private void initWeiboClientAndLoader(String accessToken) {
+    private void setUpWeiboClientAndLoader(String accessToken) {
         assert getSupportLoaderManager().getLoader(mSectionId) != null;
 
         mWeiboClient.setAccessToken(accessToken);
@@ -206,13 +221,7 @@ public class MainActivity extends ActionBarActivity
         String sectionPrivate = getString(R.string.default_section_private);
         mNavigationDrawerFragment.setItems(Lists.asList(sectionPrivate, userSections));
 
-        if (mRestoreSelectedPosition) {
-            findViewById(R.id.main_activity_message).setVisibility(View.GONE);
-            mNavigationDrawerFragment.selectItem(mCurrentPosition);
-            mRestoreSelectedPosition = false;
-        } else {
-            findViewById(R.id.main_activity_message).setVisibility(View.VISIBLE);
-        }
+        findViewById(R.id.main_activity_message).setVisibility(View.GONE);
     }
 
     @Override
@@ -224,11 +233,14 @@ public class MainActivity extends ActionBarActivity
         switch (id) {
             case R.id.action_settings:
                 // TODO dev code
-                mAccessToken = mInjector.getInstance(Key.get(String.class, Names.named(
-                        "access token")));
-                mCurrentPosition=0;
-                mRestoreSelectedPosition=true;
-                initWeiboClientAndLoader(mAccessToken);
+                mAccessToken = mInjector.getInstance(
+                        Key.get(String.class,
+                                Names.named("access token")));
+                mCurrentPosition = 0;
+                mRestoreSelectedPosition = true;
+                setUpWeiboClientAndLoader(mAccessToken);
+                // select home after weibo client initialized
+                onNavigationDrawerItemSelected(0);
 
                 return true;
             case R.id.action_bind_weibo:
@@ -248,7 +260,7 @@ public class MainActivity extends ActionBarActivity
                         Log.v(TAG, "refresh action has no listener");
                 } else {
                     Toast.makeText(this, getString(R.string.message_warning_bind_weibo),
-                                   Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT).show();
                 }
                 return true;
         }
@@ -264,7 +276,7 @@ public class MainActivity extends ActionBarActivity
         Intent intent = new Intent(this, ImageViewActivity.class);
 
         intent.putStringArrayListExtra(ImageViewActivity.URL_LIST,
-                                       itemFragment.getItemArrayList());
+                itemFragment.getItemArrayList());
         intent.putExtra(ImageViewActivity.ITEM_POSITION, position);
 
         startActivity(intent);
@@ -290,11 +302,9 @@ public class MainActivity extends ActionBarActivity
         } else {
             int newDataCount = loader.takeNewDataCount();
             if (newDataCount > 0) {
-                Toast.makeText(this,
-                               getResources().getString(R.string.format_new_data_count,
-                                                        newDataCount),
-                               Toast.LENGTH_SHORT)
-                        .show();
+                String toastMessage = getResources()
+                        .getString(R.string.format_new_data_count, newDataCount);
+                Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
 
                 // update view
                 itemFragment.onRefreshComplete(strings);
@@ -308,15 +318,7 @@ public class MainActivity extends ActionBarActivity
     }
 
     public String getSection() {
-        switch (mSectionId) {
-            case 0:
-                return "public";
-            case 1:
-                return "home";
-            default:
-                Log.d(TAG, "not ready");
-                return "";
-        }
+        return getTitle().toString();
     }
 
     public void forceLoad() {

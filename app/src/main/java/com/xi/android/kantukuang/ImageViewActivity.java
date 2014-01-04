@@ -39,21 +39,19 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_view);
 
-
         setUpActionBar();
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        ArrayList<String> stringArrayExtra = getIntent().getStringArrayListExtra(URL_LIST);
+        ArrayList<String> urlList = getIntent().getStringArrayListExtra(URL_LIST);
         int currentPosition = getIntent().getIntExtra(ITEM_POSITION, 0);
-        assert stringArrayExtra != null;
-        mSectionsPagerAdapter.setUrlList(stringArrayExtra);
+        assert urlList != null;
+        mSectionsPagerAdapter.setUrlList(urlList);
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.setCurrentItem(currentPosition);
-
     }
 
     private void setUpActionBar() {

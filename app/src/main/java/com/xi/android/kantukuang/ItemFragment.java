@@ -50,6 +50,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     private View mEmptyView;
     private PullToRefreshLayout mPullToRefreshLayout;
     private MainActivity mActivity;
+    private int mSectionId;
 
 
     /**
@@ -91,9 +92,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
         Bundle mArguments = getArguments();
         if (mArguments != null) {
-            String tag = mArguments.getString(ARG_TAG);
-            int id = mArguments.getInt(ARG_ID);
-            mActivity.onSectionAttached(id);
+            mSectionId = mArguments.getInt(ARG_ID);
         }
     }
 
@@ -108,8 +107,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         mListView = (AbsListView) view.findViewById(android.R.id.list);
         mEmptyView = view.findViewById(android.R.id.empty);
         // set up data adapter
-        mWeiboItemViewArrayAdapter = new WeiboItemViewArrayAdapter(getActivity(),
-                                                                   mImageUrlList);
+        mWeiboItemViewArrayAdapter = new WeiboItemViewArrayAdapter(mActivity, mImageUrlList);
         ((AdapterView<ListAdapter>) mListView).setAdapter(mWeiboItemViewArrayAdapter);
 
         // update empty view
@@ -125,14 +123,11 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
+        assert mWeiboClient.IsAuthenticated();
+
         super.onActivityCreated(savedInstanceState);
 
-        // TODO wrong logic :(
-        if (!mWeiboClient.IsAuthenticated()) {
-            Log.v(TAG, "weibo client is not authenticated.");
-            Toast.makeText(mActivity, "error", Toast.LENGTH_SHORT).show();
-            mActivity.finish();
-        }
+        mActivity.onSectionAttached(mSectionId);
     }
 
     @Override
@@ -234,11 +229,11 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         private final ImageLoader mImageLoader;
 
         public WeiboItemViewArrayAdapter(Context context, List<String> strings) {
-            super(context, R.layout.fragment_item_image_view, strings);
+            super(context, R.layout.image_view_narrow, strings);
 
             mInflater = (LayoutInflater) getContext().getSystemService(
                     Context.LAYOUT_INFLATER_SERVICE);
-            mImageLoader = ((MyApplication) getActivity().getApplication()).getImageLoader();
+            mImageLoader = ((MyApplication) mActivity.getApplication()).getImageLoader();
             BitmapFactory.Options bitmapOptions = KanTuKuangModule.getInjector()
                     .getInstance(Key.get(BitmapFactory.Options.class));
 
@@ -253,26 +248,26 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         public View getView(int position, View convertView, ViewGroup container) {
             if (convertView == null) {
                 convertView = mInflater.inflate(
-                        R.layout.fragment_item_image_view, container, false);
+                        R.layout.image_view_narrow, container, false);
             } else {
                 ((ImageView) convertView).setImageBitmap(null);
             }
 
             mImageLoader.displayImage(getItem(position), (ImageView) convertView,
-                                      displayImageOptions,
-                                      new SimpleImageLoadingListener() {
-                                          @Override
-                                          public void onLoadingComplete(String imageUri,
-                                                                        View view,
-                                                                        Bitmap loadedImage) {
-                                              if (loadedImage.getHeight() / 2 < FORCE_TOP_PADDING) {
-                                                  view.setPadding(0, 0, 0, 0);
-                                              } else {
-                                                  view.setPadding(0, FORCE_TOP_PADDING, 0,
-                                                                  0);
-                                              }
-                                          }
-                                      });
+                    displayImageOptions,
+                    new SimpleImageLoadingListener() {
+                        @Override
+                        public void onLoadingComplete(String imageUri,
+                                                      View view,
+                                                      Bitmap loadedImage) {
+                            if (loadedImage.getHeight() / 2 < FORCE_TOP_PADDING) {
+                                view.setPadding(0, 0, 0, 0);
+                            } else {
+                                view.setPadding(0, FORCE_TOP_PADDING, 0,
+                                        0);
+                            }
+                        }
+                    });
 
             return convertView;
         }
