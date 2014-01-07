@@ -36,7 +36,7 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
     @Override
     public List<String> loadInBackground() {
 
-        WeiboTimeline weiboTimeline = null;
+        WeiboTimeline weiboTimeline;
         List<String> stringList;
 
         if (isAbandoned()) {
