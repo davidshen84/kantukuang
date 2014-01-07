@@ -11,16 +11,17 @@ import java.util.List;
 
 public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> {
     private static final String TAG = WeiboTimelineAsyncTaskLoader.class.getName();
-    private final MainActivity mainActivity;
+    private final int mWeiboAccountId;
     private WeiboClient mWeiboClient;
     private String mSinceId = null;
     private int newDataCount;
     private boolean hasError;
 
-    public WeiboTimelineAsyncTaskLoader(Context context, WeiboClient weiboClient) {
+    public WeiboTimelineAsyncTaskLoader(Context context, int weiboAccountId,
+                                        WeiboClient weiboClient) {
         super(context);
-        this.mainActivity =(MainActivity) context;
 
+        mWeiboAccountId = weiboAccountId;
         mWeiboClient = weiboClient;
         setUpdateThrottle(10000);
     }
@@ -43,18 +44,21 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
             return null;
         }
 
-
         // make sure do not return null ref.
         stringList = new ArrayList<String>();
-        String tag = mainActivity.getSection();
-        Log.v(TAG, String.format("start loading weibo timeline: %s", tag));
+        Log.v(TAG, String.format("start loading weibo timeline: %d", mWeiboAccountId));
         try {
-            if (tag.equalsIgnoreCase("public")) {
-                weiboTimeline = mWeiboClient.getPublicTimeline(mSinceId);
-            } else if (tag.equalsIgnoreCase("home")) {
-                weiboTimeline = mWeiboClient.getHomeTimeline(mSinceId);
-            } else {
-                Log.d(TAG, String.format("i don't know how to load %s", tag));
+            switch (mWeiboAccountId) {
+                case 0:
+                    weiboTimeline = mWeiboClient.getPublicTimeline(mSinceId);
+                    break;
+                case 1:
+                    weiboTimeline = mWeiboClient.getHomeTimeline(mSinceId);
+                    break;
+                default:
+                    Log.d(TAG, String.format("i don't know how to load %d", mWeiboAccountId));
+
+                    return null;
             }
 
             if (weiboTimeline != null && weiboTimeline.statuses.size() > 0) {

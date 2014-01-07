@@ -268,7 +268,7 @@ public class MainActivity extends ActionBarActivity
     public Loader<List<String>> onCreateLoader(int i, Bundle bundle) {
         Log.v(TAG, "create new loader");
 
-        return new WeiboTimelineAsyncTaskLoader(this, mWeiboClient);
+        return new WeiboTimelineAsyncTaskLoader(this, mCurrentDrawerSelectedId, mWeiboClient);
     }
 
     @Override
@@ -299,18 +299,6 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onLoaderReset(Loader<List<String>> listLoader) {
         Log.d(TAG, "reset loader");
-    }
-
-    public String getSection() {
-        switch (mCurrentDrawerSelectedId) {
-            case 0:
-                return "public";
-            case 1:
-                return "home";
-            default:
-                Log.d(TAG, "not ready");
-                return "";
-        }
     }
 
     public void forceLoad() {
