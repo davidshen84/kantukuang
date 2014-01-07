@@ -5,10 +5,10 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -19,6 +19,7 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
 
     public static final String URL_LIST = "URL_LIST";
     public static final String ITEM_POSITION = "ITEM_POSITION";
+    private static final String TAG = ImageViewActivity.class.getName();
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -28,7 +29,6 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
     SectionsPagerAdapter mSectionsPagerAdapter;
-
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -60,7 +60,6 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
         actionBar.setHomeButtonEnabled(true);
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -82,14 +81,14 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
                 this.finish();
                 return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onImageViewFragmentInteraction(Uri uri) {
-
+        Log.d(TAG, "nop");
     }
-
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to

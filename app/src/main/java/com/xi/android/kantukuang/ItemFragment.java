@@ -79,6 +79,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         super.onAttach(activity);
 
         mActivity = (MainActivity) activity;
+        mActivity.onSectionAttached(mSectionId);
         try {
             mFragmentInteractionListener = (OnFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
@@ -93,6 +94,19 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         Bundle mArguments = getArguments();
         if (mArguments != null) {
             mSectionId = mArguments.getInt(ARG_ID);
+            mActivity.initLoader(mSectionId);
+        }
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // TODO wrong logic :(
+        if (!mWeiboClient.IsAuthenticated()) {
+            Log.v(TAG, "weibo client is not authenticated.");
+            Toast.makeText(mActivity, "error", Toast.LENGTH_SHORT).show();
+            mActivity.finish();
         }
     }
 
@@ -119,15 +133,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         mListView.setOnItemClickListener(this);
 
         return view;
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        assert mWeiboClient.IsAuthenticated();
-
-        super.onActivityCreated(savedInstanceState);
-
-        mActivity.onSectionAttached(mSectionId);
     }
 
     @Override
