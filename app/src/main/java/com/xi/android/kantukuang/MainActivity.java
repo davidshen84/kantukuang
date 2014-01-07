@@ -33,14 +33,13 @@ public class MainActivity extends ActionBarActivity
     private static final int ACTIVITY_REQUEST_CODE_BIND_WEIBO = 0x000A;
     private static final String TAG = MainActivity.class.getName();
     private static final String PREF_USER_WEIBO_ACCESS_TOKEN = "weibo access token";
-    private static final String STATE_SELECTED_POSITION = "selected navigation drawer position";
+    private static final String STATE_DRAWER_SELECTED_ID = "selected navigation drawer position";
     private final Injector mInjector;
     private WeiboClient mWeiboClient;
     private String mAccessToken;
     private NavigationDrawerFragment mNavigationDrawerFragment;
-    private int mSectionId;
-    private int mCurrentPosition;
-    private boolean mRestoreSelectedPosition = false;
+    private int mCurrentDrawerSelectedId;
+    private boolean mHasAttachedSection = false;
 
     public MainActivity() {
         mInjector = KanTuKuangModule.getInjector();
@@ -54,9 +53,7 @@ public class MainActivity extends ActionBarActivity
         setContentView(R.layout.activity_main);
 
         if (savedInstanceState != null) {
-            mCurrentPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION, -1);
-            if (mCurrentPosition > -1)
-                mRestoreSelectedPosition = true;
+            mCurrentDrawerSelectedId = savedInstanceState.getInt(STATE_DRAWER_SELECTED_ID, 0);
         }
 
 //      Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -83,13 +80,15 @@ public class MainActivity extends ActionBarActivity
         mAccessToken = sp.getString(PREF_USER_WEIBO_ACCESS_TOKEN, "");
 
         initWeiboClientAndLoader(mAccessToken);
+        if (mHasAttachedSection)
+            findViewById(R.id.main_activity_message).setVisibility(View.GONE);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putInt(STATE_SELECTED_POSITION, mCurrentPosition);
+        outState.putInt(STATE_DRAWER_SELECTED_ID, mCurrentDrawerSelectedId);
     }
 
     @Override
@@ -103,18 +102,18 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
-    public void onNavigationDrawerItemSelected(int position) {
+    public void onNavigationDrawerItemSelected(int selectedId) {
         ItemFragment itemFragment = null;
 
-        switch (position) {
+        switch (selectedId) {
             case 0:
                 // Public Home
-                itemFragment = ItemFragment.newInstance("public", position);
+                itemFragment = ItemFragment.newInstance("public", selectedId);
 
                 break;
             case 1:
                 // Private Home
-                itemFragment = ItemFragment.newInstance("home", position);
+                itemFragment = ItemFragment.newInstance("home", selectedId);
 
                 break;
             default:
@@ -122,17 +121,16 @@ public class MainActivity extends ActionBarActivity
 
                 break;
         }
-        mCurrentPosition = position;
+        mCurrentDrawerSelectedId = selectedId;
         // update the main content by replacing fragments
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, itemFragment)
                 .commit();
     }
 
-    public void onSectionAttached(int section) {
-//        setTitle(section);
-        mSectionId = section;
-        getSupportLoaderManager().initLoader(mSectionId, null, this);
+    public void initLoader(int sectionId) {
+//        setTitle(sectionId);
+        getSupportLoaderManager().initLoader(sectionId, null, this);
     }
 
     public void restoreActionBar() {
@@ -170,8 +168,7 @@ public class MainActivity extends ActionBarActivity
 
                 // request access token
                 String accessToken = mWeiboClient.requestAccessToken(code);
-                mCurrentPosition=0;
-                mRestoreSelectedPosition=true;
+                mCurrentDrawerSelectedId = 0;
                 initWeiboClientAndLoader(accessToken);
             }
         } else {
@@ -187,7 +184,7 @@ public class MainActivity extends ActionBarActivity
      * @param accessToken: weibo client access token
      */
     private void initWeiboClientAndLoader(String accessToken) {
-        assert getSupportLoaderManager().getLoader(mSectionId) != null;
+        assert getSupportLoaderManager().getLoader(mCurrentDrawerSelectedId) != null;
 
         mWeiboClient.setAccessToken(accessToken);
         if (mWeiboClient.IsAuthenticated()) {
@@ -206,13 +203,11 @@ public class MainActivity extends ActionBarActivity
         String sectionPrivate = getString(R.string.default_section_private);
         mNavigationDrawerFragment.setItems(Lists.asList(sectionPrivate, userSections));
 
-        if (mRestoreSelectedPosition) {
-            findViewById(R.id.main_activity_message).setVisibility(View.GONE);
-            mNavigationDrawerFragment.selectItem(mCurrentPosition);
-            mRestoreSelectedPosition = false;
-        } else {
-            findViewById(R.id.main_activity_message).setVisibility(View.VISIBLE);
+        if (!mHasAttachedSection) {
+            mNavigationDrawerFragment.selectItem(mCurrentDrawerSelectedId);
         }
+
+        findViewById(R.id.main_activity_message).setVisibility(View.GONE);
     }
 
     @Override
@@ -226,8 +221,7 @@ public class MainActivity extends ActionBarActivity
                 // TODO dev code
                 mAccessToken = mInjector.getInstance(Key.get(String.class, Names.named(
                         "access token")));
-                mCurrentPosition=0;
-                mRestoreSelectedPosition=true;
+                mCurrentDrawerSelectedId = 0;
                 initWeiboClientAndLoader(mAccessToken);
 
                 return true;
@@ -304,11 +298,11 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onLoaderReset(Loader<List<String>> listLoader) {
-
+        Log.d(TAG, "reset loader");
     }
 
     public String getSection() {
-        switch (mSectionId) {
+        switch (mCurrentDrawerSelectedId) {
             case 0:
                 return "public";
             case 1:
@@ -320,10 +314,15 @@ public class MainActivity extends ActionBarActivity
     }
 
     public void forceLoad() {
-        getSupportLoaderManager().getLoader(mSectionId).forceLoad();
+        getSupportLoaderManager().getLoader(mCurrentDrawerSelectedId).forceLoad();
     }
 
     public void refreshLoader() {
-        getSupportLoaderManager().getLoader(mSectionId).onContentChanged();
+        getSupportLoaderManager().getLoader(mCurrentDrawerSelectedId).onContentChanged();
+    }
+
+    public void onSectionAttached(int mSectionId) {
+        mCurrentDrawerSelectedId = mSectionId;
+        mHasAttachedSection = true;
     }
 }
