@@ -132,9 +132,12 @@ public class MainActivity extends ActionBarActivity implements
                 .commit();
     }
 
-    public void initLoader(int sectionId) {
-        setTitle(mapSectionIdToString(sectionId));
-        getSupportLoaderManager().initLoader(sectionId, null, this);
+    public void initLoader(int sectionId, String mLastId) {
+        WeiboTimelineAsyncTaskLoader loader = (WeiboTimelineAsyncTaskLoader)
+                getSupportLoaderManager().initLoader(0, null, this);
+
+        loader.setAccountId(sectionId);
+        loader.setLastId(mLastId);
     }
 
     private String mapSectionIdToString(int sectionId) {
@@ -288,7 +291,11 @@ public class MainActivity extends ActionBarActivity implements
     public Loader<List<String>> onCreateLoader(int i, Bundle bundle) {
         Log.v(TAG, "create new loader");
 
-        return new WeiboTimelineAsyncTaskLoader(this, mCurrentDrawerSelectedId, mWeiboClient);
+        WeiboTimelineAsyncTaskLoader weiboTimelineAsyncTaskLoader = new WeiboTimelineAsyncTaskLoader(
+                this, mWeiboClient);
+        weiboTimelineAsyncTaskLoader.setAccountId(mCurrentDrawerSelectedId);
+
+        return weiboTimelineAsyncTaskLoader;
     }
 
     @Override
@@ -300,7 +307,7 @@ public class MainActivity extends ActionBarActivity implements
         if (loader.takeHasError()) {
             // display error message
             Toast.makeText(this, R.string.message_error_load, Toast.LENGTH_SHORT).show();
-            itemFragment.onRefreshComplete(null);
+            itemFragment.onRefreshComplete(null, loader.getLastId());
         } else {
             int newDataCount = loader.takeNewDataCount();
             if (newDataCount > 0) {
@@ -309,7 +316,7 @@ public class MainActivity extends ActionBarActivity implements
                 Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
 
                 // update view
-                itemFragment.onRefreshComplete(strings);
+                itemFragment.onRefreshComplete(strings, loader.getLastId());
             }
         }
     }
@@ -327,8 +334,9 @@ public class MainActivity extends ActionBarActivity implements
         getSupportLoaderManager().getLoader(mCurrentDrawerSelectedId).onContentChanged();
     }
 
-    public void onSectionAttached(int mSectionId) {
-        mCurrentDrawerSelectedId = mSectionId;
+    public void onSectionAttached(int sectionId) {
+        setTitle(mapSectionIdToString(sectionId));
+        mCurrentDrawerSelectedId = sectionId;
         mHasAttachedSection = true;
     }
 }

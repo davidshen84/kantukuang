@@ -9,17 +9,15 @@ import java.util.List;
 
 public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> {
     private static final String TAG = WeiboTimelineAsyncTaskLoader.class.getName();
-    private final int mWeiboAccountId;
+    private int mWeiboAccountId;
     private WeiboClient mWeiboClient;
     private String mSinceId = null;
     private int newDataCount;
     private boolean hasError;
 
-    public WeiboTimelineAsyncTaskLoader(Context context, int weiboAccountId,
-                                        WeiboClient weiboClient) {
+    public WeiboTimelineAsyncTaskLoader(Context context, WeiboClient weiboClient) {
         super(context);
 
-        mWeiboAccountId = weiboAccountId;
         mWeiboClient = weiboClient;
         setUpdateThrottle(10000);
     }
@@ -61,9 +59,8 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
 
             if (weiboTimeline != null && weiboTimeline.statuses.size() > 0) {
                 Log.v(TAG, String.format("received %d statuses.", weiboTimeline.statuses.size()));
-                if (!weiboTimeline.statuses.get(0).id.equalsIgnoreCase(mSinceId)) {
-                    mSinceId = weiboTimeline.statuses.get(0).id;
-                }
+
+                mSinceId = weiboTimeline.statuses.get(0).id;
 
                 for (WeiboStatus status : weiboTimeline.statuses) {
                     if (status.getImageUrl() != null) {
@@ -101,4 +98,22 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
 
         return result;
     }
+
+    public String getLastId() {
+        return mSinceId;
+    }
+
+    public void setLastId(String lastId) {
+        mSinceId = lastId;
+    }
+
+    public int getAccountId() {
+        return mWeiboAccountId;
+    }
+
+    public void setAccountId(int accountId) {
+        mWeiboAccountId = accountId;
+    }
+
+
 }

@@ -52,6 +52,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     private PullToRefreshLayout mPullToRefreshLayout;
     private MainActivity mActivity;
     private int mSectionId;
+    private String mLastId;
 
 
     /**
@@ -95,7 +96,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         Bundle mArguments = getArguments();
         if (mArguments != null) {
             mSectionId = mArguments.getInt(ARG_ID);
-            mActivity.initLoader(mSectionId);
+            mActivity.initLoader(mSectionId, mLastId);
         }
     }
 
@@ -198,13 +199,15 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         mActivity.refreshLoader();
     }
 
-    public void onRefreshComplete(List<String> itemList) {
+    public void onRefreshComplete(List<String> itemList, String lastId) {
         if (itemList != null && itemList.size() > 0) {
+
             mImageUrlList.addAll(0, itemList);
             mWeiboItemViewArrayAdapter.notifyDataSetChanged();
 
             setEmptyText(mImageUrlList.size() == 0 ? getResources().getString(
                     R.string.message_info_empty_list) : null);
+            mLastId = lastId;
         }
 
         mPullToRefreshLayout.setRefreshComplete();
