@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
@@ -27,14 +28,17 @@ import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
-public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks, ItemFragment.OnFragmentInteractionListener, LoaderManager.LoaderCallbacks<List<String>> {
+public class MainActivity extends ActionBarActivity implements
+        NavigationDrawerFragment.NavigationDrawerCallbacks,
+        ItemFragment.OnFragmentInteractionListener,
+        LoaderManager.LoaderCallbacks<List<String>> {
 
     private static final int ACTIVITY_REQUEST_CODE_BIND_WEIBO = 0x000A;
     private static final String TAG = MainActivity.class.getName();
     private static final String PREF_USER_WEIBO_ACCESS_TOKEN = "weibo access token";
     private static final String STATE_DRAWER_SELECTED_ID = "selected navigation drawer position";
     private final Injector mInjector;
+    @Inject
     private WeiboClient mWeiboClient;
     private String mAccessToken;
     private NavigationDrawerFragment mNavigationDrawerFragment;
@@ -43,7 +47,7 @@ public class MainActivity extends ActionBarActivity
 
     public MainActivity() {
         mInjector = KanTuKuangModule.getInjector();
-        mWeiboClient = mInjector.getInstance(WeiboClient.class);
+        mInjector.injectMembers(this);
     }
 
     @Override
@@ -239,8 +243,6 @@ public class MainActivity extends ActionBarActivity
                                 Names.named("access token")));
                 mCurrentDrawerSelectedId = 0;
                 setUpWeiboClientAndLoader(mAccessToken);
-                // select home after weibo client initialized
-                onNavigationDrawerItemSelected(0);
 
                 return true;
             case R.id.action_bind_weibo:
@@ -260,7 +262,7 @@ public class MainActivity extends ActionBarActivity
                         Log.v(TAG, "refresh action has no listener");
                 } else {
                     Toast.makeText(this, getString(R.string.message_warning_bind_weibo),
-                            Toast.LENGTH_SHORT).show();
+                                   Toast.LENGTH_SHORT).show();
                 }
                 return true;
         }
@@ -276,7 +278,7 @@ public class MainActivity extends ActionBarActivity
         Intent intent = new Intent(this, ImageViewActivity.class);
 
         intent.putStringArrayListExtra(ImageViewActivity.URL_LIST,
-                itemFragment.getItemArrayList());
+                                       itemFragment.getItemArrayList());
         intent.putExtra(ImageViewActivity.ITEM_POSITION, position);
 
         startActivity(intent);

@@ -4,8 +4,6 @@ import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
-import com.xi.android.kantukuang.MainActivity;
-
 import java.util.ArrayList;
 import java.util.List;
 

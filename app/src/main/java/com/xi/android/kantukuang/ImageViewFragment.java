@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.google.inject.Inject;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 
@@ -19,12 +20,13 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 public class ImageViewFragment extends Fragment {
     private static final String ARG_IMAGE_URL = "image url";
     private OnFragmentInteractionListener mListener;
+    @Inject
     private ImageLoader mImageLoader;
     private String mImageUrl;
     private PhotoViewAttacher mPhotoViewAttacher;
 
     public ImageViewFragment() {
-        // Required empty public constructor
+        KanTuKuangModule.getInjector().injectMembers(this);
     }
 
     /**
@@ -48,8 +50,6 @@ public class ImageViewFragment extends Fragment {
         if (arguments != null) {
             mImageUrl = arguments.getString(ARG_IMAGE_URL);
         }
-
-        mImageLoader = ((MyApplication) getActivity().getApplication()).getImageLoader();
     }
 
     @Override

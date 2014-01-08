@@ -3,7 +3,6 @@ package com.xi.android.kantukuang;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -18,8 +17,9 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Key;
+import com.google.inject.name.Named;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
@@ -44,6 +44,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
      * The fragment's ListView/GridView.
      */
     private AbsListView mListView;
+    @Inject
     private WeiboClient mWeiboClient;
     private ArrayAdapter<String> mWeiboItemViewArrayAdapter;
     private List<String> mImageUrlList = new ArrayList<String>();
@@ -58,8 +59,8 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
      * fragment (e.g. upon screen orientation changes).
      */
     public ItemFragment() {
-        Injector mInjector = KanTuKuangModule.getInjector();
-        mWeiboClient = mInjector.getInstance(WeiboClient.class);
+        Injector injector = KanTuKuangModule.getInjector();
+        injector.injectMembers(this);
     }
 
     public static ItemFragment newInstance(String tag, int id) {
@@ -138,6 +139,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     @Override
     public void onStart() {
         super.onStart();
+
         // set up pull to refresh widget
         ActionBarPullToRefresh
                 .from(mActivity)
@@ -149,7 +151,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     @Override
     public void onResume() {
         super.onResume();
-
 
         // trigger refresh
         if (mImageUrlList.size() == 0) {
@@ -229,24 +230,18 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     }
 
     private class WeiboItemViewArrayAdapter extends ArrayAdapter<String> {
-        private final DisplayImageOptions displayImageOptions;
-        private final LayoutInflater mInflater;
-        private final ImageLoader mImageLoader;
+        @Inject
+        @Named("low resolution")
+        private DisplayImageOptions displayImageOptions;
+        @Inject
+        private LayoutInflater mInflater;
+        @Inject
+        private ImageLoader mImageLoader;
 
         public WeiboItemViewArrayAdapter(Context context, List<String> strings) {
             super(context, R.layout.image_view_narrow, strings);
 
-            mInflater = (LayoutInflater) getContext().getSystemService(
-                    Context.LAYOUT_INFLATER_SERVICE);
-            mImageLoader = ((MyApplication) mActivity.getApplication()).getImageLoader();
-            BitmapFactory.Options bitmapOptions = KanTuKuangModule.getInjector()
-                    .getInstance(Key.get(BitmapFactory.Options.class));
-
-
-            displayImageOptions = new DisplayImageOptions.Builder()
-                    .decodingOptions(bitmapOptions)
-                    .cacheOnDisc(true)
-                    .build();
+            KanTuKuangModule.getInjector().injectMembers(this);
         }
 
         @Override
@@ -259,20 +254,20 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             }
 
             mImageLoader.displayImage(getItem(position), (ImageView) convertView,
-                    displayImageOptions,
-                    new SimpleImageLoadingListener() {
-                        @Override
-                        public void onLoadingComplete(String imageUri,
-                                                      View view,
-                                                      Bitmap loadedImage) {
-                            if (loadedImage.getHeight() / 2 < FORCE_TOP_PADDING) {
-                                view.setPadding(0, 0, 0, 0);
-                            } else {
-                                view.setPadding(0, FORCE_TOP_PADDING, 0,
-                                        0);
-                            }
-                        }
-                    });
+                                      displayImageOptions,
+                                      new SimpleImageLoadingListener() {
+                                          @Override
+                                          public void onLoadingComplete(String imageUri,
+                                                                        View view,
+                                                                        Bitmap loadedImage) {
+                                              if (loadedImage.getHeight() / 2 < FORCE_TOP_PADDING) {
+                                                  view.setPadding(0, 0, 0, 0);
+                                              } else {
+                                                  view.setPadding(0, FORCE_TOP_PADDING, 0,
+                                                                  0);
+                                              }
+                                          }
+                                      });
 
             return convertView;
         }

@@ -1,6 +1,9 @@
 package com.xi.android.kantukuang;
 
+import android.app.Application;
+import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.view.LayoutInflater;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.BearerToken;
@@ -22,6 +25,9 @@ import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 
 import java.util.Arrays;
@@ -31,10 +37,25 @@ public class KanTuKuangModule extends AbstractModule {
 
     private static final String CLIENT_ID = "3016222086";
     private static final String CLIENT_SECRET = "2f23dcc09bc9ebd1d2fa1d316d3cf87a";
-    private static Injector injectorInstance = Guice.createInjector(new KanTuKuangModule());
+    private static final String ClassName = KanTuKuangModule.class.getName();
+    private static Injector injectorInstance;
+    private final Application mApplication;
+
+    public KanTuKuangModule(Application application) {
+
+        mApplication = application;
+    }
 
     public static Injector getInjector() {
+        if (injectorInstance == null) {
+            throw new IllegalStateException(String.format("%s is not initialized.", ClassName));
+        }
+
         return injectorInstance;
+    }
+
+    public static void initialize(Application application) {
+        injectorInstance = Guice.createInjector(new KanTuKuangModule(application));
     }
 
     @Override
@@ -64,6 +85,44 @@ public class KanTuKuangModule extends AbstractModule {
         bind(Credential.AccessMethod.class).toInstance(BearerToken.queryParameterAccessMethod());
 
         bind(WeiboClient.class).in(Scopes.SINGLETON);
+
+        // normal image resolution
+        bind(DisplayImageOptions.class).toInstance(new DisplayImageOptions.Builder()
+                                                           .cacheOnDisc(true)
+                                                           .build());
+    }
+
+    @Provides
+    @Singleton
+    private ImageLoader provideImageLoader(ImageLoaderConfiguration configuration) {
+        ImageLoader instance = ImageLoader.getInstance();
+        instance.init(configuration);
+
+        return instance;
+    }
+
+    @Provides
+    private ImageLoaderConfiguration provideImageLoaderConfiguration(DisplayImageOptions options) {
+        return new ImageLoaderConfiguration.Builder(mApplication)
+                .defaultDisplayImageOptions(options)
+                .build();
+    }
+
+    @Provides
+    private BitmapFactory.Options provideBitmapOptions() {
+        BitmapFactory.Options imageItemViewDecodingOptions = new BitmapFactory.Options();
+        imageItemViewDecodingOptions.inSampleSize = 2;
+
+        return imageItemViewDecodingOptions;
+    }
+
+    @Provides
+    @Named("low resolution")
+    private DisplayImageOptions provideDisplayImageOptions(BitmapFactory.Options options) {
+        return new DisplayImageOptions.Builder()
+                .decodingOptions(options)
+                .cacheOnDisc(true)
+                .build();
     }
 
     @Provides
@@ -102,11 +161,9 @@ public class KanTuKuangModule extends AbstractModule {
     }
 
     @Provides
-    private BitmapFactory.Options provideBitmapOptions() {
-        BitmapFactory.Options imageItemViewDecodingOptions = new BitmapFactory.Options();
-        imageItemViewDecodingOptions.inSampleSize = 2;
-
-        return imageItemViewDecodingOptions;
+    private LayoutInflater provideLayoutInflater() {
+        return (LayoutInflater) mApplication.getSystemService(
+                Context.LAYOUT_INFLATER_SERVICE);
     }
 
     private static class TypeLiteralCollectionString extends TypeLiteral<Collection<String>> {
