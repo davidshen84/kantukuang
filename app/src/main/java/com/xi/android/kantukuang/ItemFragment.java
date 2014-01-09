@@ -155,7 +155,12 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
         // trigger refresh
         if (mImageUrlList.size() == 0) {
-//            mPullToRefreshLayout.setRefreshing(true);
+            mPullToRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mPullToRefreshLayout.setRefreshing(true);
+                }
+            });
             mActivity.forceLoad();
         }
     }
