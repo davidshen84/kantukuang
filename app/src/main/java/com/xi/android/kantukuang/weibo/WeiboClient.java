@@ -12,10 +12,9 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonObjectParser;
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-
-import org.json.JSONException;
 
 import java.io.IOException;
 
@@ -44,16 +43,25 @@ public class WeiboClient {
         this.mRedirectUri = redirectUri;
     }
 
-    @Deprecated
-    public String[] getMyTags() throws IOException, JSONException {
+    private HttpRequestFactory getRequestFactory() {
+        if (mRequestFactory == null) {
+            // build credential
+            mCredential = new Credential(mAccessMethod).setAccessToken(mAccessToken);
+            Log.d(TAG, String.format("created credential with token: %s", mAccessToken));
 
-        String mUid = "2860471240";
-        HttpResponse response = mRequestFactory.buildGetRequest(new WeiboTagsUrl(mUid)).execute();
+            // create request factory
+            mRequestFactory = mHttpTransport.createRequestFactory(new HttpRequestInitializer() {
+                @Override
+                public void initialize(HttpRequest httpRequest) throws IOException {
+                    mCredential.initialize(httpRequest);
+                    httpRequest.setParser(mJsonObjectParser);
+                }
 
-        String[] strings = {response.parseAsString()};
-        response.disconnect();
+            });
+            Log.v(TAG, "created new request factory");
+        }
 
-        return strings;
+        return mRequestFactory;
     }
 
     private WeiboTimeline getWeiboTimelineByUrl(
@@ -64,9 +72,7 @@ public class WeiboClient {
 
         boolean hasException = false;
         try {
-            HttpRequest httpRequest = requestFactory.buildGetRequest(url)
-                    .setNumberOfRetries(2);
-            Log.v(TAG, httpRequest.getUrl().toString());
+            HttpRequest httpRequest = requestFactory.buildGetRequest(url);
 
             httpResponse = httpRequest.execute();
             Log.d(TAG, String.format("status: %d", httpResponse.getStatusCode()));
@@ -143,27 +149,6 @@ public class WeiboClient {
         return accessToken;
     }
 
-    private HttpRequestFactory getRequestFactory() {
-        if (mRequestFactory == null) {
-            // build credential
-            mCredential = new Credential(mAccessMethod).setAccessToken(mAccessToken);
-            Log.d(TAG, String.format("created credential with token: %s", mAccessToken));
-
-            // create request factory
-            mRequestFactory = mHttpTransport.createRequestFactory(new HttpRequestInitializer() {
-                @Override
-                public void initialize(HttpRequest httpRequest) throws IOException {
-                    mCredential.initialize(httpRequest);
-                    httpRequest.setParser(mJsonObjectParser);
-                }
-
-            });
-            Log.v(TAG, "created new request factory");
-        }
-
-        return mRequestFactory;
-    }
-
     public String getAccessToken() {
         return mAccessToken;
     }
@@ -176,4 +161,25 @@ public class WeiboClient {
         return mAccessToken != null && !mAccessToken.equalsIgnoreCase("");
     }
 
+    public WeiboFriends getFriends(String id, String cursor) {
+
+        WeiboFriendsUrl url = new WeiboFriendsUrl(id);
+
+        if (!Strings.isNullOrEmpty(cursor)) {
+            url.cursor = cursor;
+        }
+
+        try {
+            HttpRequest httpRequest = getRequestFactory().buildGetRequest(url);
+            HttpResponse httpResponse = httpRequest.execute();
+            if (httpResponse.isSuccessStatusCode()) {
+                return httpResponse.parseAs(WeiboFriends.class);
+            }
+
+        } catch (IOException e) {
+            System.out.print(e.getMessage());
+        }
+
+        return null;
+    }
 }

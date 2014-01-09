@@ -6,6 +6,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.xi.android.kantukuang.KanTuKuangModule;
 import com.xi.android.kantukuang.weibo.WeiboClient;
+import com.xi.android.kantukuang.weibo.WeiboFriends;
 import com.xi.android.kantukuang.weibo.WeiboTimeline;
 import com.xi.android.kantukuang.weibo.WeiboTimelineException;
 
@@ -14,6 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -21,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(RobolectricGradleTestRunner.class)
 public class WeiboClientTest {
+    private static final Logger logger = Logger.getLogger(WeiboClientTest.class.getName());
     private WeiboClient client;
 
     @Before
@@ -59,4 +62,13 @@ public class WeiboClientTest {
                 url);
     }
 
+    @Test
+    public void testGetFriends() {
+        WeiboFriends friends = client.getFriends("2860471240", null);
+
+        assertNotNull(friends);
+        assertTrue(friends.users.size() > 0);
+
+        logger.info(friends.users.get(0).screenName);
+    }
 }
