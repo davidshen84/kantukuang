@@ -1,5 +1,7 @@
 package com.xi.android.kantukuang.test;
 
+import android.app.Application;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.xi.android.kantukuang.KanTuKuangModule;
@@ -12,7 +14,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -24,7 +25,7 @@ public class WeiboClientTest {
 
     @Before
     public void setUp() throws Exception {
-        Injector injector = Guice.createInjector(new KanTuKuangModule());
+        Injector injector = Guice.createInjector(new KanTuKuangModule(new Application()));
         client = injector.getInstance(WeiboClient.class);
         client.setAccessToken("2.00uOPaHD1JlHSDcc83013405KD6O9D");
     }

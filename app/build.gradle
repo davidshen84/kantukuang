@@ -5,6 +5,7 @@ buildscript {
             url 'https://oss.sonatype.org/content/repositories/snapshots/'
         }
     }
+
     dependencies {
         classpath 'com.android.tools.build:gradle:0.7.+'
         classpath 'com.squareup.gradle:gradle-android-test-plugin:0.9.1-SNAPSHOT'
@@ -28,6 +29,7 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
     buildTypes {
         release {
             runProguard false
@@ -36,7 +38,10 @@ android {
     }
 
     sourceSets {
-        instrumentTest.setRoot('src/test')
+        instrumentTest {
+            java.srcDir file('src/test/java')
+            resources.srcDir file('src/test/res')
+        }
     }
 }
 
@@ -50,13 +55,10 @@ dependencies {
     compile 'com.google.oauth-client:google-oauth-client:1.17.0-rc'
     compile 'com.google.http-client:google-http-client-jackson2:1.17.0-rc'
     compile 'com.google.inject:guice:3.0:no_aop'
-    
-    
 
     testCompile 'junit:junit:4.+'
     testCompile 'org.robolectric:robolectric:2.1.+'
     testCompile 'com.squareup:fest-android:1.0.+'
-
     instrumentTestCompile 'junit:junit:4.+'
     instrumentTestCompile 'org.robolectric:robolectric:2.1.+'
     instrumentTestCompile 'com.squareup:fest-android:1.0.+'

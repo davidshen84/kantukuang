@@ -1,5 +1,7 @@
 package com.xi.android.kantukuang.test;
 
+import android.app.Application;
+
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
@@ -25,7 +27,7 @@ public class GuiceInjectorConfigurationTest {
 
     @Before
     public void setUp() throws Exception {
-        injector = Guice.createInjector(new KanTuKuangModule());
+        injector = Guice.createInjector(new KanTuKuangModule(new Application()));
     }
 
     @Test
