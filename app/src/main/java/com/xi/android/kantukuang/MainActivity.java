@@ -109,6 +109,7 @@ public class MainActivity extends ActionBarActivity implements
     public void onNavigationDrawerItemSelected(int selectedId) {
         ItemFragment itemFragment = null;
 
+        mCurrentDrawerSelectedId = selectedId;
         switch (selectedId) {
             case 0:
                 // Public Home
@@ -125,19 +126,10 @@ public class MainActivity extends ActionBarActivity implements
 
                 break;
         }
-        mCurrentDrawerSelectedId = selectedId;
         // update the main content by replacing fragments
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, itemFragment)
                 .commit();
-    }
-
-    public void initLoader(int sectionId, String mLastId) {
-        WeiboTimelineAsyncTaskLoader loader = (WeiboTimelineAsyncTaskLoader)
-                getSupportLoaderManager().initLoader(0, null, this);
-
-        loader.setAccountId(sectionId);
-        loader.setLastId(mLastId);
     }
 
     private String mapSectionIdToString(int sectionId) {
@@ -327,11 +319,11 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     public void forceLoad() {
-        getSupportLoaderManager().getLoader(mCurrentDrawerSelectedId).forceLoad();
+        getSupportLoaderManager().getLoader(0).forceLoad();
     }
 
     public void refreshLoader() {
-        getSupportLoaderManager().getLoader(mCurrentDrawerSelectedId).onContentChanged();
+        getSupportLoaderManager().getLoader(0).onContentChanged();
     }
 
     public void onSectionAttached(int sectionId) {

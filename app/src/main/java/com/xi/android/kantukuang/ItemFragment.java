@@ -24,6 +24,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.xi.android.kantukuang.weibo.WeiboClient;
+import com.xi.android.kantukuang.weibo.WeiboTimelineAsyncTaskLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,7 +82,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         super.onAttach(activity);
 
         mActivity = (MainActivity) activity;
-        mActivity.onSectionAttached(mSectionId);
+
         try {
             mFragmentInteractionListener = (OnFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
@@ -96,7 +97,12 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         Bundle mArguments = getArguments();
         if (mArguments != null) {
             mSectionId = mArguments.getInt(ARG_ID);
-            mActivity.initLoader(mSectionId, mLastId);
+
+            WeiboTimelineAsyncTaskLoader listLoader = (WeiboTimelineAsyncTaskLoader)
+                    mActivity.getSupportLoaderManager().initLoader(0, null, mActivity);
+
+            listLoader.setAccountId(mSectionId);
+            listLoader.setLastId(mLastId);
         }
     }
 
@@ -133,6 +139,8 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
+
+        mActivity.onSectionAttached(mSectionId);
 
         return view;
     }
