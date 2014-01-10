@@ -172,12 +172,27 @@ public class WeiboClient {
         try {
             HttpRequest httpRequest = getRequestFactory().buildGetRequest(url);
             HttpResponse httpResponse = httpRequest.execute();
-            if (httpResponse.isSuccessStatusCode()) {
+            if (httpResponse.isSuccessStatusCode())
                 return httpResponse.parseAs(WeiboFriends.class);
-            }
 
         } catch (IOException e) {
-            System.out.print(e.getMessage());
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public WeiboTokenInfo getTokenInfo() {
+        WeiboTokenInfoUrl url = new WeiboTokenInfoUrl();
+
+        try {
+            HttpRequest httpRequest = getRequestFactory().buildPostRequest(url, null);
+            HttpResponse httpResponse = httpRequest.execute();
+
+            if (httpResponse.isSuccessStatusCode())
+                return httpResponse.parseAs(WeiboTokenInfo.class);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         return null;

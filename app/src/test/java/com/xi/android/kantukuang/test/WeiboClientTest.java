@@ -9,6 +9,7 @@ import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboFriends;
 import com.xi.android.kantukuang.weibo.WeiboTimeline;
 import com.xi.android.kantukuang.weibo.WeiboTimelineException;
+import com.xi.android.kantukuang.weibo.WeiboTokenInfo;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,4 +72,13 @@ public class WeiboClientTest {
 
         logger.info(friends.users.get(0).screenName);
     }
+
+    @Test
+    public void testGetTokenInfo() {
+        WeiboTokenInfo tokenInfo = client.getTokenInfo();
+
+        assertNotNull(tokenInfo);
+        logger.info(String.format("%d", tokenInfo.uid));
+    }
+
 }
