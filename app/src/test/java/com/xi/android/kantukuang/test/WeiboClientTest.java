@@ -5,6 +5,7 @@ import android.app.Application;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.xi.android.kantukuang.KanTuKuangModule;
+import com.xi.android.kantukuang.WeiboRepostResponse;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboFriends;
 import com.xi.android.kantukuang.weibo.WeiboTimeline;
@@ -16,6 +17,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.Random;
 import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
@@ -81,4 +84,16 @@ public class WeiboClientTest {
         logger.info(String.format("%d", tokenInfo.uid));
     }
 
+    @Test
+    public void testRepost() {
+        long weiboId = 2759524863L;
+        Random random = new Random(new Date().getTime());
+
+        String comment = String.format("test - %f", random.nextFloat());
+        WeiboRepostResponse repost = client.repost(weiboId, comment);
+
+        assertNotNull(repost);
+        assertEquals(comment, repost.text);
+        logger.info(repost.createdAt);
+    }
 }

@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.http.EmptyContent;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpRequestInitializer;
@@ -15,6 +16,7 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.xi.android.kantukuang.WeiboRepostResponse;
 
 import java.io.IOException;
 
@@ -22,6 +24,7 @@ public class WeiboClient {
 
 
     private static final String TAG = WeiboClient.class.getName();
+    private static final EmptyContent EMPTY_CONTENT = new EmptyContent();
     private final String mRedirectUri;
     private final Credential.AccessMethod mAccessMethod;
     private final HttpTransport mHttpTransport;
@@ -186,12 +189,39 @@ public class WeiboClient {
         WeiboTokenInfoUrl url = new WeiboTokenInfoUrl();
 
         try {
-            HttpRequest httpRequest = getRequestFactory().buildPostRequest(url, null);
+            HttpRequest httpRequest = getRequestFactory().buildPostRequest(url, EMPTY_CONTENT);
             HttpResponse httpResponse = httpRequest.execute();
 
             if (httpResponse.isSuccessStatusCode())
                 return httpResponse.parseAs(WeiboTokenInfo.class);
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /**
+     * Repost a weibo status by id
+     *
+     * @param weiboId weibo id
+     * @param comment if not null, add the comment to current repost
+     * @return posted status, or null if failed
+     */
+    public WeiboRepostResponse repost(long weiboId, String comment) {
+        WeiboRepostUrl url = new WeiboRepostUrl(weiboId);
+
+        if (!Strings.isNullOrEmpty(comment))
+            url.setComment(comment);
+
+        try {
+            HttpRequest httpRequest = getRequestFactory().buildPostRequest(url, EMPTY_CONTENT);
+            HttpResponse httpResponse = httpRequest.execute();
+
+            if (httpResponse.isSuccessStatusCode())
+                return httpResponse.parseAs(WeiboRepostResponse.class);
+        } catch (IOException e) {
+            System.out.print(e.getMessage());
             e.printStackTrace();
         }
 
