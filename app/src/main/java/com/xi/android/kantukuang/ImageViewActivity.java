@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -12,10 +13,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.inject.Inject;
+import com.xi.android.kantukuang.weibo.WeiboClient;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class ImageViewActivity extends ActionBarActivity implements ImageViewFragment.OnFragmentInteractionListener {
+public class ImageViewActivity extends ActionBarActivity implements ImageViewFragment.OnFragmentInteractionListener, WeiboRepostView.WeiboRepostListener {
 
     public static final String URL_LIST = "URL_LIST";
     public static final String ITEM_POSITION = "ITEM_POSITION";
@@ -33,6 +37,12 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
      * The {@link ViewPager} that will host the section contents.
      */
     ViewPager mViewPager;
+    @Inject
+    private WeiboClient weiboClient;
+
+    public ImageViewActivity() {
+        KanTuKuangModule.getInjector().injectMembers(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +75,12 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
 
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.image_view, menu);
+
+        // set up repost listener
+        MenuItem menuItem = menu.findItem(R.id.action_weibo_repost);
+        WeiboRepostView weiboRepostView = (WeiboRepostView) MenuItemCompat.getActionView(menuItem);
+        weiboRepostView.setOnRepostListener(this);
+
         return true;
     }
 
@@ -88,6 +104,11 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
     @Override
     public void onImageViewFragmentInteraction(Uri uri) {
         Log.d(TAG, "nop");
+    }
+
+    @Override
+    public void post(long id, String text) {
+        Log.d(TAG, text);
     }
 
     /**
