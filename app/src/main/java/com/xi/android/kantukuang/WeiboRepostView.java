@@ -17,10 +17,9 @@ import com.xi.android.kantukuang.weibo.WeiboClient;
  * An action view. Should be used to embed into the action bar
  * It inflates the {@code abc_weibo_repost.xml}
  */
-public class WeiboRepostView extends LinearLayout implements View.OnFocusChangeListener, View.OnClickListener {
+public class WeiboRepostView extends LinearLayout implements View.OnClickListener {
     private static final String TAG = WeiboRepostView.class.getName();
     private final EditText mText;
-    private final CharSequence mPlaceHolderText;
     @Inject
     private LayoutInflater mInflater;
     @Inject
@@ -30,29 +29,13 @@ public class WeiboRepostView extends LinearLayout implements View.OnFocusChangeL
     public WeiboRepostView(Context context) {
         super(context);
 
-        mPlaceHolderText = getResources().getText(
-                R.string.abc_weibo_repost_placeholder);
-
         KanTuKuangModule.getInjector().injectMembers(this);
 
         mInflater.inflate(R.layout.abc_weibo_repost, this, true);
 
         mText = (EditText) findViewById(android.R.id.edit);
-        mText.setOnFocusChangeListener(this);
         Button mButton = (Button) findViewById(android.R.id.button1);
         mButton.setOnClickListener(this);
-    }
-
-    @Override
-    public void onFocusChange(View view, boolean hasFocus) {
-        if (hasFocus) {
-            mText.setText("");
-        } else {
-            String text = String.valueOf(mText.getText());
-            if (Strings.isNullOrEmpty(text)) {
-                mText.setText(mPlaceHolderText);
-            }
-        }
     }
 
     @Override
@@ -61,10 +44,9 @@ public class WeiboRepostView extends LinearLayout implements View.OnFocusChangeL
 
         if (!Strings.isNullOrEmpty(text)) {
             Log.d(TAG, text);
-
-
-        } else
+        } else {
             Log.d(TAG, "no thing ;)");
+        }
 
         assert mRepostListener != null;
         // TODO fix id

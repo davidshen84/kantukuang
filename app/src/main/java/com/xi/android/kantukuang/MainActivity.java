@@ -283,11 +283,8 @@ public class MainActivity extends ActionBarActivity implements
     public Loader<List<String>> onCreateLoader(int i, Bundle bundle) {
         Log.v(TAG, "create new loader");
 
-        WeiboTimelineAsyncTaskLoader weiboTimelineAsyncTaskLoader = new WeiboTimelineAsyncTaskLoader(
+        return new WeiboTimelineAsyncTaskLoader(
                 this, mWeiboClient);
-        weiboTimelineAsyncTaskLoader.setAccountId(mCurrentDrawerSelectedId);
-
-        return weiboTimelineAsyncTaskLoader;
     }
 
     @Override

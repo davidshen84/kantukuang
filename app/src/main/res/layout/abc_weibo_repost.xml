@@ -10,8 +10,8 @@
         android:id="@android:id/edit"
         android:layout_weight="1"
         android:editable="true"
-        android:text="@string/abc_weibo_repost_placeholder"
-        android:inputType="textShortMessage"/>
+        android:inputType="textShortMessage"
+        android:hint="@string/abc_weibo_repost_placeholder"/>
 
     <Button
         android:layout_width="@dimen/abc_action_button_min_width"
