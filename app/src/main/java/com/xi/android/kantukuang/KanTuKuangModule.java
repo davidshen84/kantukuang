@@ -42,7 +42,6 @@ public class KanTuKuangModule extends AbstractModule {
     private final Application mApplication;
 
     public KanTuKuangModule(Application application) {
-
         mApplication = application;
     }
 
@@ -80,16 +79,18 @@ public class KanTuKuangModule extends AbstractModule {
 
         bind(String.class).annotatedWith(Names.named("redirect uri")).toInstance("kantukuang.com/");
         bind(HttpTransport.class).to(NetHttpTransport.class);
-        bind(JsonFactory.class).to(JacksonFactory.class);
+        bind(JsonFactory.class).to(JacksonFactory.class).in(Scopes.SINGLETON);
 
         bind(Credential.AccessMethod.class).toInstance(BearerToken.queryParameterAccessMethod());
 
         bind(WeiboClient.class).in(Scopes.SINGLETON);
 
         // normal image resolution
-        bind(DisplayImageOptions.class).toInstance(new DisplayImageOptions.Builder()
-                                                           .cacheOnDisc(true)
-                                                           .build());
+        bind(DisplayImageOptions.class).toInstance(
+                new DisplayImageOptions.Builder()
+                        .cacheOnDisc(true)
+                        .build()
+        );
     }
 
     @Provides

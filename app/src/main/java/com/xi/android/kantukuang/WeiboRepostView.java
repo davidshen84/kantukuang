@@ -1,14 +1,12 @@
 package com.xi.android.kantukuang;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 
@@ -18,7 +16,6 @@ import com.xi.android.kantukuang.weibo.WeiboClient;
  * It inflates the {@code abc_weibo_repost.xml}
  */
 public class WeiboRepostView extends LinearLayout implements View.OnClickListener {
-    private static final String TAG = WeiboRepostView.class.getName();
     private final EditText mText;
     @Inject
     private LayoutInflater mInflater;
@@ -42,15 +39,8 @@ public class WeiboRepostView extends LinearLayout implements View.OnClickListene
     public void onClick(View view) {
         String text = String.valueOf(mText.getText());
 
-        if (!Strings.isNullOrEmpty(text)) {
-            Log.d(TAG, text);
-        } else {
-            Log.d(TAG, "no thing ;)");
-        }
-
         assert mRepostListener != null;
-        // TODO fix id
-        mRepostListener.post(0, text);
+        mRepostListener.post(text);
     }
 
     public void setOnRepostListener(WeiboRepostListener listener) {
@@ -58,6 +48,6 @@ public class WeiboRepostView extends LinearLayout implements View.OnClickListene
     }
 
     public interface WeiboRepostListener {
-        void post(long id, String text);
+        void post(String text);
     }
 }

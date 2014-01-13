@@ -24,6 +24,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.xi.android.kantukuang.weibo.WeiboClient;
+import com.xi.android.kantukuang.weibo.WeiboStatus;
 import com.xi.android.kantukuang.weibo.WeiboTimelineAsyncTaskLoader;
 
 import java.util.ArrayList;
@@ -47,8 +48,8 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     private AbsListView mListView;
     @Inject
     private WeiboClient mWeiboClient;
-    private ArrayAdapter<String> mWeiboItemViewArrayAdapter;
-    private List<String> mImageUrlList = new ArrayList<String>();
+    private ArrayAdapter<WeiboStatus> mWeiboItemViewArrayAdapter;
+    private List<WeiboStatus> mImageUrlList = new ArrayList<WeiboStatus>();
     private View mEmptyView;
     private PullToRefreshLayout mPullToRefreshLayout;
     private MainActivity mActivity;
@@ -212,22 +213,21 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         mActivity.refreshLoader();
     }
 
-    public void onRefreshComplete(List<String> itemList, String lastId) {
-        if (itemList != null && itemList.size() > 0) {
-
-            mImageUrlList.addAll(0, itemList);
+    public void onRefreshComplete(List<WeiboStatus> statusList, String lastId) {
+        if (statusList != null && statusList.size() > 0) {
+            mImageUrlList.addAll(0, statusList);
             mWeiboItemViewArrayAdapter.notifyDataSetChanged();
 
-            setEmptyText(mImageUrlList.size() == 0 ? getResources().getString(
-                    R.string.message_info_empty_list) : null);
             mLastId = lastId;
         }
 
+        setEmptyText(mImageUrlList.size() == 0 ? getResources().getString(
+                R.string.message_info_empty_list) : null);
         mPullToRefreshLayout.setRefreshComplete();
     }
 
-    public ArrayList<String> getItemArrayList() {
-        return (ArrayList<String>) mImageUrlList;
+    public ArrayList<WeiboStatus> getStatuses() {
+        return (ArrayList<WeiboStatus>) mImageUrlList;
     }
 
 
@@ -245,7 +245,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         public void onItemFragmentInteraction(int position);
     }
 
-    private class WeiboItemViewArrayAdapter extends ArrayAdapter<String> {
+    private class WeiboItemViewArrayAdapter extends ArrayAdapter<WeiboStatus> {
         @Inject
         @Named("low resolution")
         private DisplayImageOptions displayImageOptions;
@@ -254,8 +254,8 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         @Inject
         private ImageLoader mImageLoader;
 
-        public WeiboItemViewArrayAdapter(Context context, List<String> strings) {
-            super(context, R.layout.image_view_narrow, strings);
+        public WeiboItemViewArrayAdapter(Context context, List<WeiboStatus> statuses) {
+            super(context, R.layout.image_view_narrow, statuses);
 
             KanTuKuangModule.getInjector().injectMembers(this);
         }
@@ -269,7 +269,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
                 ((ImageView) convertView).setImageBitmap(null);
             }
 
-            mImageLoader.displayImage(getItem(position), (ImageView) convertView,
+            mImageLoader.displayImage(getItem(position).getImageUrl(), (ImageView) convertView,
                                       displayImageOptions,
                                       new SimpleImageLoadingListener() {
                                           @Override

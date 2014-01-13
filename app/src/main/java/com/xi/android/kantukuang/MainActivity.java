@@ -16,14 +16,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.api.client.json.JsonFactory;
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 import com.xi.android.kantukuang.weibo.WeiboClient;
+import com.xi.android.kantukuang.weibo.WeiboStatus;
 import com.xi.android.kantukuang.weibo.WeiboTimelineAsyncTaskLoader;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
@@ -31,13 +35,15 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 public class MainActivity extends ActionBarActivity implements
         NavigationDrawerFragment.NavigationDrawerCallbacks,
         ItemFragment.OnFragmentInteractionListener,
-        LoaderManager.LoaderCallbacks<List<String>> {
+        LoaderManager.LoaderCallbacks<List<WeiboStatus>> {
 
     private static final int ACTIVITY_REQUEST_CODE_BIND_WEIBO = 0x000A;
     private static final String TAG = MainActivity.class.getName();
     private static final String PREF_USER_WEIBO_ACCESS_TOKEN = "weibo access token";
     private static final String STATE_DRAWER_SELECTED_ID = "selected navigation drawer position";
     private final Injector mInjector;
+    @Inject
+    private JsonFactory mJsonFactory;
     @Inject
     private WeiboClient mWeiboClient;
     private String mAccessToken;
@@ -272,15 +278,23 @@ public class MainActivity extends ActionBarActivity implements
                 getSupportFragmentManager().findFragmentById(R.id.container);
         Intent intent = new Intent(this, ImageViewActivity.class);
 
-        intent.putStringArrayListExtra(ImageViewActivity.URL_LIST,
-                                       itemFragment.getItemArrayList());
+        ArrayList<WeiboStatus> statuses = itemFragment.getStatuses();
+
         intent.putExtra(ImageViewActivity.ITEM_POSITION, position);
+
+        try {
+            intent.putExtra(ImageViewActivity.STATUS_JSON, mJsonFactory.toString(statuses));
+        } catch (IOException e) {
+            e.printStackTrace();
+
+            intent.putExtra(ImageViewActivity.STATUS_JSON, "[]");
+        }
 
         startActivity(intent);
     }
 
     @Override
-    public Loader<List<String>> onCreateLoader(int i, Bundle bundle) {
+    public Loader<List<WeiboStatus>> onCreateLoader(int i, Bundle bundle) {
         Log.v(TAG, "create new loader");
 
         return new WeiboTimelineAsyncTaskLoader(
@@ -288,7 +302,7 @@ public class MainActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onLoadFinished(Loader<List<String>> listLoader, List<String> strings) {
+    public void onLoadFinished(Loader<List<WeiboStatus>> listLoader, List<WeiboStatus> statuses) {
         ItemFragment itemFragment = (ItemFragment) getSupportFragmentManager().findFragmentById(
                 R.id.container);
 
@@ -305,13 +319,13 @@ public class MainActivity extends ActionBarActivity implements
                 Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
 
                 // update view
-                itemFragment.onRefreshComplete(strings, loader.getLastId());
+                itemFragment.onRefreshComplete(statuses, loader.getLastId());
             }
         }
     }
 
     @Override
-    public void onLoaderReset(Loader<List<String>> listLoader) {
+    public void onLoaderReset(Loader<List<WeiboStatus>> listLoader) {
         Log.d(TAG, "reset loader");
     }
 

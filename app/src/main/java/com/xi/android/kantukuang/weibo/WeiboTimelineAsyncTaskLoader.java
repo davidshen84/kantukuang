@@ -7,7 +7,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> {
+public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<WeiboStatus>> {
     private static final String TAG = WeiboTimelineAsyncTaskLoader.class.getName();
     private int mWeiboAccountId;
     private WeiboClient mWeiboClient;
@@ -30,10 +30,10 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
     }
 
     @Override
-    public List<String> loadInBackground() {
+    public List<WeiboStatus> loadInBackground() {
 
         WeiboTimeline weiboTimeline;
-        List<String> stringList;
+        List<WeiboStatus> weiboStatusList;
 
         if (isAbandoned()) {
             reset();
@@ -41,7 +41,7 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
         }
 
         // make sure do not return null ref.
-        stringList = new ArrayList<String>();
+        weiboStatusList = new ArrayList<WeiboStatus>();
         Log.v(TAG, String.format("start loading weibo timeline: %d", mWeiboAccountId));
         try {
             switch (mWeiboAccountId) {
@@ -62,26 +62,23 @@ public class WeiboTimelineAsyncTaskLoader extends AsyncTaskLoader<List<String>> 
 
                 mSinceId = weiboTimeline.statuses.get(0).id;
 
-                for (WeiboStatus status : weiboTimeline.statuses) {
+                for (WeiboStatus status : weiboTimeline.statuses)
                     if (status.getImageUrl() != null) {
-                        stringList.add(status.getImageUrl());
-                    } else if (status.thumbnailUrl != null) {
-                        stringList.add(status.thumbnailUrl);
+                        weiboStatusList.add(status);
                     }
-                }
 
-                newDataCount = stringList.size();
+                newDataCount = weiboStatusList.size();
             }
         } catch (WeiboTimelineException ignored) {
             Log.v(TAG, "there's an error when loading timeline");
             hasError = true;
         }
 
-        return stringList;
+        return weiboStatusList;
     }
 
     @Override
-    public void deliverResult(List<String> data) {
+    public void deliverResult(List<WeiboStatus> data) {
         super.deliverResult(data);
     }
 

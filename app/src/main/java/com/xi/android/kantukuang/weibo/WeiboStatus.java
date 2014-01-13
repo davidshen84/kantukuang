@@ -19,16 +19,19 @@ public class WeiboStatus {
     public WeiboStatus repostedStatus;
 
     public String getImageUrl() {
+        // get self image url
         if (imageUrl != null && !imageUrl.equalsIgnoreCase(""))
             return imageUrl;
 
+        // get reposted status image url
         if (repostedStatus != null)
             return repostedStatus.getImageUrl();
 
-        return null;
+        // fall back to thumbnail :(
+        return getThumbnailUrl();
     }
 
-    public String getThumbnailUrl() {
+    private String getThumbnailUrl() {
         if (thumbnailUrl != null && !thumbnailUrl.equalsIgnoreCase(""))
             return thumbnailUrl;
 

@@ -1,5 +1,6 @@
 package com.xi.android.kantukuang;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -13,16 +14,19 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.JsonParser;
 import com.google.inject.Inject;
 import com.xi.android.kantukuang.weibo.WeiboClient;
+import com.xi.android.kantukuang.weibo.WeiboStatus;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 
 public class ImageViewActivity extends ActionBarActivity implements ImageViewFragment.OnFragmentInteractionListener, WeiboRepostView.WeiboRepostListener {
 
-    public static final String URL_LIST = "URL_LIST";
-    public static final String ITEM_POSITION = "ITEM_POSITION";
+    public static final String ITEM_POSITION = "item position";
+    public static final String STATUS_JSON = "weibo status in json";
     private static final String TAG = ImageViewActivity.class.getName();
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -39,6 +43,9 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
     ViewPager mViewPager;
     @Inject
     private WeiboClient weiboClient;
+    private String mCurrentStatusId;
+    @Inject
+    private JsonFactory mJsonFactory;
 
     public ImageViewActivity() {
         KanTuKuangModule.getInjector().injectMembers(this);
@@ -53,11 +60,19 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        ArrayList<String> urlList = getIntent().getStringArrayListExtra(URL_LIST);
-        int currentPosition = getIntent().getIntExtra(ITEM_POSITION, 0);
-        assert urlList != null;
-        mSectionsPagerAdapter.setUrlList(urlList);
+        Intent intent = getIntent();
+        int currentPosition = intent.getIntExtra(ITEM_POSITION, 0);
 
+        List<WeiboStatus> statuses = null;
+        try {
+            String stringExtra = intent.getStringExtra(STATUS_JSON);
+            JsonParser jsonParser = mJsonFactory.createJsonParser(stringExtra);
+            statuses = (List<WeiboStatus>) jsonParser.parseArray(List.class, WeiboStatus.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+            finish();
+        }
+        mSectionsPagerAdapter.setStatusList(statuses);
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
@@ -107,8 +122,12 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
     }
 
     @Override
-    public void post(long id, String text) {
-        Log.d(TAG, text);
+    public void post(String text) {
+        Log.d(TAG, String.format("%s: %s", mCurrentStatusId, text));
+    }
+
+    public void setCurrentStatusId(String id) {
+        mCurrentStatusId = id;
     }
 
     /**
@@ -117,7 +136,7 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-        private List<String> mUrlList;
+        private List<WeiboStatus> mStatusList;
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -127,12 +146,14 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
 
-            return ImageViewFragment.newInstance(mUrlList.get(position));
+            WeiboStatus status = mStatusList.get(position);
+
+            return ImageViewFragment.newInstance(status.id, status.getImageUrl());
         }
 
         @Override
         public int getCount() {
-            return mUrlList.size();
+            return mStatusList.size();
         }
 
         @Override
@@ -140,9 +161,8 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
             return "title place holder";
         }
 
-        public void setUrlList(ArrayList<String> urlList) {
-            mUrlList = urlList;
+        public void setStatusList(List<WeiboStatus> statuses) {
+            mStatusList = statuses;
         }
     }
-
 }

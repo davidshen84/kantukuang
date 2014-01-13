@@ -19,6 +19,7 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class ImageViewFragment extends Fragment {
     private static final String ARG_IMAGE_URL = "image url";
+    private static final String ARG_ID = "weibo status id";
     private OnFragmentInteractionListener mListener;
     @Inject
     private ImageLoader mImageLoader;
@@ -33,9 +34,10 @@ public class ImageViewFragment extends Fragment {
      * @param imageUrl The url for the image
      * @return A new instance
      */
-    public static Fragment newInstance(String imageUrl) {
+    public static Fragment newInstance(String id, String imageUrl) {
         ImageViewFragment fragment = new ImageViewFragment();
         Bundle bundle = new Bundle();
+        bundle.putString(ARG_ID, id);
         bundle.putString(ARG_IMAGE_URL, imageUrl);
         fragment.setArguments(bundle);
 
@@ -49,13 +51,17 @@ public class ImageViewFragment extends Fragment {
         Bundle arguments = getArguments();
         if (arguments != null) {
             mImageUrl = arguments.getString(ARG_IMAGE_URL);
+            String id = arguments.getString(ARG_ID);
+            ((ImageViewActivity) getActivity()).setCurrentStatusId(id);
         }
+
     }
 
     @Override
     public void onStop() {
         if (mPhotoViewAttacher != null)
             mPhotoViewAttacher.cleanup();
+
         super.onStop();
     }
 
@@ -87,7 +93,6 @@ public class ImageViewFragment extends Fragment {
 
         try {
             mListener = (OnFragmentInteractionListener) activity;
-
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                                                  + " must implement OnFragmentInteractionListener");
