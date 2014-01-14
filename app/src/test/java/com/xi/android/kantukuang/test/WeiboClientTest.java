@@ -86,7 +86,7 @@ public class WeiboClientTest {
 
     @Test
     public void testRepost() {
-        long weiboId = 2759524863L;
+        String weiboId = "2759524863";
         Random random = new Random(new Date().getTime());
 
         String comment = String.format("test - %f", random.nextFloat());

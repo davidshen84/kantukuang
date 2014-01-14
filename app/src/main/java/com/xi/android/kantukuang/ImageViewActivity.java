@@ -13,6 +13,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonParser;
@@ -124,6 +125,13 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
     @Override
     public void post(String text) {
         Log.d(TAG, String.format("%s: %s", mCurrentStatusId, text));
+        boolean success = weiboClient.repost(mCurrentStatusId, text) != null;
+
+        if (success) {
+            Toast.makeText(this, R.string.message_success, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, R.string.message_fail, Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void setCurrentStatusId(String id) {

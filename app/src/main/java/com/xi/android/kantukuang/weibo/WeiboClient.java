@@ -208,7 +208,7 @@ public class WeiboClient {
      * @param comment if not null, add the comment to current repost
      * @return posted status, or null if failed
      */
-    public WeiboRepostResponse repost(long weiboId, String comment) {
+    public WeiboRepostResponse repost(String weiboId, String comment) {
         WeiboRepostUrl url = new WeiboRepostUrl(weiboId);
 
         if (!Strings.isNullOrEmpty(comment))
@@ -221,7 +221,6 @@ public class WeiboClient {
             if (httpResponse.isSuccessStatusCode())
                 return httpResponse.parseAs(WeiboRepostResponse.class);
         } catch (IOException e) {
-            System.out.print(e.getMessage());
             e.printStackTrace();
         }
 
