@@ -11,7 +11,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -48,6 +47,8 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
     private String mCurrentStatusId;
     @Inject
     private JsonFactory mJsonFactory;
+    private int mSelectedViewPosition;
+    private List<WeiboStatus> mStatusList;
 
     public ImageViewActivity() {
         KanTuKuangModule.getInjector().injectMembers(this);
@@ -65,16 +66,15 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
         Intent intent = getIntent();
         int currentPosition = intent.getIntExtra(ITEM_POSITION, 0);
 
-        List<WeiboStatus> statuses = null;
         try {
             String stringExtra = intent.getStringExtra(STATUS_JSON);
             JsonParser jsonParser = mJsonFactory.createJsonParser(stringExtra);
-            statuses = (List<WeiboStatus>) jsonParser.parseArray(List.class, WeiboStatus.class);
+            mStatusList = (List<WeiboStatus>) jsonParser.parseArray(List.class, WeiboStatus.class);
         } catch (IOException e) {
             e.printStackTrace();
             finish();
         }
-        mSectionsPagerAdapter.setStatusList(statuses);
+        mSectionsPagerAdapter.setStatusList(mStatusList);
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
@@ -123,20 +123,22 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
         Log.d(TAG, "nop");
     }
 
+    public String getImageUrlByOrder(int position) {
+        return mStatusList.get(position).getImageUrl();
+    }
+
     @Override
     public void post(String text) {
-        Log.d(TAG, String.format("%s: %s", mCurrentStatusId, text));
-        boolean success = weiboClient.repost(mCurrentStatusId, text) != null;
+        String id = mStatusList.get(mViewPager.getCurrentItem()).id;
+
+        Log.d(TAG, String.format("%s: %s", id, text));
+        boolean success = weiboClient.repost(id, text) != null;
 
         if (success) {
             Toast.makeText(this, R.string.message_success, Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, R.string.message_fail, Toast.LENGTH_SHORT).show();
         }
-    }
-
-    public void setCurrentStatusId(String id) {
-        mCurrentStatusId = id;
     }
 
     /**
@@ -154,10 +156,7 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
-
-            WeiboStatus status = mStatusList.get(position);
-
-            return ImageViewFragment.newInstance(status.id, status.getImageUrl());
+            return ImageViewFragment.newInstance(position);
         }
 
         @Override

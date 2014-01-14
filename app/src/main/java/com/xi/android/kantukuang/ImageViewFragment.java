@@ -18,30 +18,45 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 
 
 public class ImageViewFragment extends Fragment {
-    private static final String ARG_IMAGE_URL = "image url";
-    private static final String ARG_ID = "weibo status id";
+    private static final String ARG_ORDER = "weibo status position in context";
     private OnFragmentInteractionListener mListener;
     @Inject
     private ImageLoader mImageLoader;
-    private String mImageUrl;
     private PhotoViewAttacher mPhotoViewAttacher;
+    private ImageViewActivity mImageViewActivity;
+    private int mOrder;
 
     public ImageViewFragment() {
         KanTuKuangModule.getInjector().injectMembers(this);
     }
 
     /**
-     * @param imageUrl The url for the image
-     * @return A new instance
+     * create a new instance of {@link com.xi.android.kantukuang.ImageViewFragment}
+     *
+     * @param order the order of the item in its parent context
+     * @return
      */
-    public static Fragment newInstance(String id, String imageUrl) {
+    public static Fragment newInstance(int order) {
         ImageViewFragment fragment = new ImageViewFragment();
         Bundle bundle = new Bundle();
-        bundle.putString(ARG_ID, id);
-        bundle.putString(ARG_IMAGE_URL, imageUrl);
+        bundle.putInt(ARG_ORDER, order);
+
         fragment.setArguments(bundle);
 
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        mImageViewActivity = (ImageViewActivity) activity;
+        try {
+            mListener = (OnFragmentInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                                                 + " must implement OnFragmentInteractionListener");
+        }
     }
 
     @Override
@@ -50,19 +65,9 @@ public class ImageViewFragment extends Fragment {
 
         Bundle arguments = getArguments();
         if (arguments != null) {
-            mImageUrl = arguments.getString(ARG_IMAGE_URL);
-            String id = arguments.getString(ARG_ID);
-            ((ImageViewActivity) getActivity()).setCurrentStatusId(id);
+            mOrder = arguments.getInt(ARG_ORDER);
         }
 
-    }
-
-    @Override
-    public void onStop() {
-        if (mPhotoViewAttacher != null)
-            mPhotoViewAttacher.cleanup();
-
-        super.onStop();
     }
 
     @Override
@@ -74,29 +79,27 @@ public class ImageViewFragment extends Fragment {
         assert view != null;
         ImageView imageView = (ImageView) view.findViewById(android.R.id.content);
 
-        mImageLoader.displayImage(mImageUrl, imageView, new SimpleImageLoadingListener() {
-            @Override
-            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                ImageView imageView = (ImageView) view;
-                imageView.setImageBitmap(loadedImage);
+        mImageLoader.displayImage(mImageViewActivity.getImageUrlByOrder(mOrder), imageView,
+                                  new SimpleImageLoadingListener() {
+                                      @Override
+                                      public void onLoadingComplete(String imageUri, View view,
+                                                                    Bitmap loadedImage) {
+                                          ImageView imageView = (ImageView) view;
+                                          imageView.setImageBitmap(loadedImage);
 
-                mPhotoViewAttacher = new PhotoViewAttacher(imageView);
-            }
-        });
+                                          mPhotoViewAttacher = new PhotoViewAttacher(imageView);
+                                      }
+                                  });
 
         return view;
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onStop() {
+        if (mPhotoViewAttacher != null)
+            mPhotoViewAttacher.cleanup();
 
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                                                 + " must implement OnFragmentInteractionListener");
-        }
+        super.onStop();
     }
 
     @Override
@@ -104,6 +107,7 @@ public class ImageViewFragment extends Fragment {
         super.onDetach();
 
         mListener = null;
+        mImageViewActivity = null;
     }
 
 
