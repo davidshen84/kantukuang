@@ -111,7 +111,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        // TODO wrong logic :(
         if (!mWeiboClient.IsAuthenticated()) {
             Log.v(TAG, "weibo client is not authenticated.");
             Toast.makeText(mActivity, "error", Toast.LENGTH_SHORT).show();

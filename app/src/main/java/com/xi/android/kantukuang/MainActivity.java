@@ -17,7 +17,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.api.client.json.JsonFactory;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -28,6 +27,7 @@ import com.xi.android.kantukuang.weibo.WeiboTimelineAsyncTaskLoader;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
@@ -217,11 +217,8 @@ public class MainActivity extends ActionBarActivity implements
 
         // add default private section
         // this section is only available when the weibo client is authenticated
-
-        // TODO restore user added sections;
-        String[] userSections = {};
         String sectionPrivate = getString(R.string.default_section_private);
-        mNavigationDrawerFragment.setItems(Lists.asList(sectionPrivate, userSections));
+        mNavigationDrawerFragment.setItems(Arrays.asList(sectionPrivate));
 
         if (!mHasAttachedSection) {
             mNavigationDrawerFragment.selectItem(mCurrentDrawerSelectedId);
