@@ -20,7 +20,7 @@ import com.xi.android.kantukuang.weibo.WeiboClient;
  * It inflates the {@code abc_weibo_repost.xml}
  */
 public class WeiboRepostView extends LinearLayout implements View.OnClickListener, TextView.OnEditorActionListener {
-    private final EditText mText;
+    private final EditText mEditText;
     @Inject
     private LayoutInflater mInflater;
     @Inject
@@ -36,18 +36,20 @@ public class WeiboRepostView extends LinearLayout implements View.OnClickListene
 
         mInflater.inflate(R.layout.abc_weibo_repost, this, true);
 
-        mText = (EditText) findViewById(android.R.id.edit);
-        mText.setOnEditorActionListener(this);
+        mEditText = (EditText) findViewById(android.R.id.edit);
+        mEditText.setOnEditorActionListener(this);
         Button mButton = (Button) findViewById(android.R.id.button1);
         mButton.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
-        String text = String.valueOf(mText.getText());
+        String text = String.valueOf(mEditText.getText());
 
         assert mRepostListener != null;
         mRepostListener.post(text);
+
+        mEditText.setText("");
     }
 
     public void setOnRepostListener(WeiboRepostListener listener) {

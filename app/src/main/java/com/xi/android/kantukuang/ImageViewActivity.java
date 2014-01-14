@@ -2,6 +2,7 @@ package com.xi.android.kantukuang;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -132,13 +133,24 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
         String id = mStatusList.get(mViewPager.getCurrentItem()).id;
 
         Log.d(TAG, String.format("%s: %s", id, text));
-        boolean success = weiboClient.repost(id, text) != null;
+        new AsyncTask<String, Integer, Boolean>() {
+            @Override
+            protected Boolean doInBackground(String... strings) {
+                return weiboClient.repost(strings[0], strings[1]) != null;
+            }
 
-        if (success) {
-            Toast.makeText(this, R.string.message_success, Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, R.string.message_fail, Toast.LENGTH_SHORT).show();
-        }
+            @Override
+            protected void onPostExecute(Boolean result) {
+                if (result) {
+                    Toast.makeText(ImageViewActivity.this, R.string.message_success,
+                                   Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(ImageViewActivity.this, R.string.message_fail,
+                                   Toast.LENGTH_SHORT).show();
+                }
+            }
+        }.execute(id, text);
+
     }
 
     /**
