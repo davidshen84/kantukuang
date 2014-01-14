@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
+import android.view.inputmethod.InputMethodManager;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.BearerToken;
@@ -162,9 +163,16 @@ public class KanTuKuangModule extends AbstractModule {
     }
 
     @Provides
+    @Singleton
     private LayoutInflater provideLayoutInflater() {
         return (LayoutInflater) mApplication.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
+    }
+
+    @Provides
+    @Singleton
+    private InputMethodManager provideInputMethodManager() {
+        return (InputMethodManager) mApplication.getSystemService(Context.INPUT_METHOD_SERVICE);
     }
 
     private static class TypeLiteralCollectionString extends TypeLiteral<Collection<String>> {
