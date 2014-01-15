@@ -17,7 +17,7 @@ import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 
-public class ImageViewFragment extends Fragment {
+public class ImageViewFragment extends Fragment implements PhotoViewAttacher.OnViewTapListener {
     private static final String ARG_ORDER = "weibo status position in context";
     private OnFragmentInteractionListener mListener;
     @Inject
@@ -88,6 +88,7 @@ public class ImageViewFragment extends Fragment {
                                           imageView.setImageBitmap(loadedImage);
 
                                           mPhotoViewAttacher = new PhotoViewAttacher(imageView);
+                                          mPhotoViewAttacher.setOnViewTapListener(ImageViewFragment.this);
                                       }
                                   });
 
@@ -108,6 +109,11 @@ public class ImageViewFragment extends Fragment {
 
         mListener = null;
         mImageViewActivity = null;
+    }
+
+    @Override
+    public void onViewTap(View view, float v, float v2) {
+        mListener.onImageViewFragmentInteraction(null);
     }
 
 

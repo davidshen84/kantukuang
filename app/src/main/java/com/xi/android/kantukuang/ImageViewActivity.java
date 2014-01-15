@@ -45,11 +45,10 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
     ViewPager mViewPager;
     @Inject
     private WeiboClient weiboClient;
-    private String mCurrentStatusId;
     @Inject
     private JsonFactory mJsonFactory;
-    private int mSelectedViewPosition;
     private List<WeiboStatus> mStatusList;
+    private boolean mShowRepostAction = false;
 
     public ImageViewActivity() {
         KanTuKuangModule.getInjector().injectMembers(this);
@@ -96,6 +95,8 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
 
         // set up repost listener
         MenuItem menuItem = menu.findItem(R.id.action_weibo_repost);
+        if (mShowRepostAction)
+            MenuItemCompat.setShowAsAction(menuItem, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
         WeiboRepostView weiboRepostView = (WeiboRepostView) MenuItemCompat.getActionView(menuItem);
         weiboRepostView.setOnRepostListener(this);
 
@@ -121,7 +122,8 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
 
     @Override
     public void onImageViewFragmentInteraction(Uri uri) {
-        Log.d(TAG, "nop");
+        mShowRepostAction = !mShowRepostAction;
+        supportInvalidateOptionsMenu();
     }
 
     public String getImageUrlByOrder(int position) {

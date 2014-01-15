@@ -13,5 +13,5 @@
         android:title="@string/action_weibo_repost"
         android:orderInCategory="100"
         app:actionViewClass="com.xi.android.kantukuang.WeiboRepostView"
-        app:showAsAction="always"/>
+        app:showAsAction="never"/>
 </menu>
