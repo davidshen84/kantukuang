@@ -144,16 +144,21 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
             @Override
             protected void onPostExecute(Boolean result) {
                 if (result) {
-                    Toast.makeText(ImageViewActivity.this, R.string.message_success,
+                    Toast.makeText(ImageViewActivity.this, R.string.message_info_success,
                                    Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(ImageViewActivity.this, R.string.message_fail,
+                    Toast.makeText(ImageViewActivity.this, R.string.message_error_fail,
                                    Toast.LENGTH_SHORT).show();
                 }
             }
         }.execute(id, text);
 
     }
+
+    public CharSequence getTextByOrder(int order) {
+        return mStatusList.get(order).text;
+    }
+
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to

@@ -5,10 +5,14 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.inject.Inject;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -78,6 +82,7 @@ public class ImageViewFragment extends Fragment implements PhotoViewAttacher.OnV
 
         assert view != null;
         ImageView imageView = (ImageView) view.findViewById(android.R.id.content);
+        TextView textView = (TextView) view.findViewById(android.R.id.text1);
 
         mImageLoader.displayImage(mImageViewActivity.getImageUrlByOrder(mOrder), imageView,
                                   new SimpleImageLoadingListener() {
@@ -88,9 +93,13 @@ public class ImageViewFragment extends Fragment implements PhotoViewAttacher.OnV
                                           imageView.setImageBitmap(loadedImage);
 
                                           mPhotoViewAttacher = new PhotoViewAttacher(imageView);
-                                          mPhotoViewAttacher.setOnViewTapListener(ImageViewFragment.this);
+                                          mPhotoViewAttacher.setOnViewTapListener(
+                                                  ImageViewFragment.this);
+
                                       }
                                   });
+
+        textView.setText(mImageViewActivity.getTextByOrder(mOrder));
 
         return view;
     }

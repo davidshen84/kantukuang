@@ -24,7 +24,7 @@
     <string name="default_section_private">Private</string>
     <string name="action_weibo_repost">Repost</string>
     <string name="abc_weibo_repost_placeholder">Repost Placeholder</string>
-    <string name="message_success">Success!</string>
-    <string name="message_fail">Fail!</string>
+    <string name="message_info_success">Success!</string>
+    <string name="message_error_fail">Fail!</string>
 
 </resources>
