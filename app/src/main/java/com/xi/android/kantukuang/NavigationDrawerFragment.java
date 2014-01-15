@@ -21,6 +21,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+import com.squareup.otto.Bus;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,10 +41,7 @@ public class NavigationDrawerFragment extends Fragment {
      * expands it. This shared preference tracks this.
      */
     private static final String PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned";
-    /**
-     * A pointer to the current callbacks instance (the Activity).
-     */
-    private NavigationDrawerCallbacks mCallbacks;
+    private final NavigationEvent mEvent = new NavigationEvent();
     /**
      * Helper component that ties the action bar to the navigation drawer.
      */
@@ -51,8 +52,12 @@ public class NavigationDrawerFragment extends Fragment {
     private boolean mUserLearnedDrawer;
     private List<String> mTitleSectionList = new ArrayList<String>();
     private ArrayAdapter<String> mTitleSectionListAdapter;
+    @Inject
+    private Bus mBus;
 
     public NavigationDrawerFragment() {
+        Injector mInjector = KanTuKuangModule.getInjector();
+        mInjector.injectMembers(this);
     }
 
     @Override
@@ -63,12 +68,6 @@ public class NavigationDrawerFragment extends Fragment {
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(activity);
         mUserLearnedDrawer = sp.getBoolean(PREF_USER_LEARNED_DRAWER, false);
-
-        try {
-            mCallbacks = (NavigationDrawerCallbacks) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException("Activity must implement NavigationDrawerCallbacks.");
-        }
     }
 
     @Override
@@ -175,18 +174,18 @@ public class NavigationDrawerFragment extends Fragment {
         if (mDrawerListView != null) {
             mDrawerListView.setItemChecked(position, true);
         }
+
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawer(mFragmentContainerView);
         }
-        if (mCallbacks != null) {
-            mCallbacks.onNavigationDrawerItemSelected(position);
-        }
+
+        mEvent.setPosition(position);
+        mBus.post(mEvent);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mCallbacks = null;
     }
 
     @Override
@@ -236,13 +235,16 @@ public class NavigationDrawerFragment extends Fragment {
         mTitleSectionListAdapter.notifyDataSetChanged();
     }
 
-    /**
-     * Callbacks interface that all activities using this fragment must implement.
-     */
-    public static interface NavigationDrawerCallbacks {
-        /**
-         * Called when an item in the navigation drawer is selected.
-         */
-        void onNavigationDrawerItemSelected(int position);
+    public class NavigationEvent {
+        private int mPosition;
+
+        public int getPosition() {
+            return mPosition;
+        }
+
+        public void setPosition(int position) {
+            this.mPosition = position;
+        }
+
     }
 }

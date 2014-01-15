@@ -29,6 +29,7 @@ import com.google.inject.name.Names;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.squareup.otto.Bus;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 
 import java.util.Arrays;
@@ -92,6 +93,8 @@ public class KanTuKuangModule extends AbstractModule {
                         .cacheOnDisc(true)
                         .build()
         );
+
+        bind(Bus.class).in(Scopes.SINGLETON);
     }
 
     @Provides

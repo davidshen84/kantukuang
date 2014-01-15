@@ -21,6 +21,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
 import com.xi.android.kantukuang.weibo.WeiboTimelineAsyncTaskLoader;
@@ -32,16 +34,16 @@ import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
-public class MainActivity extends ActionBarActivity implements
-        NavigationDrawerFragment.NavigationDrawerCallbacks,
-        ItemFragment.OnFragmentInteractionListener,
-        LoaderManager.LoaderCallbacks<List<WeiboStatus>> {
+public class MainActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<List<WeiboStatus>> {
 
     private static final int ACTIVITY_REQUEST_CODE_BIND_WEIBO = 0x000A;
     private static final String TAG = MainActivity.class.getName();
     private static final String PREF_USER_WEIBO_ACCESS_TOKEN = "weibo access token";
     private static final String STATE_DRAWER_SELECTED_ID = "selected navigation drawer position";
     private final Injector mInjector;
+    private final RefreshCompleteEvent mRefreshCompleteEvent = new RefreshCompleteEvent();
+    @Inject
+    private Bus mBus;
     @Inject
     private JsonFactory mJsonFactory;
     @Inject
@@ -50,6 +52,7 @@ public class MainActivity extends ActionBarActivity implements
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private int mCurrentDrawerSelectedId;
     private boolean mHasAttachedSection = false;
+
 
     public MainActivity() {
         mInjector = KanTuKuangModule.getInjector();
@@ -81,6 +84,8 @@ public class MainActivity extends ActionBarActivity implements
     protected void onResume() {
         super.onResume();
 
+        mBus.register(this);
+
         // set up action bar title
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(getTitle());
@@ -103,51 +108,14 @@ public class MainActivity extends ActionBarActivity implements
 
     @Override
     protected void onPause() {
-        super.onPause();
-
         PreferenceManager.getDefaultSharedPreferences(this)
                 .edit()
                 .putString(PREF_USER_WEIBO_ACCESS_TOKEN, mAccessToken)
                 .commit();
-    }
 
-    @Override
-    public void onNavigationDrawerItemSelected(int selectedId) {
-        ItemFragment itemFragment = null;
+        mBus.unregister(this);
 
-        mCurrentDrawerSelectedId = selectedId;
-        switch (selectedId) {
-            case 0:
-                // Public Home
-                itemFragment = ItemFragment.newInstance("public", selectedId);
-
-                break;
-            case 1:
-                // Private Home
-                itemFragment = ItemFragment.newInstance("home", selectedId);
-
-                break;
-            default:
-                Log.d(TAG, "default not ready");
-
-                break;
-        }
-        // update the main content by replacing fragments
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, itemFragment)
-                .commit();
-    }
-
-    private String mapSectionIdToString(int sectionId) {
-        switch (sectionId) {
-            case 0:
-                return "public";
-            case 1:
-                return "home";
-            default:
-                Log.d(TAG, "not ready");
-                return "";
-        }
+        super.onPause();
     }
 
     public void restoreActionBar() {
@@ -189,7 +157,7 @@ public class MainActivity extends ActionBarActivity implements
                 setUpWeiboClientAndLoader(accessToken);
 
                 // select public by default
-                onNavigationDrawerItemSelected(0);
+                mNavigationDrawerFragment.selectItem(0);
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -268,8 +236,8 @@ public class MainActivity extends ActionBarActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onItemFragmentInteraction(int position) {
+    @Subscribe
+    public void selectedItem(ItemFragment.SelectItemEvent event) {
         // start image view activity
         ItemFragment itemFragment = (ItemFragment)
                 getSupportFragmentManager().findFragmentById(R.id.container);
@@ -277,7 +245,7 @@ public class MainActivity extends ActionBarActivity implements
 
         ArrayList<WeiboStatus> statuses = itemFragment.getStatuses();
 
-        intent.putExtra(ImageViewActivity.ITEM_POSITION, position);
+        intent.putExtra(ImageViewActivity.ITEM_POSITION, event.getPosition());
 
         try {
             intent.putExtra(ImageViewActivity.STATUS_JSON, mJsonFactory.toString(statuses));
@@ -290,6 +258,40 @@ public class MainActivity extends ActionBarActivity implements
         startActivity(intent);
     }
 
+    @Subscribe
+    public void navigateSection(NavigationDrawerFragment.NavigationEvent event) {
+        ItemFragment itemFragment = null;
+
+        mCurrentDrawerSelectedId = event.getPosition();
+        switch (mCurrentDrawerSelectedId) {
+            case 0:
+                // Public Home
+                itemFragment = ItemFragment.newInstance(
+                        getString(R.string.section_name_public),
+                        mCurrentDrawerSelectedId);
+
+                break;
+            case 1:
+                // Private Home
+                itemFragment = ItemFragment.newInstance(
+                        getString(R.string.section_name_home),
+                        mCurrentDrawerSelectedId);
+
+                break;
+            default:
+                Log.d(TAG, "default not ready");
+
+                break;
+        }
+
+        // update the main content by replacing fragments
+        if (itemFragment != null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container, itemFragment)
+                    .commit();
+        }
+    }
+
     @Override
     public Loader<List<WeiboStatus>> onCreateLoader(int i, Bundle bundle) {
         Log.v(TAG, "create new loader");
@@ -300,14 +302,14 @@ public class MainActivity extends ActionBarActivity implements
 
     @Override
     public void onLoadFinished(Loader<List<WeiboStatus>> listLoader, List<WeiboStatus> statuses) {
-        ItemFragment itemFragment = (ItemFragment) getSupportFragmentManager().findFragmentById(
-                R.id.container);
-
         WeiboTimelineAsyncTaskLoader loader = (WeiboTimelineAsyncTaskLoader) listLoader;
+
         if (loader.takeHasError()) {
             // display error message
             Toast.makeText(this, R.string.message_error_load, Toast.LENGTH_SHORT).show();
-            itemFragment.onRefreshComplete(null, loader.getLastId());
+            mBus.post(mRefreshCompleteEvent
+                              .setStatusList(null)
+                              .setLastId(loader.getLastId()));
         } else {
             int newDataCount = loader.takeNewDataCount();
             if (newDataCount > 0) {
@@ -316,7 +318,9 @@ public class MainActivity extends ActionBarActivity implements
                 Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
 
                 // update view
-                itemFragment.onRefreshComplete(statuses, loader.getLastId());
+                mBus.post(mRefreshCompleteEvent
+                                  .setStatusList(statuses)
+                                  .setLastId(loader.getLastId()));
             }
         }
     }
@@ -334,9 +338,36 @@ public class MainActivity extends ActionBarActivity implements
         getSupportLoaderManager().getLoader(0).onContentChanged();
     }
 
-    public void onSectionAttached(int sectionId) {
-        setTitle(mapSectionIdToString(sectionId));
-        mCurrentDrawerSelectedId = sectionId;
+    @Subscribe
+    public void sectionAttach(ItemFragment.SectionAttachEvent event) {
+        setTitle(event.getSectionName());
+        mCurrentDrawerSelectedId = event.getSectionId();
         mHasAttachedSection = true;
     }
+
+    public class RefreshCompleteEvent {
+        private List<WeiboStatus> mStatusList;
+        private String mLastId;
+
+        public List<WeiboStatus> getStatusList() {
+            return mStatusList;
+        }
+
+        public RefreshCompleteEvent setStatusList(List<WeiboStatus> statusList) {
+            this.mStatusList = statusList;
+
+            return this;
+        }
+
+        public String getLastId() {
+            return mLastId;
+        }
+
+        public RefreshCompleteEvent setLastId(String lastId) {
+            this.mLastId = lastId;
+
+            return this;
+        }
+    }
+
 }

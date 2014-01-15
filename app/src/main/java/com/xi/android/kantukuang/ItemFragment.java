@@ -23,6 +23,8 @@ import com.google.inject.name.Named;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
 import com.xi.android.kantukuang.weibo.WeiboTimelineAsyncTaskLoader;
@@ -35,13 +37,13 @@ import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 
-public class ItemFragment extends Fragment implements AbsListView.OnItemClickListener, OnRefreshListener {
+public class ItemFragment extends Fragment implements OnRefreshListener {
 
     public static final String ARG_TAG = "tag";
     private static final int FORCE_TOP_PADDING = 256;
     private static final String TAG = ItemFragment.class.getName();
     private static final String ARG_ID = "id";
-    private OnFragmentInteractionListener mFragmentInteractionListener;
+    private final SectionAttachEvent mSectionAttachEvent = new SectionAttachEvent();
     /**
      * The fragment's ListView/GridView.
      */
@@ -55,6 +57,9 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     private MainActivity mActivity;
     private int mSectionId;
     private String mLastId;
+    @Inject
+    private Bus mBus;
+    private String mSectionName;
 
 
     /**
@@ -83,12 +88,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         super.onAttach(activity);
 
         mActivity = (MainActivity) activity;
-
-        try {
-            mFragmentInteractionListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString());
-        }
     }
 
     @Override
@@ -98,6 +97,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         Bundle mArguments = getArguments();
         if (mArguments != null) {
             mSectionId = mArguments.getInt(ARG_ID);
+            mSectionName = mArguments.getString(ARG_TAG);
 
             WeiboTimelineAsyncTaskLoader listLoader = (WeiboTimelineAsyncTaskLoader)
                     mActivity.getSupportLoaderManager().initLoader(0, null, mActivity);
@@ -138,9 +138,19 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         }
 
         // Set OnItemClickListener so we can be notified on item clicks
-        mListView.setOnItemClickListener(this);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            private final SelectItemEvent event = new SelectItemEvent();
 
-        mActivity.onSectionAttached(mSectionId);
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                event.setPosition(position);
+                mBus.post(event);
+            }
+        });
+
+        mBus.post(mSectionAttachEvent
+                          .setSectionId(mSectionId)
+                          .setSectionName(mSectionName));
 
         return view;
     }
@@ -161,35 +171,25 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     public void onResume() {
         super.onResume();
 
+        mBus.register(this);
         // trigger refresh
         if (mImageUrlList.size() == 0) {
+            mActivity.forceLoad();
             mPullToRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
                     mPullToRefreshLayout.setRefreshing(true);
                 }
             });
-            mActivity.forceLoad();
         }
     }
 
     @Override
     public void onDetach() {
-        super.onDetach();
-
         // clean ref. to activity
-        mFragmentInteractionListener = null;
         mActivity = null;
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (null != mFragmentInteractionListener) {
-            // Notify the active callbacks interface (the activity, if the
-            // fragment is attached to one) that an item has been selected.
-
-            mFragmentInteractionListener.onItemFragmentInteraction(position);
-        }
+        mBus.unregister(this);
+        super.onDetach();
     }
 
     private void setEmptyText(CharSequence emptyText) {
@@ -212,16 +212,19 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         mActivity.refreshLoader();
     }
 
-    public void onRefreshComplete(List<WeiboStatus> statusList, String lastId) {
+    @Subscribe
+    public void refreshComplete(MainActivity.RefreshCompleteEvent event) {
+        List<WeiboStatus> statusList = event.getStatusList();
         if (statusList != null && statusList.size() > 0) {
             mImageUrlList.addAll(0, statusList);
             mWeiboItemViewArrayAdapter.notifyDataSetChanged();
 
-            mLastId = lastId;
+            mLastId = event.getLastId();
         }
 
-        setEmptyText(mImageUrlList.size() == 0 ? getResources().getString(
-                R.string.message_info_empty_list) : null);
+        setEmptyText(mImageUrlList.size() == 0
+                             ? getResources().getString(R.string.message_info_empty_list)
+                             : null);
         mPullToRefreshLayout.setRefreshComplete();
     }
 
@@ -229,19 +232,29 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         return (ArrayList<WeiboStatus>) mImageUrlList;
     }
 
+    public class SectionAttachEvent {
+        private int mSectionId;
+        private String mSectionName;
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        public void onItemFragmentInteraction(int position);
+        public int getSectionId() {
+            return mSectionId;
+        }
+
+        public SectionAttachEvent setSectionId(int sectionId) {
+            mSectionId = sectionId;
+
+            return this;
+        }
+
+        public String getSectionName() {
+            return mSectionName;
+        }
+
+        public SectionAttachEvent setSectionName(String sectionName) {
+            mSectionName = sectionName;
+
+            return this;
+        }
     }
 
     private class WeiboItemViewArrayAdapter extends ArrayAdapter<WeiboStatus> {
@@ -287,4 +300,21 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             return convertView;
         }
     }
+
+    public class SelectItemEvent {
+        private int mPosition;
+
+        public SelectItemEvent() {
+            mPosition = 0;
+        }
+
+        public int getPosition() {
+            return mPosition;
+        }
+
+        public void setPosition(int position) {
+            mPosition = position;
+        }
+    }
+
 }
