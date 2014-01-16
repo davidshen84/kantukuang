@@ -81,6 +81,7 @@ public class MainActivity extends ActionBarActivity {
         super.onResume();
 
         mBus.register(this);
+        mHasAttachedSection = getSupportFragmentManager().findFragmentById(R.id.container) == null;
 
         // set up action bar title
         ActionBar actionBar = getSupportActionBar();
@@ -184,7 +185,7 @@ public class MainActivity extends ActionBarActivity {
         String sectionPrivate = getString(R.string.default_section_private);
         mNavigationDrawerFragment.setItems(Arrays.asList(sectionPrivate));
 
-        if (!mHasAttachedSection) {
+        if (mHasAttachedSection) {
             mNavigationDrawerFragment.selectItem(mCurrentDrawerSelectedId);
         }
 
@@ -312,7 +313,6 @@ public class MainActivity extends ActionBarActivity {
     public void sectionAttach(ItemFragment.SectionAttachEvent event) {
         setTitle(event.getSectionName());
         mCurrentDrawerSelectedId = event.getSectionId();
-        mHasAttachedSection = true;
     }
 
     public class RefreshCompleteEvent {
