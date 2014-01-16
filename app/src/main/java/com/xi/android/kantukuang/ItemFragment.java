@@ -27,7 +27,6 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
-import com.xi.android.kantukuang.weibo.WeiboTimelineAsyncTaskLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +43,7 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
     private static final String TAG = ItemFragment.class.getName();
     private static final String ARG_ID = "id";
     private final SectionAttachEvent mSectionAttachEvent = new SectionAttachEvent();
+    private final WeiboClientManager.RefreshStatusEvent mRefreshStatusEvent = new WeiboClientManager.RefreshStatusEvent();
     /**
      * The fragment's ListView/GridView.
      */
@@ -98,12 +98,6 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
         if (mArguments != null) {
             mSectionId = mArguments.getInt(ARG_ID);
             mSectionName = mArguments.getString(ARG_TAG);
-
-            WeiboTimelineAsyncTaskLoader listLoader = (WeiboTimelineAsyncTaskLoader)
-                    mActivity.getSupportLoaderManager().initLoader(0, null, mActivity);
-
-            listLoader.setAccountId(mSectionId);
-            listLoader.setLastId(mLastId);
         }
     }
 
@@ -174,7 +168,9 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
         mBus.register(this);
         // trigger refresh
         if (mImageUrlList.size() == 0) {
-            mActivity.forceLoad();
+            mRefreshStatusEvent.setAccountId(mSectionName);
+            mRefreshStatusEvent.setSinceId(null);
+            mBus.post(mRefreshStatusEvent);
             mPullToRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
@@ -209,7 +205,9 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
         if (!mPullToRefreshLayout.isRefreshing())
             mPullToRefreshLayout.setRefreshing(true);
 
-        mActivity.refreshLoader();
+        mRefreshStatusEvent.setAccountId(mSectionName);
+        mRefreshStatusEvent.setSinceId(mLastId);
+        mBus.post(mRefreshStatusEvent);
     }
 
     @Subscribe

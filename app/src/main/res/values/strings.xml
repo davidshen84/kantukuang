@@ -10,7 +10,7 @@
     <string name="loading_message">Loading</string>
     <string name="message_info_empty_list">No content</string>
     <string name="message_error_load">Load failed</string>
-    <string name="format_new_data_count">loaded %d items</string>
+    <string name="format_info_new_data">loaded %d items</string>
 
     <string-array name="default_sections">
         <item>Public</item>
@@ -28,5 +28,6 @@
     <string name="message_error_fail">Fail!</string>
     <string name="section_name_public">Public</string>
     <string name="section_name_home">Home</string>
+    <string name="message_info_no_new">No new status</string>
 
 </resources>

@@ -5,8 +5,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -25,7 +23,6 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
-import com.xi.android.kantukuang.weibo.WeiboTimelineAsyncTaskLoader;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,7 +31,7 @@ import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
-public class MainActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<List<WeiboStatus>> {
+public class MainActivity extends ActionBarActivity {
 
     private static final int ACTIVITY_REQUEST_CODE_BIND_WEIBO = 0x000A;
     private static final String TAG = MainActivity.class.getName();
@@ -52,7 +49,6 @@ public class MainActivity extends ActionBarActivity implements LoaderManager.Loa
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private int mCurrentDrawerSelectedId;
     private boolean mHasAttachedSection = false;
-
 
     public MainActivity() {
         mInjector = KanTuKuangModule.getInjector();
@@ -292,50 +288,24 @@ public class MainActivity extends ActionBarActivity implements LoaderManager.Loa
         }
     }
 
-    @Override
-    public Loader<List<WeiboStatus>> onCreateLoader(int i, Bundle bundle) {
-        Log.v(TAG, "create new loader");
-
-        return new WeiboTimelineAsyncTaskLoader(
-                this, mWeiboClient);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<WeiboStatus>> listLoader, List<WeiboStatus> statuses) {
-        WeiboTimelineAsyncTaskLoader loader = (WeiboTimelineAsyncTaskLoader) listLoader;
-
-        if (loader.takeHasError()) {
-            // display error message
+    @Subscribe
+    public void refreshStatusComplete(WeiboClientManager.RefreshStatusCompleteEvent event) {
+        List<WeiboStatus> statusList = event.getStatus();
+        String lastId = null;
+        if (statusList == null) {
             Toast.makeText(this, R.string.message_error_load, Toast.LENGTH_SHORT).show();
-            mBus.post(mRefreshCompleteEvent
-                              .setStatusList(null)
-                              .setLastId(loader.getLastId()));
+        } else if (statusList.size() == 0) {
+            Toast.makeText(this, R.string.message_info_no_new, Toast.LENGTH_SHORT).show();
         } else {
-            int newDataCount = loader.takeNewDataCount();
-            if (newDataCount > 0) {
-                String toastMessage = getResources()
-                        .getString(R.string.format_new_data_count, newDataCount);
-                Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
-
-                // update view
-                mBus.post(mRefreshCompleteEvent
-                                  .setStatusList(statuses)
-                                  .setLastId(loader.getLastId()));
-            }
+            String message = getResources()
+                    .getString(R.string.format_info_new_data, statusList.size());
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+            lastId = statusList.get(0).id;
         }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<List<WeiboStatus>> listLoader) {
-        Log.d(TAG, "reset loader");
-    }
-
-    public void forceLoad() {
-        getSupportLoaderManager().getLoader(0).forceLoad();
-    }
-
-    public void refreshLoader() {
-        getSupportLoaderManager().getLoader(0).onContentChanged();
+        // update view
+        mBus.post(mRefreshCompleteEvent
+                          .setStatusList(statusList)
+                          .setLastId(lastId));
     }
 
     @Subscribe
