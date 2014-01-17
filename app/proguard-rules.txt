@@ -7,7 +7,31 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
+#-dontobfuscate
+
 # Add any project specific keep options here:
+#-keepattributes *Annotation*,Inject,Key,Named,Provides
+-keepattributes *
+
+#-keep class com.xi.android.kantukuang.weibo.* { *; }
+-keep public class com.xi.android.kantukuang.** extends android.app.Activity
+-keep public class com.xi.android.kantukuang.** extends android.app.Application
+-keep public class com.xi.android.kantukuang.** extends android.view.View { *; }
+-keep public class com.google.inject.** { *; }
+-keep public class com.xi.android.kantukuang.** extends com.google.inject.AbstractModule { *; }
+
+-keepclassmembers class ** {
+    @com.squareup.otto.Subscribe public *;
+    # @com.squareup.otto.Produce public *;
+
+    @com.google.inject.Inject *;
+    @com.google.api.client.util.Key *;
+    @com.google.inject.name.Named *;
+    @com.google.inject.name.Provides *;
+}
+
+-dontwarn net.sf.cglib.**
+-dontwarn com.google.common.**
 
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
