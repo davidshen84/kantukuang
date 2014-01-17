@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonParser;
 import com.google.inject.Inject;
+import com.viewpagerindicator.UnderlinePageIndicator;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
 
@@ -79,6 +80,10 @@ public class ImageViewActivity extends ActionBarActivity implements ImageViewFra
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.setCurrentItem(currentPosition);
+
+        // set up pager indicator
+        UnderlinePageIndicator indicator = (UnderlinePageIndicator) findViewById(R.id.indicator);
+        indicator.setViewPager(mViewPager);
     }
 
     private void setUpActionBar() {
