@@ -41,6 +41,7 @@ import static android.widget.LinearLayout.VERTICAL;
  * Draws circles (one for each view). The current view position is filled and
  * others are only stroked.
  */
+@SuppressWarnings("ALL")
 public class CirclePageIndicator extends View implements PageIndicator {
     private static final int INVALID_POINTER = -1;
 

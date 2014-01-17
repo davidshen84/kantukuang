@@ -34,6 +34,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  * This widget implements the dynamic action bar tab behavior that can change
  * across different configurations or circumstances.
  */
+@SuppressWarnings("ALL")
 public class TabPageIndicator extends HorizontalScrollView implements PageIndicator {
     /** Title text used when no title is provided by the adapter. */
     private static final CharSequence EMPTY_TITLE = "";

@@ -55,9 +55,7 @@ dependencies {
     compile 'com.squareup:otto:+'
     compile 'com.github.chrisbanes.actionbarpulltorefresh:extra-abc:+'
     compile 'com.github.chrisbanes.photoview:library:+'
-    //    compile('com.viewpagerindicator:library:2.4.1') {
-    //        exclude module: 'support-v4'
-    //    }
+
     compile project(':lib')
     testCompile 'junit:junit:4.+'
     testCompile 'org.robolectric:robolectric:2.1.+'

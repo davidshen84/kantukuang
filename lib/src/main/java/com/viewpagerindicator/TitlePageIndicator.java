@@ -44,6 +44,7 @@ import java.util.ArrayList;
  * the right view (if exist). When the user scrolls the ViewPager then titles are
  * also scrolled.
  */
+@SuppressWarnings("ALL")
 public class TitlePageIndicator extends View implements PageIndicator {
     /**
      * Percentage indicating what percentage of the screen width away from

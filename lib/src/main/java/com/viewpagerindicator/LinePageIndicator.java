@@ -36,6 +36,7 @@ import android.view.ViewConfiguration;
  * Draws a line for each page. The current page line is colored differently
  * than the unselected page lines.
  */
+@SuppressWarnings("ALL")
 public class LinePageIndicator extends View implements PageIndicator {
     private static final int INVALID_POINTER = -1;
 
