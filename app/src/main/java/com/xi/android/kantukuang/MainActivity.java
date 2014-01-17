@@ -81,7 +81,7 @@ public class MainActivity extends ActionBarActivity {
         super.onResume();
 
         mBus.register(this);
-        mHasAttachedSection = getSupportFragmentManager().findFragmentById(R.id.container) == null;
+        mHasAttachedSection = getSupportFragmentManager().findFragmentById(R.id.container) != null;
 
         // set up action bar title
         ActionBar actionBar = getSupportActionBar();
@@ -185,7 +185,7 @@ public class MainActivity extends ActionBarActivity {
         String sectionPrivate = getString(R.string.default_section_private);
         mNavigationDrawerFragment.setItems(Arrays.asList(sectionPrivate));
 
-        if (mHasAttachedSection) {
+        if (!mHasAttachedSection) {
             mNavigationDrawerFragment.selectItem(mCurrentDrawerSelectedId);
         }
 
@@ -284,7 +284,7 @@ public class MainActivity extends ActionBarActivity {
         // update the main content by replacing fragments
         if (itemFragment != null) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, itemFragment)
+                    .replace(R.id.container, itemFragment, "Section")
                     .commit();
         }
     }
