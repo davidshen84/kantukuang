@@ -10,11 +10,8 @@
 #-dontobfuscate
 
 # Add any project specific keep options here:
--keepattributes *Annotation*,Signature,Key,Named
+-keepattributes Signature,Key,Named,Inject
 
-#-keep class com.xi.android.kantukuang.weibo.* { *; }
-#-keep public class uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout { public *; }
-#-keep public class uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh { public *; }
 -keep public class com.google.inject.** { public *; }
 -keep public class com.xi.android.kantukuang.** extends android.app.Activity
 -keep public class com.xi.android.kantukuang.** extends android.app.Application
@@ -26,7 +23,7 @@
     # @com.squareup.otto.Produce public *;
 
     @com.google.api.client.util.Key *;
-    @com.google.inject.Inject <init>(...);
+    @com.google.inject.Inject *;
     @com.google.inject.name.Named *;
     @com.google.inject.name.Provides *;
 }
