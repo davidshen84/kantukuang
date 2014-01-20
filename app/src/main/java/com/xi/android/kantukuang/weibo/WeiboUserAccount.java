@@ -3,9 +3,9 @@ package com.xi.android.kantukuang.weibo;
 
 import com.google.api.client.util.Key;
 
-public class WeiboUserAccount {
+public final class WeiboUserAccount {
 
-    @Key("id")
+    @Key
     public long id;
 
     @Key("screen_name")

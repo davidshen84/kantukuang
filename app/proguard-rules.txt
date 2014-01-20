@@ -17,6 +17,7 @@
 -keep public class com.xi.android.kantukuang.** extends android.app.Application
 -keep public class com.xi.android.kantukuang.** extends android.view.View { *; }
 -keep public class com.xi.android.kantukuang.** extends com.google.inject.AbstractModule { *; }
+-keep public class com.xi.android.kantukuang.weibo.* { public *; }
 
 -keepclassmembers class ** {
     @com.squareup.otto.Subscribe public *;

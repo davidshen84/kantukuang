@@ -8,6 +8,7 @@ import com.xi.android.kantukuang.KanTuKuangModule;
 import com.xi.android.kantukuang.WeiboRepostResponse;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboFriends;
+import com.xi.android.kantukuang.weibo.WeiboStatus;
 import com.xi.android.kantukuang.weibo.WeiboTimeline;
 import com.xi.android.kantukuang.weibo.WeiboTimelineException;
 import com.xi.android.kantukuang.weibo.WeiboTokenInfo;
@@ -22,6 +23,7 @@ import java.util.Random;
 import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -55,6 +57,15 @@ public class WeiboClientTest {
         assertNotNull(timeline);
         assertTrue(timeline.statuses.size() > 0);
         assertNotNull(timeline.statuses.get(0).text);
+    }
+
+    @Test
+    public void testGetTimeline_uid() throws WeiboTimelineException {
+        WeiboTimeline timeline = client.getPublicTimeline(null);
+
+        WeiboStatus status = timeline.statuses.get(0);
+        assertNotNull(status.uid);
+        assertNotEquals(0L, status.uid);
     }
 
     @Test
@@ -96,4 +107,5 @@ public class WeiboClientTest {
         assertEquals(comment, repost.text);
         logger.info(repost.createdAt);
     }
+
 }

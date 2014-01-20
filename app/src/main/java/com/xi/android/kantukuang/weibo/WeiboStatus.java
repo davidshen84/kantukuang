@@ -2,7 +2,7 @@ package com.xi.android.kantukuang.weibo;
 
 import com.google.api.client.util.Key;
 
-public class WeiboStatus {
+public final class WeiboStatus {
 
 
     @Key("created_at")
@@ -17,6 +17,12 @@ public class WeiboStatus {
     public String id;
     @Key("retweeted_status")
     public WeiboStatus repostedStatus;
+
+    /**
+     * the user id who authored this status
+     */
+    @Key
+    public long uid;
 
     public String getImageUrl() {
         // get self image url
