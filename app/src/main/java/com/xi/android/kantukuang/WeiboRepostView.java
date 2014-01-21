@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.inject.Inject;
+import com.squareup.otto.Bus;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 
 
@@ -21,11 +22,13 @@ import com.xi.android.kantukuang.weibo.WeiboClient;
  */
 public class WeiboRepostView extends LinearLayout implements View.OnClickListener, TextView.OnEditorActionListener {
     private final EditText mEditText;
+    private final WeiboRepostView.RepostStatusEvent mRepostStatusEvent = new RepostStatusEvent();
+    @Inject
+    private Bus mBus;
     @Inject
     private LayoutInflater mInflater;
     @Inject
     private WeiboClient mWeiboClient;
-    private WeiboRepostView.WeiboRepostListener mRepostListener;
     @Inject
     private InputMethodManager mInputMethodService;
 
@@ -44,23 +47,27 @@ public class WeiboRepostView extends LinearLayout implements View.OnClickListene
 
     @Override
     public void onClick(View view) {
-        String text = String.valueOf(mEditText.getText());
-
-        assert mRepostListener != null;
-        mRepostListener.post(text);
-
-        mEditText.setText("");
+        postStatus();
     }
 
-    public void setOnRepostListener(WeiboRepostListener listener) {
-        mRepostListener = listener;
+    private void postStatus() {
+        mRepostStatusEvent.text = getText();
+        mBus.post(mRepostStatusEvent);
+        mInputMethodService.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
+    }
+
+    public String getText() {
+        return String.valueOf(mEditText.getText());
+    }
+
+    public void setText(CharSequence text) {
+        mEditText.setText(text, TextView.BufferType.EDITABLE);
     }
 
     @Override
     public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
-            mInputMethodService.hideSoftInputFromWindow(textView.getWindowToken(), 0);
-            onClick(null);
+            postStatus();
 
             return true;
         }
@@ -68,7 +75,7 @@ public class WeiboRepostView extends LinearLayout implements View.OnClickListene
         return false;
     }
 
-    public interface WeiboRepostListener {
-        void post(String text);
+    public static class RepostStatusEvent {
+        public String text;
     }
 }

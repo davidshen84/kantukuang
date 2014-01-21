@@ -29,5 +29,6 @@
     <string name="section_name_public">Public</string>
     <string name="section_name_home">Home</string>
     <string name="message_info_no_new">No new status</string>
+    <string name="format_info_page_order">page %d</string>
 
 </resources>

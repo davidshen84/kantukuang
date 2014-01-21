@@ -6,11 +6,11 @@
 
     <EditText
         android:layout_width="0dp"
-        android:layout_height="@dimen/abc_action_bar_default_height"
+        android:layout_height="wrap_content"
         android:id="@android:id/edit"
         android:layout_weight="1"
         android:editable="true"
-        android:inputType="textShortMessage"
+        android:inputType="textMultiLine"
         android:hint="@string/abc_weibo_repost_placeholder"/>
 
     <Button

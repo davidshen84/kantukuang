@@ -14,18 +14,21 @@ import android.widget.TextView;
 import com.google.inject.Inject;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
+import com.squareup.otto.Bus;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 
 public class ImageViewFragment extends Fragment implements PhotoViewAttacher.OnViewTapListener {
     private static final String ARG_ORDER = "weibo status position in context";
-    private OnFragmentInteractionListener mListener;
+    private final ImageViewFragment.TapImageEvent mTapImageEvent = new TapImageEvent();
     @Inject
     private ImageLoader mImageLoader;
     private PhotoViewAttacher mPhotoViewAttacher;
     private ImageViewActivity mImageViewActivity;
     private int mOrder;
+    @Inject
+    private Bus mBus;
 
     public ImageViewFragment() {
         KanTuKuangModule.getInjector().injectMembers(this);
@@ -52,12 +55,6 @@ public class ImageViewFragment extends Fragment implements PhotoViewAttacher.OnV
         super.onAttach(activity);
 
         mImageViewActivity = (ImageViewActivity) activity;
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                                                 + " must implement OnFragmentInteractionListener");
-        }
     }
 
     @Override
@@ -79,7 +76,6 @@ public class ImageViewFragment extends Fragment implements PhotoViewAttacher.OnV
 
         assert view != null;
         ImageView imageView = (ImageView) view.findViewById(android.R.id.content);
-        TextView textView = (TextView) view.findViewById(android.R.id.text1);
 
         mImageLoader.displayImage(mImageViewActivity.getImageUrlByOrder(mOrder), imageView,
                                   new SimpleImageLoadingListener() {
@@ -96,8 +92,6 @@ public class ImageViewFragment extends Fragment implements PhotoViewAttacher.OnV
                                       }
                                   });
 
-        textView.setText(mImageViewActivity.getTextByOrder(mOrder));
-
         return view;
     }
 
@@ -113,27 +107,16 @@ public class ImageViewFragment extends Fragment implements PhotoViewAttacher.OnV
     public void onDetach() {
         super.onDetach();
 
-        mListener = null;
         mImageViewActivity = null;
     }
 
     @Override
     public void onViewTap(View view, float v, float v2) {
-        mListener.onImageViewFragmentInteraction(null);
+        mTapImageEvent.order = mOrder;
+        mBus.post(mTapImageEvent);
     }
 
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        public void onImageViewFragmentInteraction(Uri uri);
+    public class TapImageEvent {
+        public int order;
     }
 }
