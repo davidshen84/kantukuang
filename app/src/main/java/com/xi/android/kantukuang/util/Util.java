@@ -32,6 +32,30 @@ public final class Util {
         return new WeiboFriendPredicate(friends);
     }
 
+    public static Predicate<WeiboStatus> createBlackListPredictor(Collection<Long> blackList) {
+        return new BlackListPredicate(blackList);
+    }
+
+    private static class BlackListPredicate implements Predicate<WeiboStatus> {
+        private Collection<Long> mBlackList;
+
+        public BlackListPredicate(Collection<Long> blackList) {
+            mBlackList = blackList;
+        }
+
+        @Override
+        public boolean apply(@Nullable WeiboStatus status) {
+            if (status == null)
+                return false;
+
+            if (status.repostedStatus != null) {
+                return !mBlackList.contains(status.repostedStatus.uid);
+            } else {
+                return !mBlackList.contains(status.uid);
+            }
+        }
+    }
+
     public static class WeiboFriendPredicate implements Predicate<WeiboStatus> {
         private final Collection<Long> mFriendIds;
 

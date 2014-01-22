@@ -2,8 +2,10 @@ package com.xi.android.kantukuang;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +19,12 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.JsonParser;
+import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.api.client.util.Lists;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
@@ -25,10 +33,13 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
+import com.xi.android.kantukuang.util.Util;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
@@ -42,6 +53,7 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
     private static final int FORCE_TOP_PADDING = 256;
     private static final String TAG = ItemFragment.class.getName();
     private static final String ARG_ID = "id";
+    private static final String PREF_FILTER_BLACKLIST = "filter blacklist";
     private final SectionAttachEvent mSectionAttachEvent = new SectionAttachEvent();
     private final WeiboClientManager.RefreshStatusEvent mRefreshStatusEvent = new WeiboClientManager.RefreshStatusEvent();
     /**
@@ -60,6 +72,10 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
     @Inject
     private Bus mBus;
     private String mSectionName;
+    private boolean mFilterBlackList;
+    private List<Long> mBlackList = Lists.newArrayList();
+    @Inject
+    private JsonFactory mJsonFactory;
 
 
     /**
@@ -88,6 +104,30 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
         super.onAttach(activity);
 
         mActivity = (MainActivity) activity;
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(
+                activity);
+        mFilterBlackList = sp.getBoolean(PREF_FILTER_BLACKLIST, true);
+        createBlackList();
+    }
+
+    private void createBlackList() {
+        if (mFilterBlackList) {
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mActivity);
+            String blackListJson;
+
+            blackListJson = sp.getString(ImageViewActivity.PREF_BLACKLIST, "");
+            if (Strings.isNullOrEmpty(blackListJson))
+                return;
+
+            mBlackList.clear();
+            try {
+                JsonParser parser = mJsonFactory.createJsonParser(blackListJson);
+                parser.parseArray(mBlackList, Long.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -212,8 +252,13 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
 
     @Subscribe
     public void refreshComplete(MainActivity.RefreshCompleteEvent event) {
-        List<WeiboStatus> statusList = event.getStatusList();
+        Collection<WeiboStatus> statusList = event.getStatusList();
         if (statusList != null && statusList.size() > 0) {
+            if (mFilterBlackList && mBlackList.size() > 0) {
+                Predicate<WeiboStatus> blackListPredictor =
+                        Util.createBlackListPredictor(mBlackList);
+                statusList = Collections2.filter(statusList, blackListPredictor);
+            }
             mImageUrlList.addAll(0, statusList);
             mWeiboItemViewArrayAdapter.notifyDataSetChanged();
 

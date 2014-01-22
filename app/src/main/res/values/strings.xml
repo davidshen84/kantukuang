@@ -30,5 +30,6 @@
     <string name="section_name_home">Home</string>
     <string name="message_info_no_new">No new status</string>
     <string name="format_info_page_order">page %d</string>
+    <string name="action_add_blacklist">Add to blacklist</string>
 
 </resources>

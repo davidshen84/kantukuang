@@ -42,16 +42,11 @@
         <activity
             android:name="com.xi.android.kantukuang.ImageViewActivity"
             android:parentActivityName=".MainActivity"
-            android:uiOptions="splitActionBarWhenNarrow"
             android:label="@string/title_activity_image_view">
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity"/>
-
-            <meta-data
-                android:name="android.support.UI_OPTIONS"
-                android:value="splitActionBarWhenNarrow"/>
 
         </activity>
 
