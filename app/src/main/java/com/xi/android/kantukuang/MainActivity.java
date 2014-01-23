@@ -31,6 +31,8 @@ import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
+import static com.xi.android.kantukuang.ItemFragment.SectionAttachEvent;
+
 public class MainActivity extends ActionBarActivity {
 
     private static final int ACTIVITY_REQUEST_CODE_BIND_WEIBO = 0x000A;
@@ -310,12 +312,12 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Subscribe
-    public void sectionAttach(ItemFragment.SectionAttachEvent event) {
+    public void sectionAttach(SectionAttachEvent event) {
         setTitle(event.getSectionName());
         mCurrentDrawerSelectedId = event.getSectionId();
     }
 
-    public class RefreshCompleteEvent {
+    public static class RefreshCompleteEvent {
         private List<WeiboStatus> mStatusList;
         private String mLastId;
 

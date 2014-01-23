@@ -32,5 +32,6 @@
     <string name="format_info_page_order">page %d</string>
     <string name="action_add_blacklist">Add to blacklist</string>
     <string name="button_ok">OK</string>
+    <string name="message_info_add_blacklist">User added to blacklist</string>
 
 </resources>

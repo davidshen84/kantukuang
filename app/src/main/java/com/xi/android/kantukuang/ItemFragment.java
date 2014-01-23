@@ -46,6 +46,8 @@ import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLa
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
+import static com.xi.android.kantukuang.MainActivity.RefreshCompleteEvent;
+
 
 public class ItemFragment extends Fragment implements OnRefreshListener {
 
@@ -63,7 +65,7 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
     @Inject
     private WeiboClient mWeiboClient;
     private ArrayAdapter<WeiboStatus> mWeiboItemViewArrayAdapter;
-    private List<WeiboStatus> mImageUrlList = new ArrayList<WeiboStatus>();
+    private List<WeiboStatus> mWeiboStatuses = new ArrayList<WeiboStatus>();
     private View mEmptyView;
     private PullToRefreshLayout mPullToRefreshLayout;
     private MainActivity mActivity;
@@ -73,7 +75,6 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
     private Bus mBus;
     private String mSectionName;
     private boolean mFilterBlackList;
-    private List<Long> mBlackList = Lists.newArrayList();
     @Inject
     private JsonFactory mJsonFactory;
 
@@ -104,30 +105,9 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
         super.onAttach(activity);
 
         mActivity = (MainActivity) activity;
-
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(
-                activity);
+        SharedPreferences sp = PreferenceManager
+                .getDefaultSharedPreferences(activity);
         mFilterBlackList = sp.getBoolean(PREF_FILTER_BLACKLIST, true);
-        createBlackList();
-    }
-
-    private void createBlackList() {
-        if (mFilterBlackList) {
-            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mActivity);
-            String blackListJson;
-
-            blackListJson = sp.getString(ImageViewActivity.PREF_BLACKLIST, "");
-            if (Strings.isNullOrEmpty(blackListJson))
-                return;
-
-            mBlackList.clear();
-            try {
-                JsonParser parser = mJsonFactory.createJsonParser(blackListJson);
-                parser.parseArray(mBlackList, Long.class);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     @Override
@@ -163,11 +143,11 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
         mListView = (AbsListView) view.findViewById(android.R.id.list);
         mEmptyView = view.findViewById(android.R.id.empty);
         // set up data adapter
-        mWeiboItemViewArrayAdapter = new WeiboItemViewArrayAdapter(mActivity, mImageUrlList);
+        mWeiboItemViewArrayAdapter = new WeiboItemViewArrayAdapter(mActivity, mWeiboStatuses);
         ((AdapterView<ListAdapter>) mListView).setAdapter(mWeiboItemViewArrayAdapter);
 
         // update empty view
-        if (mImageUrlList.size() > 0) {
+        if (mWeiboStatuses.size() > 0) {
             setEmptyText(null);
         }
 
@@ -207,7 +187,7 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
 
         mBus.register(this);
         // trigger refresh
-        if (mImageUrlList.size() == 0) {
+        if (mWeiboStatuses.size() == 0) {
             mRefreshStatusEvent.setAccountId(mSectionName);
             mRefreshStatusEvent.setSinceId(null);
             mBus.post(mRefreshStatusEvent);
@@ -251,31 +231,69 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
     }
 
     @Subscribe
-    public void refreshComplete(MainActivity.RefreshCompleteEvent event) {
+    public void refreshComplete(RefreshCompleteEvent event) {
         Collection<WeiboStatus> statusList = event.getStatusList();
         if (statusList != null && statusList.size() > 0) {
-            if (mFilterBlackList && mBlackList.size() > 0) {
-                Predicate<WeiboStatus> blackListPredictor =
-                        Util.createBlackListPredictor(mBlackList);
-                statusList = Collections2.filter(statusList, blackListPredictor);
-            }
-            mImageUrlList.addAll(0, statusList);
+            if (mFilterBlackList)
+                statusList = filterBlackList(statusList);
+            mWeiboStatuses.addAll(0, statusList);
             mWeiboItemViewArrayAdapter.notifyDataSetChanged();
 
             mLastId = event.getLastId();
         }
 
-        setEmptyText(mImageUrlList.size() == 0
+        setEmptyText(mWeiboStatuses.size() == 0
                              ? getResources().getString(R.string.message_info_empty_list)
                              : null);
         mPullToRefreshLayout.setRefreshComplete();
     }
 
-    public ArrayList<WeiboStatus> getStatuses() {
-        return (ArrayList<WeiboStatus>) mImageUrlList;
+    @Subscribe
+    public void filterStatus(FilterStatusEvent event) {
+        if (event.shouldFilter) {
+            List<WeiboStatus> statuses = Lists.newArrayList(mWeiboStatuses);
+            Collection<WeiboStatus> filteredStatuses = filterBlackList(statuses);
+            mWeiboStatuses.clear();
+            mWeiboStatuses.addAll(filteredStatuses);
+            mWeiboItemViewArrayAdapter.notifyDataSetChanged();
+        }
     }
 
-    public class SectionAttachEvent {
+    private Collection<WeiboStatus> filterBlackList(Collection<WeiboStatus> statusList) {
+        List<Long> blackList = getBlackList();
+        if (blackList != null && blackList.size() > 0) {
+            Predicate<WeiboStatus> blackListPredictor =
+                    Util.createBlackListPredictor(blackList);
+            statusList = Collections2.filter(statusList, blackListPredictor);
+        }
+
+        return statusList;
+    }
+
+    private List<Long> getBlackList() {
+        List<Long> blackList = null;
+        String blackListJson;
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mActivity);
+        blackListJson = sp.getString(ImageViewActivity.PREF_BLACKLIST, "");
+        if (!Strings.isNullOrEmpty(blackListJson)) {
+            blackList = Lists.newArrayList();
+            try {
+                JsonParser parser = mJsonFactory.createJsonParser(blackListJson);
+                parser.parseArray(blackList, Long.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return blackList;
+    }
+
+    public ArrayList<WeiboStatus> getStatuses() {
+        return (ArrayList<WeiboStatus>) mWeiboStatuses;
+    }
+
+    public static class SectionAttachEvent {
         private int mSectionId;
         private String mSectionName;
 
@@ -297,6 +315,26 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
             mSectionName = sectionName;
 
             return this;
+        }
+    }
+
+    public static class FilterStatusEvent {
+        public boolean shouldFilter;
+    }
+
+    public static class SelectItemEvent {
+        private int mPosition;
+
+        public SelectItemEvent() {
+            mPosition = 0;
+        }
+
+        public int getPosition() {
+            return mPosition;
+        }
+
+        public void setPosition(int position) {
+            mPosition = position;
         }
     }
 
@@ -343,21 +381,4 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
             return convertView;
         }
     }
-
-    public class SelectItemEvent {
-        private int mPosition;
-
-        public SelectItemEvent() {
-            mPosition = 0;
-        }
-
-        public int getPosition() {
-            return mPosition;
-        }
-
-        public void setPosition(int position) {
-            mPosition = position;
-        }
-    }
-
 }

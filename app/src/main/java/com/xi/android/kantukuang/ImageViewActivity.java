@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.xi.android.kantukuang.ImageViewFragment.TapImageEvent;
+import static com.xi.android.kantukuang.ItemFragment.FilterStatusEvent;
 import static com.xi.android.kantukuang.RepostStatusFragment.RepostStatusEvent;
 
 public class ImageViewActivity extends ActionBarActivity {
@@ -60,6 +61,7 @@ public class ImageViewActivity extends ActionBarActivity {
     private List<WeiboStatus> mStatusList;
     @Inject
     private Bus mBus;
+    private FilterStatusEvent mFilterStatusEvent = new FilterStatusEvent();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +100,7 @@ public class ImageViewActivity extends ActionBarActivity {
     protected void onResume() {
         super.onResume();
 
+        mFilterStatusEvent.shouldFilter = false;
         mBus.register(this);
     }
 
@@ -105,6 +108,7 @@ public class ImageViewActivity extends ActionBarActivity {
     protected void onPause() {
         super.onPause();
 
+        mBus.post(mFilterStatusEvent);
         mBus.unregister(this);
     }
 
@@ -135,6 +139,7 @@ public class ImageViewActivity extends ActionBarActivity {
                 this.finish();
                 return true;
             case R.id.action_weibo_add_blacklist:
+                mFilterStatusEvent.shouldFilter = true;
                 WeiboStatus status = mStatusList.get(mViewPager.getCurrentItem());
                 long uid;
                 if (status.repostedStatus != null)
@@ -143,6 +148,8 @@ public class ImageViewActivity extends ActionBarActivity {
                     uid = status.uid;
 
                 addUidToBlackList(uid);
+                Toast.makeText(this, R.string.message_info_add_blacklist,
+                               Toast.LENGTH_SHORT).show();
                 return true;
 
         }
