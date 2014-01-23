@@ -8,7 +8,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -31,6 +30,9 @@ import com.xi.android.kantukuang.weibo.WeiboStatus;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+
+import static com.xi.android.kantukuang.ImageViewFragment.TapImageEvent;
+import static com.xi.android.kantukuang.RepostStatusFragment.RepostStatusEvent;
 
 public class ImageViewActivity extends ActionBarActivity {
 
@@ -56,8 +58,6 @@ public class ImageViewActivity extends ActionBarActivity {
     @Inject
     private JsonFactory mJsonFactory;
     private List<WeiboStatus> mStatusList;
-    private boolean mShowRepostAction = false;
-    private WeiboRepostView mWeiboRepostView;
     @Inject
     private Bus mBus;
 
@@ -92,12 +92,6 @@ public class ImageViewActivity extends ActionBarActivity {
         // set up pager indicator
         UnderlinePageIndicator indicator = (UnderlinePageIndicator) findViewById(R.id.indicator);
         indicator.setViewPager(mViewPager);
-/*        indicator.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            @Override
-            public void onPageSelected(int position) {
-                updateRepostText(getTextByOrder(position));
-            }
-        });*/
     }
 
     @Override
@@ -123,17 +117,7 @@ public class ImageViewActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (mShowRepostAction) {
-            // show repost action
-            getMenuInflater().inflate(R.menu.action_weibo_repost, menu);
-            // set up repost listener
-            MenuItem menuItem = menu.findItem(R.id.action_weibo_repost);
-//            MenuItemCompat.setShowAsAction(menuItem, MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
-            mWeiboRepostView = (WeiboRepostView) MenuItemCompat.getActionView(menuItem);
-        } else {
-            // show normal action
-            getMenuInflater().inflate(R.menu.image_view, menu);
-        }
+        getMenuInflater().inflate(R.menu.image_view, menu);
 
         return true;
     }
@@ -192,29 +176,28 @@ public class ImageViewActivity extends ActionBarActivity {
     }
 
     @Subscribe
-    public void tapImage(final ImageViewFragment.TapImageEvent event) {
-        mShowRepostAction = !mShowRepostAction;
+    public void tapImage(TapImageEvent event) {
+        WeiboStatus status = mStatusList.get(event.order);
+        boolean hasFragment =
+                getSupportFragmentManager().findFragmentById(R.id.fragment_repost) != null;
 
-//        updateRepostText(getTextByOrder(event.order));
-        supportInvalidateOptionsMenu();
-    }
-
-    private void updateRepostText(final String text) {
-        if (mShowRepostAction) {
-            mWeiboRepostView.post(new Runnable() {
-                @Override
-                public void run() {
-                    mWeiboRepostView.setText(text);
-                }
-            });
+        if (hasFragment) {
+            getSupportFragmentManager().popBackStack();
+        } else {
+            RepostStatusFragment fragment = RepostStatusFragment
+                    .newInstance(status.id, status.text);
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_repost, fragment)
+                    .addToBackStack("REPOST")
+                    .commit();
         }
     }
 
     @Subscribe
-    public void repostStatus(WeiboRepostView.RepostStatusEvent event) {
-        String id = mStatusList.get(mViewPager.getCurrentItem()).id;
+    public void repostStatus(RepostStatusEvent event) {
 
-        Log.d(TAG, String.format("%s: %s", id, event.text));
+        Log.d(TAG, String.format("%s: %s", event.statusId, event.text));
         new AsyncTask<String, Integer, Boolean>() {
             @Override
             protected Boolean doInBackground(String... strings) {
@@ -231,14 +214,8 @@ public class ImageViewActivity extends ActionBarActivity {
                                    Toast.LENGTH_SHORT).show();
                 }
             }
-        }.execute(id, event.text);
+        }.execute(event.statusId, event.text);
 
-        mShowRepostAction = false;
-        supportInvalidateOptionsMenu();
-    }
-
-    public String getTextByOrder(int order) {
-        return mStatusList.get(order).text;
     }
 
 

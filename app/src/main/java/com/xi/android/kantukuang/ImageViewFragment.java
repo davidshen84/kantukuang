@@ -116,7 +116,7 @@ public class ImageViewFragment extends Fragment implements PhotoViewAttacher.OnV
         mBus.post(mTapImageEvent);
     }
 
-    public class TapImageEvent {
+    public static class TapImageEvent {
         public int order;
     }
 }
