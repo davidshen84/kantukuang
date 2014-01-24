@@ -112,10 +112,17 @@ public class WeiboClient {
         return weiboTimeline;
     }
 
+    /**
+     * get public timeline with all ids greater than {@code sinceId}
+     *
+     * @param sinceId the "since_id" parameter
+     * @return {@link com.xi.android.kantukuang.weibo.WeiboTimeline}
+     * @throws WeiboTimelineException
+     */
     public WeiboTimeline getPublicTimeline(String sinceId) throws WeiboTimelineException {
         AbstractWeiboTimelineUrl url = new PublicTimelineUrl();
         if (sinceId != null)
-            url.SinceId = sinceId;
+            url.sinceId = sinceId;
 
         return getWeiboTimelineByUrl(url);
     }
@@ -123,7 +130,7 @@ public class WeiboClient {
     public WeiboTimeline getHomeTimeline(String sinceId) throws WeiboTimelineException {
         AbstractWeiboTimelineUrl url = new HomeTimelineUrl();
         if (sinceId != null)
-            url.SinceId = sinceId;
+            url.sinceId = sinceId;
 
         return getWeiboTimelineByUrl(url);
     }
