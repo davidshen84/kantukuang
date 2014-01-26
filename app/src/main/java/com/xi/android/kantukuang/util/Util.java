@@ -32,7 +32,7 @@ public final class Util {
         return new WeiboFriendPredicate(friends);
     }
 
-    public static Predicate<WeiboStatus> createBlackListPredictor(Collection<Long> blackList) {
+    public static Predicate<WeiboStatus> createBlacklistPredictor(Collection<Long> blackList) {
         return new BlackListPredicate(blackList);
     }
 

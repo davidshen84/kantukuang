@@ -35,7 +35,7 @@ public class UtilTest {
     public void canFilterStatus() {
         Collection<Long> blackList = Lists.newArrayList();
         blackList.add(123L);
-        Predicate<WeiboStatus> predictor = Util.createBlackListPredictor(blackList);
+        Predicate<WeiboStatus> predictor = Util.createBlacklistPredictor(blackList);
 
         WeiboStatus status = new WeiboStatus();
         status.uid = 123L;
@@ -48,7 +48,7 @@ public class UtilTest {
     public void canFilterRepostStatus() {
         Collection<Long> blackList = Lists.newArrayList();
         blackList.add(123L);
-        Predicate<WeiboStatus> predictor = Util.createBlackListPredictor(blackList);
+        Predicate<WeiboStatus> predictor = Util.createBlacklistPredictor(blackList);
 
         WeiboStatus status = new WeiboStatus();
         status.uid = 321L;
@@ -63,7 +63,7 @@ public class UtilTest {
     public void willNotFilterStatus(){
         Collection<Long> blackList = Lists.newArrayList();
         blackList.add(123L);
-        Predicate<WeiboStatus> predictor = Util.createBlackListPredictor(blackList);
+        Predicate<WeiboStatus> predictor = Util.createBlacklistPredictor(blackList);
 
         WeiboStatus status = new WeiboStatus();
         status.uid = 111L;

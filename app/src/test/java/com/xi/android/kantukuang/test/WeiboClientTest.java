@@ -5,13 +5,14 @@ import android.app.Application;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.xi.android.kantukuang.KanTuKuangModule;
-import com.xi.android.kantukuang.weibo.WeiboRepostResponse;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboFriends;
+import com.xi.android.kantukuang.weibo.WeiboRepostResponse;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
 import com.xi.android.kantukuang.weibo.WeiboTimeline;
 import com.xi.android.kantukuang.weibo.WeiboTimelineException;
 import com.xi.android.kantukuang.weibo.WeiboTokenInfo;
+import com.xi.android.kantukuang.weibo.WeiboUserAccount;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -108,4 +109,12 @@ public class WeiboClientTest {
         logger.info(repost.createdAt);
     }
 
+    @Test
+    public void testShowAccountInfo() {
+        long uid = 2860471240L;
+        WeiboUserAccount account = client.show(uid);
+
+        assertNotNull(account);
+        assertEquals(uid, account.id);
+    }
 }

@@ -20,8 +20,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.JsonParser;
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.api.client.util.Lists;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -37,7 +35,6 @@ import com.xi.android.kantukuang.util.Util;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -58,6 +55,7 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
     private static final String PREF_FILTER_BLACKLIST = "filter blacklist";
     private final SectionAttachEvent mSectionAttachEvent = new SectionAttachEvent();
     private final WeiboClientManager.RefreshStatusEvent mRefreshStatusEvent = new WeiboClientManager.RefreshStatusEvent();
+    private final List<WeiboStatus> mWeiboStatuses = new ArrayList<WeiboStatus>();
     /**
      * The fragment's ListView/GridView.
      */
@@ -65,7 +63,6 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
     @Inject
     private WeiboClient mWeiboClient;
     private ArrayAdapter<WeiboStatus> mWeiboItemViewArrayAdapter;
-    private List<WeiboStatus> mWeiboStatuses = new ArrayList<WeiboStatus>();
     private View mEmptyView;
     private PullToRefreshLayout mPullToRefreshLayout;
     private MainActivity mActivity;
@@ -235,7 +232,7 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
         Collection<WeiboStatus> statusList = event.getStatusList();
         if (statusList != null && statusList.size() > 0) {
             if (mFilterBlackList)
-                statusList = filterBlackList(statusList);
+                statusList = filterBlacklist(statusList);
             mWeiboStatuses.addAll(0, statusList);
             mWeiboItemViewArrayAdapter.notifyDataSetChanged();
 
@@ -252,41 +249,32 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
     public void filterStatus(FilterStatusEvent event) {
         if (event.shouldFilter) {
             List<WeiboStatus> statuses = Lists.newArrayList(mWeiboStatuses);
-            Collection<WeiboStatus> filteredStatuses = filterBlackList(statuses);
+            Collection<WeiboStatus> filteredStatuses = filterBlacklist(statuses);
             mWeiboStatuses.clear();
             mWeiboStatuses.addAll(filteredStatuses);
             mWeiboItemViewArrayAdapter.notifyDataSetChanged();
         }
     }
 
-    private Collection<WeiboStatus> filterBlackList(Collection<WeiboStatus> statusList) {
-        List<Long> blackList = getBlackList();
-        if (blackList != null && blackList.size() > 0) {
-            Predicate<WeiboStatus> blackListPredictor =
-                    Util.createBlackListPredictor(blackList);
-            statusList = Collections2.filter(statusList, blackListPredictor);
+    private Collection<WeiboStatus> filterBlacklist(Collection<WeiboStatus> statusList) {
+        Collection<Long> blacklist = getBlacklist();
+        if (blacklist != null && blacklist.size() > 0) {
+            Predicate<WeiboStatus> blacklistPredictor =
+                    Util.createBlacklistPredictor(blacklist);
+            statusList = Collections2.filter(statusList, blacklistPredictor);
         }
 
         return statusList;
     }
 
-    private List<Long> getBlackList() {
-        List<Long> blackList = null;
-        String blackListJson;
+    private Collection<Long> getBlacklist() {
+        BlacklistSQLiteOpenHelper sqLiteOpenHelper =
+                new BlacklistSQLiteOpenHelper(mActivity);
 
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mActivity);
-        blackListJson = sp.getString(ImageViewActivity.PREF_BLACKLIST, "");
-        if (!Strings.isNullOrEmpty(blackListJson)) {
-            blackList = Lists.newArrayList();
-            try {
-                JsonParser parser = mJsonFactory.createJsonParser(blackListJson);
-                parser.parseArray(blackList, Long.class);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        Collection<Long> blockedUIDs = sqLiteOpenHelper.getBlockedUIDs();
+        sqLiteOpenHelper.close();
 
-        return blackList;
+        return blockedUIDs;
     }
 
     public ArrayList<WeiboStatus> getStatuses() {

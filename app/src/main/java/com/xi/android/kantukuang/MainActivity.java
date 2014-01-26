@@ -37,7 +37,6 @@ public class MainActivity extends ActionBarActivity {
     private static final String TAG = MainActivity.class.getName();
     private static final String PREF_USER_WEIBO_ACCESS_TOKEN = "weibo access token";
     private static final String STATE_DRAWER_SELECTED_ID = "selected navigation drawer position";
-    private final Injector mInjector;
     private final RefreshCompleteEvent mRefreshCompleteEvent = new RefreshCompleteEvent();
     @Inject
     private Bus mBus;
@@ -51,7 +50,7 @@ public class MainActivity extends ActionBarActivity {
     private boolean mHasAttachedSection = false;
 
     public MainActivity() {
-        mInjector = KanTuKuangModule.getInjector();
+        Injector mInjector = KanTuKuangModule.getInjector();
         mInjector.injectMembers(this);
     }
 
@@ -105,11 +104,6 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onPause() {
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .edit()
-                .putString(PREF_USER_WEIBO_ACCESS_TOKEN, mAccessToken)
-                .commit();
-
         mBus.unregister(this);
 
         super.onPause();
@@ -153,8 +147,11 @@ public class MainActivity extends ActionBarActivity {
                 mCurrentDrawerSelectedId = 0;
                 setUpWeiboClientAndLoader(accessToken);
 
-                // select public by default
-                mNavigationDrawerFragment.selectItem(0);
+                // save access token
+                PreferenceManager.getDefaultSharedPreferences(this)
+                        .edit()
+                        .putString(PREF_USER_WEIBO_ACCESS_TOKEN, mWeiboClient.getAccessToken())
+                        .commit();
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -169,8 +166,6 @@ public class MainActivity extends ActionBarActivity {
      * @param accessToken: weibo client access token
      */
     private void setUpWeiboClientAndLoader(String accessToken) {
-        assert getSupportLoaderManager().getLoader(mCurrentDrawerSelectedId) != null;
-
         mWeiboClient.setAccessToken(accessToken);
         if (mWeiboClient.IsAuthenticated()) {
             restoreNavigationDrawerState();

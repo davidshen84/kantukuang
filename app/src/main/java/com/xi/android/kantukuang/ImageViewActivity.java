@@ -1,10 +1,8 @@
 package com.xi.android.kantukuang;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -18,18 +16,16 @@ import android.widget.Toast;
 
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonParser;
-import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.google.api.client.util.Sets;
 import com.google.inject.Inject;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import com.viewpagerindicator.UnderlinePageIndicator;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
+import com.xi.android.kantukuang.weibo.WeiboUserAccount;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 
 import static com.xi.android.kantukuang.ImageViewFragment.TapImageEvent;
 import static com.xi.android.kantukuang.ItemFragment.FilterStatusEvent;
@@ -142,12 +138,16 @@ public class ImageViewActivity extends ActionBarActivity {
                 mFilterStatusEvent.shouldFilter = true;
                 WeiboStatus status = mStatusList.get(mViewPager.getCurrentItem());
                 long uid;
-                if (status.repostedStatus != null)
+                String statusId;
+                if (status.repostedStatus != null) {
+                    statusId = status.repostedStatus.id;
                     uid = status.repostedStatus.uid;
-                else
+                } else {
+                    statusId = status.id;
                     uid = status.uid;
+                }
 
-                addUidToBlackList(uid);
+                blockUser(uid, statusId);
                 Toast.makeText(this, R.string.message_info_add_blacklist,
                                Toast.LENGTH_SHORT).show();
                 return true;
@@ -157,24 +157,15 @@ public class ImageViewActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void addUidToBlackList(long uid) {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        Set<Long> blackList = Sets.newHashSet();
-        String blackListJson;
+    private void blockUser(long uid, String statusId) {
+        WeiboUserAccount account = weiboClient.show(uid);
+        if (account != null) {
+            BlacklistSQLiteOpenHelper sqLiteOpenHelper = new BlacklistSQLiteOpenHelper(this);
 
-        blackListJson = sp.getString(PREF_BLACKLIST, "");
-        try {
-            if (!Strings.isNullOrEmpty(blackListJson)) {
-                JsonParser jsonParser = mJsonFactory.createJsonParser(blackListJson);
-                jsonParser.parseArray(blackList, Long.class);
-            }
-
-            blackList.add(uid);
-            sp.edit()
-                    .putString(PREF_BLACKLIST, mJsonFactory.toString(blackList))
-                    .commit();
-        } catch (IOException e) {
-            e.printStackTrace();
+            sqLiteOpenHelper.insert(account.id, account.screenName, account.photoUrl, statusId);
+            sqLiteOpenHelper.close();
+        } else {
+            Log.v(TAG, String.format("user %d does not exist", uid));
         }
     }
 

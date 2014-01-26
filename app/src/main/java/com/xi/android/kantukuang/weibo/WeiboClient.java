@@ -167,7 +167,7 @@ public class WeiboClient {
     }
 
     public boolean IsAuthenticated() {
-        return mAccessToken != null && !mAccessToken.equalsIgnoreCase("");
+        return !Strings.isNullOrEmpty(mAccessToken);
     }
 
     public WeiboFriends getFriends(String id, String cursor) {
@@ -226,6 +226,28 @@ public class WeiboClient {
 
             if (httpResponse.isSuccessStatusCode())
                 return httpResponse.parseAs(WeiboRepostResponse.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /**
+     * Query account information
+     *
+     * @param uid weibo user account id
+     * @return {@link com.xi.android.kantukuang.weibo.WeiboUserAccount}
+     */
+    public WeiboUserAccount show(long uid) {
+        WeiboShowUserUrl url = new WeiboShowUserUrl(uid);
+
+        try {
+            HttpRequest httpRequest = getRequestFactory().buildGetRequest(url);
+            HttpResponse httpResponse = httpRequest.execute();
+
+            if (httpResponse.isSuccessStatusCode())
+                return httpResponse.parseAs(WeiboUserAccount.class);
         } catch (IOException e) {
             e.printStackTrace();
         }
