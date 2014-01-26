@@ -17,8 +17,6 @@ import android.widget.Toast;
 import com.google.api.client.json.JsonFactory;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import com.xi.android.kantukuang.weibo.WeiboClient;
@@ -202,12 +200,7 @@ public class MainActivity extends ActionBarActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.action_settings:
-                // TODO dev code
-                mAccessToken = mInjector.getInstance(
-                        Key.get(String.class,
-                                Names.named("access token")));
-                mCurrentDrawerSelectedId = 0;
-                setUpWeiboClientAndLoader(mAccessToken);
+                Log.v(TAG, getString(R.string.action_settings));
 
                 return true;
             case R.id.action_bind_weibo:
