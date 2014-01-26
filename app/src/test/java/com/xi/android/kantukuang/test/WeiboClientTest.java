@@ -5,7 +5,7 @@ import android.app.Application;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.xi.android.kantukuang.KanTuKuangModule;
-import com.xi.android.kantukuang.WeiboRepostResponse;
+import com.xi.android.kantukuang.weibo.WeiboRepostResponse;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboFriends;
 import com.xi.android.kantukuang.weibo.WeiboStatus;

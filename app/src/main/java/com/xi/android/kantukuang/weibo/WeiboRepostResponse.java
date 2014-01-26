@@ -1,4 +1,4 @@
-package com.xi.android.kantukuang;
+package com.xi.android.kantukuang.weibo;
 
 
 import com.google.api.client.util.Key;

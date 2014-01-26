@@ -16,7 +16,6 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.xi.android.kantukuang.WeiboRepostResponse;
 
 import java.io.IOException;
 
