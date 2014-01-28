@@ -6,9 +6,9 @@ import com.google.api.client.util.Key;
 
 public class WeiboShowUserUrl extends GenericUrl{
     @Key
-    private final long uid;
+    private final String uid;
 
-    public WeiboShowUserUrl(long uid){
+    public WeiboShowUserUrl(String uid){
         super("https://api.weibo.com/2/users/show.json");
         this.uid = uid;
     }

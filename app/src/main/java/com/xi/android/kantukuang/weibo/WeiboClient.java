@@ -70,11 +70,10 @@ public class WeiboClient {
             AbstractWeiboTimelineUrl url) throws WeiboTimelineException {
         WeiboTimeline weiboTimeline = null;
         HttpResponse httpResponse = null;
-        HttpRequestFactory requestFactory = getRequestFactory();
 
         boolean hasException = false;
         try {
-            HttpRequest httpRequest = requestFactory.buildGetRequest(url);
+            HttpRequest httpRequest = getRequestFactory().buildGetRequest(url);
 
             httpResponse = httpRequest.execute();
             Log.d(TAG, String.format("status: %d", httpResponse.getStatusCode()));
@@ -178,14 +177,23 @@ public class WeiboClient {
             url.cursor = cursor;
         }
 
+        HttpResponse httpResponse = null;
         try {
             HttpRequest httpRequest = getRequestFactory().buildGetRequest(url);
-            HttpResponse httpResponse = httpRequest.execute();
+            httpResponse = httpRequest.execute();
             if (httpResponse.isSuccessStatusCode())
                 return httpResponse.parseAs(WeiboFriends.class);
 
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (httpResponse != null) {
+                try {
+                    httpResponse.disconnect();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         return null;
@@ -194,14 +202,23 @@ public class WeiboClient {
     public WeiboTokenInfo getTokenInfo() {
         WeiboTokenInfoUrl url = new WeiboTokenInfoUrl();
 
+        HttpResponse httpResponse = null;
         try {
             HttpRequest httpRequest = getRequestFactory().buildPostRequest(url, EMPTY_CONTENT);
-            HttpResponse httpResponse = httpRequest.execute();
+            httpResponse = httpRequest.execute();
 
             if (httpResponse.isSuccessStatusCode())
                 return httpResponse.parseAs(WeiboTokenInfo.class);
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (httpResponse != null) {
+                try {
+                    httpResponse.disconnect();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         return null;
@@ -220,14 +237,23 @@ public class WeiboClient {
         if (!Strings.isNullOrEmpty(comment))
             url.setComment(comment);
 
+        HttpResponse httpResponse = null;
         try {
             HttpRequest httpRequest = getRequestFactory().buildPostRequest(url, EMPTY_CONTENT);
-            HttpResponse httpResponse = httpRequest.execute();
+            httpResponse = httpRequest.execute();
 
             if (httpResponse.isSuccessStatusCode())
                 return httpResponse.parseAs(WeiboRepostResponse.class);
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            if (httpResponse != null) {
+                try {
+                    httpResponse.disconnect();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         return null;
@@ -239,7 +265,7 @@ public class WeiboClient {
      * @param uid weibo user account id
      * @return {@link com.xi.android.kantukuang.weibo.WeiboUserAccount}
      */
-    public WeiboUserAccount show(long uid) {
+    public WeiboUserAccount show(String uid) {
         WeiboShowUserUrl url = new WeiboShowUserUrl(uid);
 
         try {

@@ -31,12 +31,14 @@ import static com.xi.android.kantukuang.ImageViewFragment.TapImageEvent;
 import static com.xi.android.kantukuang.ItemFragment.FilterStatusEvent;
 import static com.xi.android.kantukuang.RepostStatusFragment.RepostStatusEvent;
 
+
 public class ImageViewActivity extends ActionBarActivity {
 
     public static final String ITEM_POSITION = "item position";
     public static final String STATUS_JSON = "weibo status in json";
     public static final String PREF_BLACKLIST = "blacklist set";
     private static final String TAG = ImageViewActivity.class.getName();
+    private final FilterStatusEvent mFilterStatusEvent = new FilterStatusEvent();
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -45,11 +47,11 @@ public class ImageViewActivity extends ActionBarActivity {
      * may be best to switch to a
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
-    SectionsPagerAdapter mSectionsPagerAdapter;
+    private SectionsPagerAdapter mSectionsPagerAdapter;
     /**
      * The {@link ViewPager} that will host the section contents.
      */
-    ViewPager mViewPager;
+    private ViewPager mViewPager;
     @Inject
     private WeiboClient weiboClient;
     @Inject
@@ -57,16 +59,18 @@ public class ImageViewActivity extends ActionBarActivity {
     private List<WeiboStatus> mStatusList;
     @Inject
     private Bus mBus;
-    private FilterStatusEvent mFilterStatusEvent = new FilterStatusEvent();
+
+    public ImageViewActivity(){
+        KanTuKuangModule.getInjector().injectMembers(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        KanTuKuangModule.getInjector().injectMembers(this);
         setContentView(R.layout.activity_image_view);
-
         setUpActionBar();
+
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         Intent intent = getIntent();
@@ -135,10 +139,9 @@ public class ImageViewActivity extends ActionBarActivity {
                 this.finish();
                 return true;
             case R.id.action_weibo_add_blacklist:
-                mFilterStatusEvent.shouldFilter = true;
-                WeiboStatus status = mStatusList.get(mViewPager.getCurrentItem());
                 long uid;
                 String statusId;
+                WeiboStatus status = mStatusList.get(mViewPager.getCurrentItem());
                 if (status.repostedStatus != null) {
                     statusId = status.repostedStatus.id;
                     uid = status.repostedStatus.uid;
@@ -147,26 +150,43 @@ public class ImageViewActivity extends ActionBarActivity {
                     uid = status.uid;
                 }
 
-                blockUser(uid, statusId);
-                Toast.makeText(this, R.string.message_info_add_blacklist,
-                               Toast.LENGTH_SHORT).show();
+                blockAccount(uid, statusId);
                 return true;
-
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void blockUser(long uid, String statusId) {
-        WeiboUserAccount account = weiboClient.show(uid);
-        if (account != null) {
-            BlacklistSQLiteOpenHelper sqLiteOpenHelper = new BlacklistSQLiteOpenHelper(this);
 
-            sqLiteOpenHelper.insert(account.id, account.screenName, account.photoUrl, statusId);
-            sqLiteOpenHelper.close();
-        } else {
-            Log.v(TAG, String.format("user %d does not exist", uid));
-        }
+    private void blockAccount(long uid, String statusId) {
+
+        new AsyncTask<String, Integer, Object[]>() {
+
+            @Override
+            protected Object[] doInBackground(String... strings) {
+                WeiboUserAccount userAccount = weiboClient.show(strings[0]);
+                if (userAccount != null)
+                    return new Object[]{userAccount, strings[1]};
+                else return null;
+            }
+
+            @Override
+            protected void onPostExecute(Object[] objects) {
+                if (objects != null) {
+                    WeiboUserAccount account = (WeiboUserAccount) objects[0];
+                    BlacklistSQLiteOpenHelper sqLiteOpenHelper =
+                            new BlacklistSQLiteOpenHelper(ImageViewActivity.this);
+
+                    sqLiteOpenHelper.insert(account.id, account.screenName,
+                                            account.photoUrl, objects[1].toString());
+                    sqLiteOpenHelper.close();
+                    String text = String.format(getString(R.string.format_info_add_blacklist),
+                                                account.screenName);
+                    Toast.makeText(ImageViewActivity.this, text, Toast.LENGTH_SHORT).show();
+                    mFilterStatusEvent.shouldFilter = true;
+                }
+            }
+        }.execute(String.valueOf(uid), statusId);
     }
 
     public String getImageUrlByOrder(int order) {
@@ -215,7 +235,6 @@ public class ImageViewActivity extends ActionBarActivity {
         }.execute(event.statusId, event.text);
 
     }
-
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to

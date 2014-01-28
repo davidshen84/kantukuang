@@ -44,7 +44,6 @@ public class MainActivity extends ActionBarActivity {
     private JsonFactory mJsonFactory;
     @Inject
     private WeiboClient mWeiboClient;
-    private String mAccessToken;
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private int mCurrentDrawerSelectedId;
     private boolean mHasAttachedSection = false;
@@ -88,7 +87,7 @@ public class MainActivity extends ActionBarActivity {
 
         // restore weibo access token
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        mAccessToken = sp.getString(PREF_USER_WEIBO_ACCESS_TOKEN, "");
+        String mAccessToken = sp.getString(PREF_USER_WEIBO_ACCESS_TOKEN, "");
 
         setUpWeiboClientAndLoader(mAccessToken);
         if (mHasAttachedSection)
