@@ -3,19 +3,27 @@
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.xi.android.kantukuang.MainActivity">
+
     <item
         android:id="@+id/action_refresh"
         android:title="@string/action_refresh"
         android:icon="@drawable/ic_action_refresh"
         app:showAsAction="ifRoom"/>
+
     <item
-        android:id="@+id/action_bind_weibo"
-        android:title="@string/action_bind_weibo"
+        android:id="@+id/menu_bind_weibo"
+        android:title="@string/menu_bind_weibo"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_edit_blacklist"
+        android:title="@string/action_edit_blacklist"
         android:icon="@drawable/ic_action_new"
         app:showAsAction="never"/>
+
     <item
-        android:id="@+id/action_settings"
-        android:title="@string/action_settings"
+        android:id="@+id/menu_settings"
+        android:title="@string/menu_settings"
         android:orderInCategory="100"
         app:showAsAction="never"/>
 </menu>

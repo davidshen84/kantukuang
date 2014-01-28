@@ -194,17 +194,20 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         switch (id) {
-            case R.id.action_settings:
-                Log.v(TAG, getString(R.string.action_settings));
+
+            case R.id.menu_settings:
+                Log.v(TAG, getString(R.string.menu_settings));
 
                 return true;
-            case R.id.action_bind_weibo:
+
+            case R.id.menu_bind_weibo: {
                 Intent intent = new Intent(this, WebActivity.class);
                 intent.putExtra(WebActivity.LANDING_URL, mWeiboClient.getAuthorizeUrl());
 
                 startActivityForResult(intent, ACTIVITY_REQUEST_CODE_BIND_WEIBO);
+            }
+            return true;
 
-                return true;
             case R.id.action_refresh:
                 if (mWeiboClient.IsAuthenticated()) {
                     OnRefreshListener refreshListener = (OnRefreshListener)
@@ -218,6 +221,13 @@ public class MainActivity extends ActionBarActivity {
                                    Toast.LENGTH_SHORT).show();
                 }
                 return true;
+
+            case R.id.action_edit_blacklist: {
+                Intent intent = new Intent(this, EditBlacklistActivity.class);
+                startActivity(intent);
+            }
+            return true;
+
         }
 
         return super.onOptionsItemSelected(item);

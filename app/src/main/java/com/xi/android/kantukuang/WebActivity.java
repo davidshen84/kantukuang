@@ -67,11 +67,11 @@ public class WebActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         switch (id) {
-            case R.id.action_settings:
+            case R.id.menu_settings:
                 return true;
-            case R.id.action_bind_weibo:
+            case R.id.menu_bind_weibo:
 
-                Toast.makeText(this, R.string.action_bind_weibo, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.menu_bind_weibo, Toast.LENGTH_SHORT).show();
                 return true;
         }
 

@@ -129,7 +129,7 @@ public class ImageViewActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         switch (id) {
-            case R.id.action_settings:
+            case R.id.menu_settings:
                 return true;
             case android.R.id.home:
                 this.finish();

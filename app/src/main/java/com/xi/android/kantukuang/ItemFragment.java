@@ -336,7 +336,7 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
         private ImageLoader mImageLoader;
 
         public WeiboItemViewArrayAdapter(Context context, List<WeiboStatus> statuses) {
-            super(context, R.layout.image_view_narrow, statuses);
+            super(context, R.layout.item_image, statuses);
 
             KanTuKuangModule.getInjector().injectMembers(this);
         }
@@ -345,7 +345,7 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
         public View getView(int position, View convertView, ViewGroup container) {
             if (convertView == null) {
                 convertView = mInflater.inflate(
-                        R.layout.image_view_narrow, container, false);
+                        R.layout.item_image, container, false);
             } else {
                 ((ImageView) convertView).setImageBitmap(null);
             }
