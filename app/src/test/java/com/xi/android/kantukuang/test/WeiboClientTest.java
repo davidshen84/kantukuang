@@ -70,6 +70,13 @@ public class WeiboClientTest {
     }
 
     @Test
+    public void canGetFriendsTimeline() throws WeiboTimelineException {
+        WeiboTimeline timeline = client.getFriendsTimeline(null);
+        assertNotNull(timeline);
+        assertTrue(timeline.statuses.size() > 0);
+    }
+
+    @Test
     public void testGetAuthorizeUrl() {
         String url = client.getAuthorizeUrl();
 
@@ -111,10 +118,10 @@ public class WeiboClientTest {
 
     @Test
     public void testShowAccountInfo() {
-        long uid = 2860471240L;
+        String uid = "2860471240";
         WeiboUserAccount account = client.show(uid);
 
         assertNotNull(account);
-        assertEquals(uid, account.id);
+        assertEquals(uid, String.valueOf(account.id));
     }
 }

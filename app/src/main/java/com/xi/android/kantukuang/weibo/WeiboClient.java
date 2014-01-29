@@ -133,6 +133,14 @@ public class WeiboClient {
         return getWeiboTimelineByUrl(url);
     }
 
+    public WeiboTimeline getFriendsTimeline(String sinceId) throws WeiboTimelineException {
+        FriendsTimelineUrl url = new FriendsTimelineUrl();
+        if(sinceId!=null)
+            url.sinceId=sinceId;
+
+        return getWeiboTimelineByUrl(url);
+    }
+
     public String getAuthorizeUrl() {
         return mAuthorizationCodeFlow.newAuthorizationUrl()
                 .setRedirectUri(mRedirectUri)
