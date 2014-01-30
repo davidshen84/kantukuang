@@ -35,5 +35,7 @@
     <string name="format_info_add_blacklist">User %s added to blacklist</string>
     <string name="action_edit_blacklist">Edit blacklist</string>
     <string name="title_activity_edit_blacklist">Edit Blacklist</string>
+    <string name="default_section_friends">Friends</string>
+    <string name="section_name_friends">Friends</string>
 
 </resources>

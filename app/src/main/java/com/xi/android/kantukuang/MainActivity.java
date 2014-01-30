@@ -176,8 +176,11 @@ public class MainActivity extends ActionBarActivity {
 
         // add default private section
         // this section is only available when the weibo client is authenticated
-        String sectionPrivate = getString(R.string.default_section_private);
-        mNavigationDrawerFragment.setItems(Arrays.asList(sectionPrivate));
+        String[] sections = new String[]{
+                getString(R.string.default_section_private),
+                getString(R.string.default_section_friends)
+        };
+        mNavigationDrawerFragment.setItems(Arrays.asList(sections));
 
         if (!mHasAttachedSection) {
             mNavigationDrawerFragment.selectItem(mCurrentDrawerSelectedId);
@@ -261,23 +264,30 @@ public class MainActivity extends ActionBarActivity {
         mCurrentDrawerSelectedId = event.getPosition();
         switch (mCurrentDrawerSelectedId) {
             case 0:
-                // Public Home
+                // Public
                 itemFragment = ItemFragment.newInstance(
                         getString(R.string.section_name_public),
                         mCurrentDrawerSelectedId);
 
                 break;
             case 1:
-                // Private Home
+                // Private
                 itemFragment = ItemFragment.newInstance(
                         getString(R.string.section_name_home),
                         mCurrentDrawerSelectedId);
 
                 break;
-            default:
-                Log.d(TAG, "default not ready");
+            case 2:
+                // Friends
+                itemFragment = ItemFragment.newInstance(
+                        getString(R.string.section_name_friends),
+                        mCurrentDrawerSelectedId);
 
                 break;
+            default:
+                Log.d(TAG, String.format("%d not ready", mCurrentDrawerSelectedId));
+
+                return;
         }
 
         // update the main content by replacing fragments

@@ -56,6 +56,8 @@ public class WeiboClientManager {
                         timeline = mClient.getHomeTimeline(sinceId);
                     } else if (accountId.equalsIgnoreCase("public")) {
                         timeline = mClient.getPublicTimeline(sinceId);
+                    }else if(accountId.equalsIgnoreCase("friends")){
+                        timeline=mClient.getFriendsTimeline(sinceId);
                     }
 
                     if (timeline != null && timeline.statuses.size() > 0) {
