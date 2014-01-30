@@ -2,26 +2,25 @@ package com.xi.android.kantukuang;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.google.inject.Inject;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.squareup.otto.Bus;
+import com.xi.android.kantukuang.event.TapImageEvent;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 
 public class ImageViewFragment extends Fragment implements PhotoViewAttacher.OnViewTapListener {
     private static final String ARG_ORDER = "weibo status position in context";
-    private final ImageViewFragment.TapImageEvent mTapImageEvent = new TapImageEvent();
+    private final TapImageEvent mTapImageEvent = new TapImageEvent();
     @Inject
     private ImageLoader mImageLoader;
     private PhotoViewAttacher mPhotoViewAttacher;
@@ -116,7 +115,4 @@ public class ImageViewFragment extends Fragment implements PhotoViewAttacher.OnV
         mBus.post(mTapImageEvent);
     }
 
-    public static class TapImageEvent {
-        public int order;
-    }
 }

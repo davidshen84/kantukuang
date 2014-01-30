@@ -31,6 +31,11 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
+import com.xi.android.kantukuang.event.FilterStatusEvent;
+import com.xi.android.kantukuang.event.RefreshCompleteEvent;
+import com.xi.android.kantukuang.event.RefreshStatusEvent;
+import com.xi.android.kantukuang.event.SectionAttachEvent;
+import com.xi.android.kantukuang.event.SelectItemEvent;
 import com.xi.android.kantukuang.util.Util;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
@@ -43,8 +48,6 @@ import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLa
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
-import static com.xi.android.kantukuang.MainActivity.RefreshCompleteEvent;
-
 
 public class ItemFragment extends Fragment implements OnRefreshListener {
 
@@ -54,7 +57,7 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
     private static final String ARG_ID = "id";
     private static final String PREF_FILTER_BLACKLIST = "filter blacklist";
     private final SectionAttachEvent mSectionAttachEvent = new SectionAttachEvent();
-    private final WeiboClientManager.RefreshStatusEvent mRefreshStatusEvent = new WeiboClientManager.RefreshStatusEvent();
+    private final RefreshStatusEvent mRefreshStatusEvent = new RefreshStatusEvent();
     private final List<WeiboStatus> mWeiboStatuses = new ArrayList<WeiboStatus>();
     /**
      * The fragment's ListView/GridView.
@@ -279,51 +282,6 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
 
     public ArrayList<WeiboStatus> getStatuses() {
         return (ArrayList<WeiboStatus>) mWeiboStatuses;
-    }
-
-    public static class SectionAttachEvent {
-        private int mSectionId;
-        private String mSectionName;
-
-        public int getSectionId() {
-            return mSectionId;
-        }
-
-        public SectionAttachEvent setSectionId(int sectionId) {
-            mSectionId = sectionId;
-
-            return this;
-        }
-
-        public String getSectionName() {
-            return mSectionName;
-        }
-
-        public SectionAttachEvent setSectionName(String sectionName) {
-            mSectionName = sectionName;
-
-            return this;
-        }
-    }
-
-    public static class FilterStatusEvent {
-        public boolean shouldFilter;
-    }
-
-    public static class SelectItemEvent {
-        private int mPosition;
-
-        public SelectItemEvent() {
-            mPosition = 0;
-        }
-
-        public int getPosition() {
-            return mPosition;
-        }
-
-        public void setPosition(int position) {
-            mPosition = position;
-        }
     }
 
     private class WeiboItemViewArrayAdapter extends ArrayAdapter<WeiboStatus> {

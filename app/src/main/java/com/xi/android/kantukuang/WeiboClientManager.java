@@ -8,6 +8,10 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
+import com.xi.android.kantukuang.event.AccessTokenCompleteEvent;
+import com.xi.android.kantukuang.event.AccessTokenEvent;
+import com.xi.android.kantukuang.event.RefreshStatusCompleteEvent;
+import com.xi.android.kantukuang.event.RefreshStatusEvent;
 import com.xi.android.kantukuang.util.Util;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
@@ -56,8 +60,8 @@ public class WeiboClientManager {
                         timeline = mClient.getHomeTimeline(sinceId);
                     } else if (accountId.equalsIgnoreCase("public")) {
                         timeline = mClient.getPublicTimeline(sinceId);
-                    }else if(accountId.equalsIgnoreCase("friends")){
-                        timeline=mClient.getFriendsTimeline(sinceId);
+                    } else if (accountId.equalsIgnoreCase("friends")) {
+                        timeline = mClient.getFriendsTimeline(sinceId);
                     }
 
                     if (timeline != null && timeline.statuses.size() > 0) {
@@ -80,47 +84,28 @@ public class WeiboClientManager {
         }.execute(event.getAccountId(), event.getSinceId());
     }
 
+    @Subscribe
+    public void accessToken(AccessTokenEvent event) {
+
+        new AsyncTask<String, Integer, String>() {
+            @Override
+            protected String doInBackground(String... strings) {
+                return mClient.requestAccessToken(strings[0]);
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                mBus.post(new AccessTokenCompleteEvent(s));
+            }
+        }.execute(event.code);
+
+    }
+
     @Override
     protected void finalize() throws Throwable {
         mBus.unregister(this);
 
         super.finalize();
-    }
-
-
-    public static class RefreshStatusEvent {
-        private String mAccountId;
-        private String mSinceId;
-
-        public String getAccountId() {
-            return mAccountId;
-        }
-
-        public void setAccountId(String accountId) {
-            mAccountId = accountId;
-        }
-
-        public String getSinceId() {
-            return mSinceId;
-        }
-
-        public void setSinceId(String sinceId) {
-            mSinceId = sinceId;
-        }
-    }
-
-    public class RefreshStatusCompleteEvent {
-        private List<WeiboStatus> mStatusList;
-
-        public List<WeiboStatus> getStatus() {
-            return mStatusList;
-        }
-
-        public RefreshStatusCompleteEvent setStatus(List<WeiboStatus> status) {
-            this.mStatusList = status;
-
-            return this;
-        }
     }
 
 }

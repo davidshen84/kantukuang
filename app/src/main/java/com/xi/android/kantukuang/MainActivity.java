@@ -19,6 +19,13 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
+import com.xi.android.kantukuang.event.AccessTokenCompleteEvent;
+import com.xi.android.kantukuang.event.AccessTokenEvent;
+import com.xi.android.kantukuang.event.NavigationEvent;
+import com.xi.android.kantukuang.event.RefreshCompleteEvent;
+import com.xi.android.kantukuang.event.RefreshStatusCompleteEvent;
+import com.xi.android.kantukuang.event.SectionAttachEvent;
+import com.xi.android.kantukuang.event.SelectItemEvent;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
 
@@ -28,8 +35,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
-
-import static com.xi.android.kantukuang.ItemFragment.SectionAttachEvent;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -142,20 +147,24 @@ public class MainActivity extends ActionBarActivity {
                 Log.d(TAG, String.format("authorize code: %s", code));
 
                 // request access token
-                String accessToken = mWeiboClient.requestAccessToken(code);
-                mCurrentDrawerSelectedId = 0;
-                setUpWeiboClientAndLoader(accessToken);
-
-                // save access token
-                PreferenceManager.getDefaultSharedPreferences(this)
-                        .edit()
-                        .putString(PREF_USER_WEIBO_ACCESS_TOKEN, mWeiboClient.getAccessToken())
-                        .commit();
+                mBus.post(new AccessTokenEvent(code));
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
 
+    }
+
+    @Subscribe
+    public void accessTokenComplete(AccessTokenCompleteEvent event) {
+        mCurrentDrawerSelectedId = 0;
+        setUpWeiboClientAndLoader(event.token);
+
+        // save access token
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .edit()
+                .putString(PREF_USER_WEIBO_ACCESS_TOKEN, mWeiboClient.getAccessToken())
+                .commit();
     }
 
     /**
@@ -236,7 +245,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Subscribe
-    public void selectedItem(ItemFragment.SelectItemEvent event) {
+    public void selectedItem(SelectItemEvent event) {
         // start image view activity
         ItemFragment itemFragment = (ItemFragment)
                 getSupportFragmentManager().findFragmentById(R.id.container);
@@ -258,8 +267,8 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Subscribe
-    public void navigateSection(NavigationDrawerFragment.NavigationEvent event) {
-        ItemFragment itemFragment = null;
+    public void navigateSection(NavigationEvent event) {
+        ItemFragment itemFragment;
 
         mCurrentDrawerSelectedId = event.getPosition();
         switch (mCurrentDrawerSelectedId) {
@@ -299,7 +308,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Subscribe
-    public void refreshStatusComplete(WeiboClientManager.RefreshStatusCompleteEvent event) {
+    public void refreshStatusComplete(RefreshStatusCompleteEvent event) {
         List<WeiboStatus> statusList = event.getStatus();
         String lastId = null;
         if (statusList == null) {
@@ -322,31 +331,6 @@ public class MainActivity extends ActionBarActivity {
     public void sectionAttach(SectionAttachEvent event) {
         setTitle(event.getSectionName());
         mCurrentDrawerSelectedId = event.getSectionId();
-    }
-
-    public static class RefreshCompleteEvent {
-        private List<WeiboStatus> mStatusList;
-        private String mLastId;
-
-        public List<WeiboStatus> getStatusList() {
-            return mStatusList;
-        }
-
-        public RefreshCompleteEvent setStatusList(List<WeiboStatus> statusList) {
-            this.mStatusList = statusList;
-
-            return this;
-        }
-
-        public String getLastId() {
-            return mLastId;
-        }
-
-        public RefreshCompleteEvent setLastId(String lastId) {
-            this.mLastId = lastId;
-
-            return this;
-        }
     }
 
 }

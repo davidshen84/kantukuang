@@ -20,16 +20,15 @@ import com.google.inject.Inject;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import com.viewpagerindicator.UnderlinePageIndicator;
+import com.xi.android.kantukuang.event.FilterStatusEvent;
+import com.xi.android.kantukuang.event.RepostStatusEvent;
+import com.xi.android.kantukuang.event.TapImageEvent;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
 import com.xi.android.kantukuang.weibo.WeiboUserAccount;
 
 import java.io.IOException;
 import java.util.List;
-
-import static com.xi.android.kantukuang.ImageViewFragment.TapImageEvent;
-import static com.xi.android.kantukuang.ItemFragment.FilterStatusEvent;
-import static com.xi.android.kantukuang.RepostStatusFragment.RepostStatusEvent;
 
 
 public class ImageViewActivity extends ActionBarActivity {
@@ -60,7 +59,7 @@ public class ImageViewActivity extends ActionBarActivity {
     @Inject
     private Bus mBus;
 
-    public ImageViewActivity(){
+    public ImageViewActivity() {
         KanTuKuangModule.getInjector().injectMembers(this);
     }
 

@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 
 import com.google.inject.Inject;
 import com.squareup.otto.Bus;
+import com.xi.android.kantukuang.event.RepostStatusEvent;
 
 
 /**
@@ -93,8 +94,4 @@ public class RepostStatusFragment extends Fragment implements View.OnClickListen
         getActivity().getSupportFragmentManager().popBackStack();
     }
 
-    public static class RepostStatusEvent {
-        public String text;
-        public String statusId;
-    }
 }

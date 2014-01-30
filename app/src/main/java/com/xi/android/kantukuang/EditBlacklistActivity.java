@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -18,6 +17,7 @@ import com.google.inject.Inject;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
+import com.xi.android.kantukuang.event.UnblockAccountEvent;
 
 public class EditBlacklistActivity extends ActionBarActivity {
 
@@ -119,7 +119,4 @@ public class EditBlacklistActivity extends ActionBarActivity {
         public Button Button;
     }
 
-    private class UnblockAccountEvent {
-        public String uid;
-    }
 }

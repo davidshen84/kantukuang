@@ -24,6 +24,7 @@ import android.widget.ListView;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.squareup.otto.Bus;
+import com.xi.android.kantukuang.event.NavigationEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -235,16 +236,4 @@ public class NavigationDrawerFragment extends Fragment {
         mTitleSectionListAdapter.notifyDataSetChanged();
     }
 
-    public class NavigationEvent {
-        private int mPosition;
-
-        public int getPosition() {
-            return mPosition;
-        }
-
-        public void setPosition(int position) {
-            this.mPosition = position;
-        }
-
-    }
 }
