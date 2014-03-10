@@ -7,21 +7,14 @@ import com.xi.android.kantukuang.util.Util;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
 import com.xi.android.kantukuang.weibo.WeiboUserAccount;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import junit.framework.TestCase;
 
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
-@RunWith(RobolectricGradleTestRunner.class)
-public class UtilTest {
+public class UtilTest extends TestCase {
 
-
-    @Test
-    public void extractUidFunction() {
+    public void testExtractUidFunction() {
         WeiboUserAccount weiboUserAccount = new WeiboUserAccount();
         weiboUserAccount.id = 1;
         Long uid = Util.extractUidFunction.apply(weiboUserAccount);
@@ -31,8 +24,7 @@ public class UtilTest {
         assertEquals(-1L, uid.longValue());
     }
 
-    @Test
-    public void canFilterStatus() {
+    public void testFilterStatus() {
         Collection<Long> blackList = Lists.newArrayList();
         blackList.add(123L);
         Predicate<WeiboStatus> predictor = Util.createBlacklistPredictor(blackList);
@@ -44,8 +36,7 @@ public class UtilTest {
         assertFalse(apply);
     }
 
-    @Test
-    public void canFilterRepostStatus() {
+    public void testFilterRepostStatus() {
         Collection<Long> blackList = Lists.newArrayList();
         blackList.add(123L);
         Predicate<WeiboStatus> predictor = Util.createBlacklistPredictor(blackList);
@@ -59,8 +50,7 @@ public class UtilTest {
         assertFalse(apply);
     }
 
-    @Test
-    public void willNotFilterStatus(){
+    public void testWillNotFilterStatus(){
         Collection<Long> blackList = Lists.newArrayList();
         blackList.add(123L);
         Predicate<WeiboStatus> predictor = Util.createBlacklistPredictor(blackList);

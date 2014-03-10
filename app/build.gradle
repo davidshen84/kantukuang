@@ -5,17 +5,14 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.7.+'
-        classpath 'com.squareup.gradle:gradle-android-test-plugin:0.9.1-SNAPSHOT'
+        classpath 'com.android.tools.build:gradle:0.9.+'
     }
 }
 
 apply plugin: 'android'
-apply plugin: 'android-test'
 
 repositories {
     mavenCentral()
-    //    maven { url 'http://dl.bintray.com/populov/maven/' }
 }
 
 android {
@@ -50,13 +47,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
-
-    sourceSets {
-        instrumentTest {
-            java.srcDir file('src/test/java')
-            resources.srcDir file('src/test/res')
-        }
-    }
 }
 
 dependencies {
@@ -70,15 +60,7 @@ dependencies {
     compile 'com.google.oauth-client:google-oauth-client:1.17.0-rc'
     compile 'com.google.http-client:google-http-client-jackson2:1.17.0-rc'
     compile 'com.google.inject:guice:3.0:no_aop'
-    
-    
-    
 
     compile project(':lib')
-    testCompile 'junit:junit:4.+'
-    testCompile 'org.robolectric:robolectric:2.1.+'
-    testCompile 'com.squareup:fest-android:1.0.+'
-    instrumentTestCompile 'junit:junit:4.+'
-    instrumentTestCompile 'org.robolectric:robolectric:2.1.+'
-    instrumentTestCompile 'com.squareup:fest-android:1.0.+'
+    androidTestCompile 'com.squareup:fest-android:1.0.+'
 }
