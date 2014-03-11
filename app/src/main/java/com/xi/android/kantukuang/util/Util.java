@@ -37,7 +37,7 @@ public final class Util {
     }
 
     private static class BlackListPredicate implements Predicate<WeiboStatus> {
-        private Collection<Long> mBlackList;
+        private final Collection<Long> mBlackList;
 
         public BlackListPredicate(Collection<Long> blackList) {
             mBlackList = blackList;

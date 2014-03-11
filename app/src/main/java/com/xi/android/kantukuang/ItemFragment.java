@@ -51,7 +51,7 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 public class ItemFragment extends Fragment implements OnRefreshListener {
 
-    public static final String ARG_TAG = "tag";
+    private static final String ARG_TAG = "tag";
     private static final int FORCE_TOP_PADDING = 256;
     private static final String TAG = ItemFragment.class.getName();
     private static final String ARG_ID = "id";
@@ -209,7 +209,6 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
     }
 
     private void setEmptyText(CharSequence emptyText) {
-        assert mEmptyView != null && mEmptyView instanceof TextView;
         if (emptyText == null) {
             mEmptyView.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);

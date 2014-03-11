@@ -1,6 +1,6 @@
 package com.xi.android.kantukuang.weibo;
 
-public class HomeTimelineUrl extends AbstractWeiboTimelineUrl {
+class HomeTimelineUrl extends AbstractWeiboTimelineUrl {
     private static final String HOME_TIMELINE_URL = "https://api.weibo.com/2/statuses/home_timeline.json";
 
     public HomeTimelineUrl() {

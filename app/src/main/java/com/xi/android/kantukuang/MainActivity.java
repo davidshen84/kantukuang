@@ -114,7 +114,7 @@ public class MainActivity extends ActionBarActivity {
         super.onPause();
     }
 
-    public void restoreActionBar() {
+    private void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
@@ -182,8 +182,6 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void restoreNavigationDrawerState() {
-        assert mWeiboClient.IsAuthenticated();
-
         // add default private section
         // this section is only available when the weibo client is authenticated
         String[] sections = new String[]{

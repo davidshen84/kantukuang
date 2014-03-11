@@ -51,7 +51,7 @@ public class NavigationDrawerFragment extends Fragment {
     private ListView mDrawerListView;
     private View mFragmentContainerView;
     private boolean mUserLearnedDrawer;
-    private List<String> mTitleSectionList = new ArrayList<String>();
+    private final List<String> mTitleSectionList = new ArrayList<String>();
     private ArrayAdapter<String> mTitleSectionListAdapter;
     @Inject
     private Bus mBus;

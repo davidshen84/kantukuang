@@ -3,4 +3,5 @@
            android:layout_width="match_parent"
            android:layout_height="128dp"
            android:scaleType="centerCrop"
-           android:id="@android:id/content"/>
+           android:id="@android:id/content"
+           android:contentDescription="@string/narrow_image_view"/>

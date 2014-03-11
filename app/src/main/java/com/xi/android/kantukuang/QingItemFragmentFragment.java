@@ -1,7 +1,9 @@
 package com.xi.android.kantukuang;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
@@ -41,7 +43,7 @@ public class QingItemFragmentFragment extends Fragment implements AbsListView.On
      */
     private ArrayAdapter mAdapter;
     private QingClient qingClient;
-    private List<ArticleInfo> articleInfoList = new ArrayList<ArticleInfo>();
+    private final List<ArticleInfo> articleInfoList = new ArrayList<ArticleInfo>();
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -70,6 +72,7 @@ public class QingItemFragmentFragment extends Fragment implements AbsListView.On
         qingClient = QingClient.createForTag(mQingTag);
     }
 
+    @TargetApi(Build.VERSION_CODES.CUPCAKE)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

@@ -28,7 +28,7 @@ public class QingClient {
     private HttpRequestFactory httpRequestFactory;
     private TagResult tagResult;
     private ArrayList<ArticleInfo> articleArrayList;
-    private TagResultUrl tagResultUrl = new TagResultUrl();
+    private final TagResultUrl tagResultUrl = new TagResultUrl();
 
     private QingClient() {
         KanTuKuangModule.getInjector().injectMembers(this);

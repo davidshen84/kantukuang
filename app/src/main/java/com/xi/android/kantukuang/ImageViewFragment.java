@@ -29,7 +29,7 @@ public class ImageViewFragment extends Fragment implements PhotoViewAttacher.OnV
     @Inject
     private Bus mBus;
 
-    public ImageViewFragment() {
+    private ImageViewFragment() {
         KanTuKuangModule.getInjector().injectMembers(this);
     }
 

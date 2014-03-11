@@ -31,11 +31,6 @@ public class QingClientClientTest extends TestCase {
         qingClient = QingClient.createFromJson(new InputStreamReader(resourceAsStream));
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     public void testCreateFromJson() throws IOException {
         assertNotNull(qingClient);
         assertEquals("猫", qingClient.getTag());
