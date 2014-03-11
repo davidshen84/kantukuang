@@ -12,6 +12,9 @@ import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpExecuteInterceptor;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -32,6 +35,7 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.squareup.otto.Bus;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -176,6 +180,18 @@ public class KanTuKuangModule extends AbstractModule {
     @Singleton
     private InputMethodManager provideInputMethodManager() {
         return (InputMethodManager) mApplication.getSystemService(Context.INPUT_METHOD_SERVICE);
+    }
+
+    @Provides
+    @Singleton
+    private HttpRequestFactory provideRequestFactory(HttpTransport httpTransport,
+                                                     final JsonObjectParser jsonObjectParser) {
+        return httpTransport.createRequestFactory(new HttpRequestInitializer() {
+            @Override
+            public void initialize(HttpRequest request) throws IOException {
+                request.setParser(jsonObjectParser);
+            }
+        });
     }
 
     private static class TypeLiteralCollectionString extends TypeLiteral<Collection<String>> {

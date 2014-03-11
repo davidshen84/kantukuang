@@ -13,6 +13,7 @@
     <string name="format_info_new_data">loaded %d items</string>
 
     <string-array name="default_sections">
+        <item>Qing Blog</item>
         <item>Public</item>
         <!-- <item>Private</item> -->
     </string-array>

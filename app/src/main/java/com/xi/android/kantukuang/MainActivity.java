@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -268,25 +269,28 @@ public class MainActivity extends ActionBarActivity {
 
     @Subscribe
     public void navigateSection(NavigationEvent event) {
-        ItemFragment itemFragment;
+        Fragment itemFragment;
 
         mCurrentDrawerSelectedId = event.getPosition();
         switch (mCurrentDrawerSelectedId) {
             case 0:
+                itemFragment = QingItemFragmentFragment.newInstance("猫");
+                break;
+            case 1:
                 // Public
                 itemFragment = ItemFragment.newInstance(
                         getString(R.string.section_name_public),
                         mCurrentDrawerSelectedId);
 
                 break;
-            case 1:
+            case 2:
                 // Private
                 itemFragment = ItemFragment.newInstance(
                         getString(R.string.section_name_home),
                         mCurrentDrawerSelectedId);
 
                 break;
-            case 2:
+            case 3:
                 // Friends
                 itemFragment = ItemFragment.newInstance(
                         getString(R.string.section_name_friends),
