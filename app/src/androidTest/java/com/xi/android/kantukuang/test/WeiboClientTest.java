@@ -68,14 +68,6 @@ public class WeiboClientTest extends TestCase {
         assertTrue(timeline.statuses.size() > 0);
     }
 
-    public void testGetAuthorizeUrl() {
-        String url = client.getAuthorizeUrl();
-
-        assertEquals(
-                "https://api.weibo.com/oauth2/authorize?client_id=3016222086&redirect_uri=kantukuang.com/&response_type=code&scope=all&display=mobile",
-                url);
-    }
-
     public void testGetFriends() {
         WeiboFriends friends = client.getFriends("2860471240", null);
 

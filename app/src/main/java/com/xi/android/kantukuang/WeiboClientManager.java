@@ -9,7 +9,7 @@ import com.google.inject.Inject;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import com.xi.android.kantukuang.event.RefreshStatusCompleteEvent;
-import com.xi.android.kantukuang.event.RefreshStatusEvent;
+import com.xi.android.kantukuang.event.RefreshWeiboEvent;
 import com.xi.android.kantukuang.util.Util;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
@@ -34,7 +34,7 @@ public class WeiboClientManager {
     }
 
     @Subscribe
-    public void refreshStatus(RefreshStatusEvent event) {
+    public void refreshStatus(RefreshWeiboEvent event) {
 
         new AsyncTask<String, Integer, List<WeiboStatus>>() {
 
@@ -70,7 +70,7 @@ public class WeiboClientManager {
                 mBus.post(completeEvent.setStatus(weiboStatuses));
             }
 
-        }.execute(event.getSinceId());
+        }.execute(event.sinceId);
     }
 
     @Override

@@ -36,7 +36,6 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 public class MainActivity extends ActionBarActivity {
 
-    private static final int ACTIVITY_REQUEST_CODE_BIND_WEIBO = 0x000A;
     private static final String TAG = MainActivity.class.getName();
     private static final String PREF_USER_WEIBO_ACCESS_TOKEN = "weibo access token";
     private static final String STATE_DRAWER_SELECTED_ID = "selected navigation drawer position";
@@ -92,7 +91,7 @@ public class MainActivity extends ActionBarActivity {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         String mAccessToken = sp.getString(PREF_USER_WEIBO_ACCESS_TOKEN, "");
 
-        setUpWeiboClientAndLoader(mAccessToken);
+        setUpWeiboClientAndLoader();
         if (mHasAttachedSection)
             findViewById(R.id.main_activity_message).setVisibility(View.GONE);
     }
@@ -111,7 +110,7 @@ public class MainActivity extends ActionBarActivity {
         super.onPause();
     }
 
-    public void restoreActionBar() {
+    private void restoreActionBar() {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
@@ -136,18 +135,16 @@ public class MainActivity extends ActionBarActivity {
     }
 
     /**
-     * set the access token and initialize the loader
+     * initialize the loader
      * then restore the drawer state
-     *
-     * @param accessToken: weibo client access token
      */
-    private void setUpWeiboClientAndLoader(String accessToken) {
-        mWeiboClient.setAccessToken(accessToken);
+    private void setUpWeiboClientAndLoader() {
         restoreNavigationDrawerState();
     }
 
     private void restoreNavigationDrawerState() {
         mNavigationDrawerFragment.initItems();
+
         if (!mHasAttachedSection) {
             mNavigationDrawerFragment.selectItem(mCurrentDrawerSelectedId);
         }
@@ -171,10 +168,7 @@ public class MainActivity extends ActionBarActivity {
 
                 OnRefreshListener refreshListener = (OnRefreshListener)
                         getSupportFragmentManager().findFragmentById(R.id.container);
-                if (refreshListener != null)
-                    refreshListener.onRefreshStarted(null);
-                else
-                    Log.v(TAG, "refresh action has no listener");
+                refreshListener.onRefreshStarted(null);
 
                 return true;
 
@@ -217,16 +211,18 @@ public class MainActivity extends ActionBarActivity {
 
         mCurrentDrawerSelectedId = event.getPosition();
         switch (mCurrentDrawerSelectedId) {
+
             case 0:
                 // Weibo
-                itemFragment = ItemFragment.newInstance(
-                        getString(R.string.section_name_public),
-                        mCurrentDrawerSelectedId);
+                itemFragment = ItemFragment.newInstance(getString(R.string.section_name_public));
 
                 break;
+
             case 1:
                 // Qing
-                throw new UnsupportedOperationException("Qing");
+                itemFragment = QingItemFragmentFragment.newInstance("猫");
+
+                break;
 
             default:
                 Log.d(TAG, String.format("%d not ready", mCurrentDrawerSelectedId));
@@ -264,8 +260,8 @@ public class MainActivity extends ActionBarActivity {
 
     @Subscribe
     public void sectionAttach(SectionAttachEvent event) {
-        setTitle(event.getSectionName());
-        mCurrentDrawerSelectedId = event.getSectionId();
+        setTitle(event.sectionName);
+        mCurrentDrawerSelectedId = event.sectionId;
     }
 
 }

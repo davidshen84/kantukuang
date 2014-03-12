@@ -43,7 +43,7 @@ public class GuiceInjectorConfigurationTest extends TestCase {
     }
 
     private static class WeiboScope {
-        private Collection<String> mScope;
+        private final Collection<String> mScope;
 
         @Inject
         public WeiboScope(@Named("scope") Collection<String> scope) {

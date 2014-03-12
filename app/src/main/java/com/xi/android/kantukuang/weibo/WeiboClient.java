@@ -3,7 +3,6 @@ package com.xi.android.kantukuang.weibo;
 
 import android.util.Log;
 
-import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.http.EmptyContent;
 import com.google.api.client.http.HttpRequest;
@@ -20,29 +19,25 @@ import com.google.inject.name.Named;
 import java.io.IOException;
 
 public class WeiboClient {
-
-
     private static final String TAG = WeiboClient.class.getName();
     private static final EmptyContent EMPTY_CONTENT = new EmptyContent();
-    private final String mRedirectUri;
     private final Credential.AccessMethod mAccessMethod;
     private final HttpTransport mHttpTransport;
     private final JsonObjectParser mJsonObjectParser;
-    private final AuthorizationCodeFlow mAuthorizationCodeFlow;
     private Credential mCredential;
     private HttpRequestFactory mRequestFactory;
     private String mAccessToken;
 
     @Inject
-    public WeiboClient(AuthorizationCodeFlow authorizationCodeFlow,
-                       Credential.AccessMethod accessMethod, HttpTransport httpTransport,
+    public WeiboClient(Credential.AccessMethod accessMethod,
+                       HttpTransport httpTransport,
                        JsonObjectParser jsonObjectParser,
+                       @Named("access token") String accessToken,
                        @Named("redirect uri") String redirectUri) {
-        this.mAuthorizationCodeFlow = authorizationCodeFlow;
-        this.mAccessMethod = accessMethod;
-        this.mHttpTransport = httpTransport;
-        this.mJsonObjectParser = jsonObjectParser;
-        this.mRedirectUri = redirectUri;
+        mAccessMethod = accessMethod;
+        mHttpTransport = httpTransport;
+        mJsonObjectParser = jsonObjectParser;
+        mAccessToken = accessToken;
     }
 
     private HttpRequestFactory getRequestFactory() {
@@ -141,35 +136,6 @@ public class WeiboClient {
             url.sinceId=sinceId;
 
         return getWeiboTimelineByUrl(url);
-    }
-
-    public String getAuthorizeUrl() {
-        return mAuthorizationCodeFlow.newAuthorizationUrl()
-                .setRedirectUri(mRedirectUri)
-                .set("display", "mobile")
-                .toString();
-    }
-
-    @Deprecated
-    public String requestAccessToken(String code) {
-        String accessToken = "";
-
-        try {
-            accessToken = mAuthorizationCodeFlow
-                    .newTokenRequest(code)
-                    .setRedirectUri(mRedirectUri)
-                    .execute()
-                    .getAccessToken();
-            Log.d(TAG, String.format("%s => %s", code, accessToken));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return accessToken;
-    }
-
-    public String getAccessToken() {
-        return mAccessToken;
     }
 
     public void setAccessToken(String accessToken) {

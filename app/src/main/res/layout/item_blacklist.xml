@@ -13,7 +13,8 @@
         android:id="@android:id/icon"
         android:layout_width="@android:dimen/app_icon_size"
         android:layout_height="@android:dimen/app_icon_size"
-        android:src="@drawable/ic_social_person"/>
+        android:src="@drawable/ic_social_person"
+        android:contentDescription="@string/weibo_user_image"/>
 
     <TextView
         android:id="@android:id/text1"

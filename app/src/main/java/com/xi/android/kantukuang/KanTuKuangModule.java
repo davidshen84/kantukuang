@@ -6,12 +6,13 @@ import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.inputmethod.InputMethodManager;
 
-import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.ClientParametersAuthentication;
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpExecuteInterceptor;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestFactory;
+import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -32,6 +33,7 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.squareup.otto.Bus;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -39,6 +41,7 @@ public class KanTuKuangModule extends AbstractModule {
 
     private static final String CLIENT_ID = "3016222086";
     private static final String CLIENT_SECRET = "2f23dcc09bc9ebd1d2fa1d316d3cf87a";
+    private static final String ACCESS_TOKEN = "2.00uOPaHD1JlHSDcc83013405KD6O9D";
     private static final String ClassName = KanTuKuangModule.class.getName();
     private static Injector injectorInstance;
     private final Application mApplication;
@@ -67,6 +70,9 @@ public class KanTuKuangModule extends AbstractModule {
         bind(String.class)
                 .annotatedWith(Names.named("client_secret"))
                 .toInstance(CLIENT_SECRET);
+        bind(String.class)
+                .annotatedWith(Names.named("access token"))
+                .toInstance(ACCESS_TOKEN);
         bind(String.class)
                 .annotatedWith(Names.named("token_server_url"))
                 .toInstance("https://api.weibo.com/oauth2/access_token");
@@ -130,16 +136,17 @@ public class KanTuKuangModule extends AbstractModule {
                 .build();
     }
 
+/*
     @Provides
-    @Singleton
-    private AuthorizationCodeFlow provideAuthorizationCodeFlow(Credential.AccessMethod method,
-                                                               HttpTransport transport,
-                                                               JsonFactory jsonFactory,
-                                                               @Named("token_server_url") String tokenServerUrl,
-                                                               HttpExecuteInterceptor clientAuthentication,
-                                                               @Named("client_id") String clientId,
-                                                               @Named("authorization_server_encoded_url") String authorizationServerEncodedUrl,
-                                                               @Named("scope") Collection<String> scope) {
+         @Singleton
+         private AuthorizationCodeFlow provideAuthorizationCodeFlow(Credential.AccessMethod method,
+                                                                    HttpTransport transport,
+                                                                    JsonFactory jsonFactory,
+                                                                    @Named("token_server_url") String tokenServerUrl,
+                                                                    HttpExecuteInterceptor clientAuthentication,
+                                                                    @Named("client_id") String clientId,
+                                                                    @Named("authorization_server_encoded_url") String authorizationServerEncodedUrl,
+                                                                    @Named("scope") Collection<String> scope) {
 
 
         return new AuthorizationCodeFlow
@@ -151,6 +158,7 @@ public class KanTuKuangModule extends AbstractModule {
 
 
     }
+*/
 
     @Provides
     @Singleton
@@ -176,6 +184,18 @@ public class KanTuKuangModule extends AbstractModule {
     @Singleton
     private InputMethodManager provideInputMethodManager() {
         return (InputMethodManager) mApplication.getSystemService(Context.INPUT_METHOD_SERVICE);
+    }
+
+    @Provides
+    @Singleton
+    private HttpRequestFactory provideRequestFactory(HttpTransport httpTransport,
+                                                     final JsonObjectParser jsonObjectParser) {
+        return httpTransport.createRequestFactory(new HttpRequestInitializer() {
+            @Override
+            public void initialize(HttpRequest request) throws IOException {
+                request.setParser(jsonObjectParser);
+            }
+        });
     }
 
     private static class TypeLiteralCollectionString extends TypeLiteral<Collection<String>> {

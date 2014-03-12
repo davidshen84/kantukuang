@@ -31,7 +31,7 @@ import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import com.xi.android.kantukuang.event.FilterStatusEvent;
 import com.xi.android.kantukuang.event.RefreshCompleteEvent;
-import com.xi.android.kantukuang.event.RefreshStatusEvent;
+import com.xi.android.kantukuang.event.RefreshWeiboEvent;
 import com.xi.android.kantukuang.event.SectionAttachEvent;
 import com.xi.android.kantukuang.event.SelectItemEvent;
 import com.xi.android.kantukuang.util.Util;
@@ -49,13 +49,13 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 public class ItemFragment extends Fragment implements OnRefreshListener {
 
-    public static final String ARG_TAG = "tag";
+    private static final String ARG_TAG = "tag";
     private static final int FORCE_TOP_PADDING = 256;
     private static final String TAG = ItemFragment.class.getName();
     private static final String ARG_ID = "id";
     private static final String PREF_FILTER_BLACKLIST = "filter blacklist";
     private final SectionAttachEvent mSectionAttachEvent = new SectionAttachEvent();
-    private final RefreshStatusEvent mRefreshStatusEvent = new RefreshStatusEvent();
+    private final RefreshWeiboEvent mRefreshWeiboEvent = new RefreshWeiboEvent();
     private final List<WeiboStatus> mWeiboStatuses = new ArrayList<WeiboStatus>();
     /**
      * The fragment's ListView/GridView.
@@ -67,7 +67,6 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
     private View mEmptyView;
     private PullToRefreshLayout mPullToRefreshLayout;
     private MainActivity mActivity;
-    private int mSectionId;
     private String mLastId;
     @Inject
     private Bus mBus;
@@ -75,6 +74,7 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
     private boolean mFilterBlackList;
     @Inject
     private JsonFactory mJsonFactory;
+    private int mSectionId;
 
 
     /**
@@ -86,13 +86,12 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
         injector.injectMembers(this);
     }
 
-    public static ItemFragment newInstance(String tag, int id) {
+    public static ItemFragment newInstance(String tag) {
         ItemFragment fragment = new ItemFragment();
         fragment.setRetainInstance(true);
 
         Bundle args = new Bundle();
         args.putString(ARG_TAG, tag);
-        args.putInt(ARG_ID, id);
         fragment.setArguments(args);
 
         return fragment;
@@ -114,8 +113,8 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
 
         Bundle mArguments = getArguments();
         if (mArguments != null) {
-            mSectionId = mArguments.getInt(ARG_ID);
             mSectionName = mArguments.getString(ARG_TAG);
+            mSectionId = mArguments.getInt(ARG_ID);
         }
     }
 
@@ -149,9 +148,9 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
             }
         });
 
-        mBus.post(mSectionAttachEvent
-                          .setSectionId(mSectionId)
-                          .setSectionName(mSectionName));
+        mSectionAttachEvent.sectionName = mSectionName;
+        mSectionAttachEvent.sectionId = mSectionId;
+        mBus.post(mSectionAttachEvent);
 
         return view;
     }
@@ -175,9 +174,7 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
         mBus.register(this);
         // trigger refresh
         if (mWeiboStatuses.size() == 0) {
-            mRefreshStatusEvent.setAccountId(mSectionName);
-            mRefreshStatusEvent.setSinceId(null);
-            mBus.post(mRefreshStatusEvent);
+            mBus.post(mRefreshWeiboEvent);
             mPullToRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
@@ -196,7 +193,6 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
     }
 
     private void setEmptyText(CharSequence emptyText) {
-        assert mEmptyView != null && mEmptyView instanceof TextView;
         if (emptyText == null) {
             mEmptyView.setVisibility(View.GONE);
             mListView.setVisibility(View.VISIBLE);
@@ -212,9 +208,8 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
         if (!mPullToRefreshLayout.isRefreshing())
             mPullToRefreshLayout.setRefreshing(true);
 
-        mRefreshStatusEvent.setAccountId(mSectionName);
-        mRefreshStatusEvent.setSinceId(mLastId);
-        mBus.post(mRefreshStatusEvent);
+        mRefreshWeiboEvent.sinceId = mLastId;
+        mBus.post(mRefreshWeiboEvent);
     }
 
     @Subscribe
@@ -309,7 +304,8 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
                                                                   0);
                                               }
                                           }
-                                      });
+                                      }
+            );
 
             return convertView;
         }
