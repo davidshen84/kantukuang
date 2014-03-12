@@ -13,8 +13,8 @@
     <string name="format_info_new_data">loaded %d items</string>
 
     <string-array name="default_sections">
-        <item>Public</item>
-        <!-- <item>Private</item> -->
+        <item>Weibo</item>
+        <item>Qing</item>
     </string-array>
 
     <string name="title_activity_image_view">Image View</string>

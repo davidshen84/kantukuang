@@ -125,6 +125,7 @@ public class WeiboClient {
         return getWeiboTimelineByUrl(url);
     }
 
+    @Deprecated
     public WeiboTimeline getHomeTimeline(String sinceId) throws WeiboTimelineException {
         AbstractWeiboTimelineUrl url = new HomeTimelineUrl();
         if (sinceId != null)
@@ -133,6 +134,7 @@ public class WeiboClient {
         return getWeiboTimelineByUrl(url);
     }
 
+    @Deprecated
     public WeiboTimeline getFriendsTimeline(String sinceId) throws WeiboTimelineException {
         FriendsTimelineUrl url = new FriendsTimelineUrl();
         if(sinceId!=null)
@@ -148,6 +150,7 @@ public class WeiboClient {
                 .toString();
     }
 
+    @Deprecated
     public String requestAccessToken(String code) {
         String accessToken = "";
 
@@ -173,10 +176,7 @@ public class WeiboClient {
         this.mAccessToken = accessToken;
     }
 
-    public boolean IsAuthenticated() {
-        return !Strings.isNullOrEmpty(mAccessToken);
-    }
-
+    @Deprecated
     public WeiboFriends getFriends(String id, String cursor) {
 
         WeiboFriendsUrl url = new WeiboFriendsUrl(id);
@@ -207,6 +207,7 @@ public class WeiboClient {
         return null;
     }
 
+    @Deprecated
     public WeiboTokenInfo getTokenInfo() {
         WeiboTokenInfoUrl url = new WeiboTokenInfoUrl();
 
@@ -239,6 +240,7 @@ public class WeiboClient {
      * @param comment if not null, add the comment to current repost
      * @return posted status, or null if failed
      */
+    @Deprecated
     public WeiboRepostResponse repost(String weiboId, String comment) {
         WeiboRepostUrl url = new WeiboRepostUrl(weiboId);
 
@@ -273,6 +275,7 @@ public class WeiboClient {
      * @param uid weibo user account id
      * @return {@link com.xi.android.kantukuang.weibo.WeiboUserAccount}
      */
+    @Deprecated
     public WeiboUserAccount show(String uid) {
         WeiboShowUserUrl url = new WeiboShowUserUrl(uid);
 

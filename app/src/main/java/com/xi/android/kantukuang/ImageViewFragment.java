@@ -13,14 +13,12 @@ import com.google.inject.Inject;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.squareup.otto.Bus;
-import com.xi.android.kantukuang.event.TapImageEvent;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 
-public class ImageViewFragment extends Fragment implements PhotoViewAttacher.OnViewTapListener {
+public class ImageViewFragment extends Fragment {
     private static final String ARG_ORDER = "weibo status position in context";
-    private final TapImageEvent mTapImageEvent = new TapImageEvent();
     @Inject
     private ImageLoader mImageLoader;
     private PhotoViewAttacher mPhotoViewAttacher;
@@ -85,11 +83,9 @@ public class ImageViewFragment extends Fragment implements PhotoViewAttacher.OnV
                                           imageView.setImageBitmap(loadedImage);
 
                                           mPhotoViewAttacher = new PhotoViewAttacher(imageView);
-                                          mPhotoViewAttacher.setOnViewTapListener(
-                                                  ImageViewFragment.this);
-
                                       }
-                                  });
+                                  }
+        );
 
         return view;
     }
@@ -107,12 +103,6 @@ public class ImageViewFragment extends Fragment implements PhotoViewAttacher.OnV
         super.onDetach();
 
         mImageViewActivity = null;
-    }
-
-    @Override
-    public void onViewTap(View view, float v, float v2) {
-        mTapImageEvent.order = mOrder;
-        mBus.post(mTapImageEvent);
     }
 
 }

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -19,8 +20,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
-import com.xi.android.kantukuang.event.AccessTokenCompleteEvent;
-import com.xi.android.kantukuang.event.AccessTokenEvent;
 import com.xi.android.kantukuang.event.NavigationEvent;
 import com.xi.android.kantukuang.event.RefreshCompleteEvent;
 import com.xi.android.kantukuang.event.RefreshStatusCompleteEvent;
@@ -31,7 +30,6 @@ import com.xi.android.kantukuang.weibo.WeiboStatus;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
@@ -137,36 +135,6 @@ public class MainActivity extends ActionBarActivity {
 
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        if (requestCode == ACTIVITY_REQUEST_CODE_BIND_WEIBO) {
-            if (resultCode == RESULT_OK) {
-                // get authorize code
-                String code = data.getStringExtra(WebActivity.AUTHORIZE_CODE);
-                Log.d(TAG, String.format("authorize code: %s", code));
-
-                // request access token
-                mBus.post(new AccessTokenEvent(code));
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-
-    }
-
-    @Subscribe
-    public void accessTokenComplete(AccessTokenCompleteEvent event) {
-        mCurrentDrawerSelectedId = 0;
-        setUpWeiboClientAndLoader(event.token);
-
-        // save access token
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .edit()
-                .putString(PREF_USER_WEIBO_ACCESS_TOKEN, mWeiboClient.getAccessToken())
-                .commit();
-    }
-
     /**
      * set the access token and initialize the loader
      * then restore the drawer state
@@ -175,22 +143,11 @@ public class MainActivity extends ActionBarActivity {
      */
     private void setUpWeiboClientAndLoader(String accessToken) {
         mWeiboClient.setAccessToken(accessToken);
-        if (mWeiboClient.IsAuthenticated()) {
-            restoreNavigationDrawerState();
-        }
+        restoreNavigationDrawerState();
     }
 
     private void restoreNavigationDrawerState() {
-        assert mWeiboClient.IsAuthenticated();
-
-        // add default private section
-        // this section is only available when the weibo client is authenticated
-        String[] sections = new String[]{
-                getString(R.string.default_section_private),
-                getString(R.string.default_section_friends)
-        };
-        mNavigationDrawerFragment.setItems(Arrays.asList(sections));
-
+        mNavigationDrawerFragment.initItems();
         if (!mHasAttachedSection) {
             mNavigationDrawerFragment.selectItem(mCurrentDrawerSelectedId);
         }
@@ -205,32 +162,20 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         switch (id) {
-
             case R.id.menu_settings:
                 Log.v(TAG, getString(R.string.menu_settings));
 
                 return true;
 
-            case R.id.menu_bind_weibo: {
-                Intent intent = new Intent(this, WebActivity.class);
-                intent.putExtra(WebActivity.LANDING_URL, mWeiboClient.getAuthorizeUrl());
-
-                startActivityForResult(intent, ACTIVITY_REQUEST_CODE_BIND_WEIBO);
-            }
-            return true;
-
             case R.id.action_refresh:
-                if (mWeiboClient.IsAuthenticated()) {
-                    OnRefreshListener refreshListener = (OnRefreshListener)
-                            getSupportFragmentManager().findFragmentById(R.id.container);
-                    if (refreshListener != null)
-                        refreshListener.onRefreshStarted(null);
-                    else
-                        Log.v(TAG, "refresh action has no listener");
-                } else {
-                    Toast.makeText(this, getString(R.string.message_warning_bind_weibo),
-                                   Toast.LENGTH_SHORT).show();
-                }
+
+                OnRefreshListener refreshListener = (OnRefreshListener)
+                        getSupportFragmentManager().findFragmentById(R.id.container);
+                if (refreshListener != null)
+                    refreshListener.onRefreshStarted(null);
+                else
+                    Log.v(TAG, "refresh action has no listener");
+
                 return true;
 
             case R.id.action_edit_blacklist: {
@@ -268,31 +213,21 @@ public class MainActivity extends ActionBarActivity {
 
     @Subscribe
     public void navigateSection(NavigationEvent event) {
-        ItemFragment itemFragment;
+        Fragment itemFragment;
 
         mCurrentDrawerSelectedId = event.getPosition();
         switch (mCurrentDrawerSelectedId) {
             case 0:
-                // Public
+                // Weibo
                 itemFragment = ItemFragment.newInstance(
                         getString(R.string.section_name_public),
                         mCurrentDrawerSelectedId);
 
                 break;
             case 1:
-                // Private
-                itemFragment = ItemFragment.newInstance(
-                        getString(R.string.section_name_home),
-                        mCurrentDrawerSelectedId);
+                // Qing
+                throw new UnsupportedOperationException("Qing");
 
-                break;
-            case 2:
-                // Friends
-                itemFragment = ItemFragment.newInstance(
-                        getString(R.string.section_name_friends),
-                        mCurrentDrawerSelectedId);
-
-                break;
             default:
                 Log.d(TAG, String.format("%d not ready", mCurrentDrawerSelectedId));
 

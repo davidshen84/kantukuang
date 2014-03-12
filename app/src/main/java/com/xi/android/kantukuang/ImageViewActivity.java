@@ -9,7 +9,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -18,11 +17,8 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonParser;
 import com.google.inject.Inject;
 import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
 import com.viewpagerindicator.UnderlinePageIndicator;
 import com.xi.android.kantukuang.event.FilterStatusEvent;
-import com.xi.android.kantukuang.event.RepostStatusEvent;
-import com.xi.android.kantukuang.event.TapImageEvent;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
 import com.xi.android.kantukuang.weibo.WeiboUserAccount;
@@ -190,49 +186,6 @@ public class ImageViewActivity extends ActionBarActivity {
 
     public String getImageUrlByOrder(int order) {
         return mStatusList.get(order).getImageUrl();
-    }
-
-    @Subscribe
-    public void tapImage(TapImageEvent event) {
-        WeiboStatus status = mStatusList.get(event.order);
-        boolean hasFragment =
-                getSupportFragmentManager().findFragmentById(R.id.fragment_repost) != null;
-
-        if (hasFragment) {
-            getSupportFragmentManager().popBackStack();
-        } else {
-            RepostStatusFragment fragment = RepostStatusFragment
-                    .newInstance(status.id, status.text);
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_repost, fragment)
-                    .addToBackStack("REPOST")
-                    .commit();
-        }
-    }
-
-    @Subscribe
-    public void repostStatus(RepostStatusEvent event) {
-
-        Log.d(TAG, String.format("%s: %s", event.statusId, event.text));
-        new AsyncTask<String, Integer, Boolean>() {
-            @Override
-            protected Boolean doInBackground(String... strings) {
-                return weiboClient.repost(strings[0], strings[1]) != null;
-            }
-
-            @Override
-            protected void onPostExecute(Boolean result) {
-                if (result) {
-                    Toast.makeText(ImageViewActivity.this, R.string.message_info_success,
-                                   Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(ImageViewActivity.this, R.string.message_error_fail,
-                                   Toast.LENGTH_SHORT).show();
-                }
-            }
-        }.execute(event.statusId, event.text);
-
     }
 
     /**

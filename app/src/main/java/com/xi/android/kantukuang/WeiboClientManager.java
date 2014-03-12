@@ -8,8 +8,6 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
-import com.xi.android.kantukuang.event.AccessTokenCompleteEvent;
-import com.xi.android.kantukuang.event.AccessTokenEvent;
 import com.xi.android.kantukuang.event.RefreshStatusCompleteEvent;
 import com.xi.android.kantukuang.event.RefreshStatusEvent;
 import com.xi.android.kantukuang.util.Util;
@@ -52,17 +50,8 @@ public class WeiboClientManager {
                 List<WeiboStatus> statusList = null;
 
                 try {
-                    WeiboTimeline timeline = null;
-                    String accountId = strings[0];
-                    String sinceId = strings[1];
-
-                    if (accountId.equalsIgnoreCase("home")) {
-                        timeline = mClient.getHomeTimeline(sinceId);
-                    } else if (accountId.equalsIgnoreCase("public")) {
-                        timeline = mClient.getPublicTimeline(sinceId);
-                    } else if (accountId.equalsIgnoreCase("friends")) {
-                        timeline = mClient.getFriendsTimeline(sinceId);
-                    }
+                    String sinceId = strings[0];
+                    WeiboTimeline timeline = mClient.getPublicTimeline(sinceId);
 
                     if (timeline != null && timeline.statuses.size() > 0) {
                         Collection<WeiboStatus> statusCollection =
@@ -81,24 +70,7 @@ public class WeiboClientManager {
                 mBus.post(completeEvent.setStatus(weiboStatuses));
             }
 
-        }.execute(event.getAccountId(), event.getSinceId());
-    }
-
-    @Subscribe
-    public void accessToken(AccessTokenEvent event) {
-
-        new AsyncTask<String, Integer, String>() {
-            @Override
-            protected String doInBackground(String... strings) {
-                return mClient.requestAccessToken(strings[0]);
-            }
-
-            @Override
-            protected void onPostExecute(String s) {
-                mBus.post(new AccessTokenCompleteEvent(s));
-            }
-        }.execute(event.code);
-
+        }.execute(event.getSinceId());
     }
 
     @Override

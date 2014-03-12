@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.util.Lists;
@@ -118,17 +116,6 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
         if (mArguments != null) {
             mSectionId = mArguments.getInt(ARG_ID);
             mSectionName = mArguments.getString(ARG_TAG);
-        }
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        if (!mWeiboClient.IsAuthenticated()) {
-            Log.v(TAG, "weibo client is not authenticated.");
-            Toast.makeText(mActivity, "error", Toast.LENGTH_SHORT).show();
-            mActivity.finish();
         }
     }
 

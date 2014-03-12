@@ -227,12 +227,11 @@ public class NavigationDrawerFragment extends Fragment {
         return ((ActionBarActivity) getActivity()).getSupportActionBar();
     }
 
-    public void setItems(List<String> items) {
+    public void initItems() {
         String[] defaultSections = getResources().getStringArray(R.array.default_sections);
 
         mTitleSectionList.clear();
         mTitleSectionList.addAll(Arrays.asList(defaultSections));
-        mTitleSectionList.addAll(items);
         mTitleSectionListAdapter.notifyDataSetChanged();
     }
 

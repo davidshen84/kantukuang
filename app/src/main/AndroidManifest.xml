@@ -28,15 +28,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.xi.android.kantukuang.WebActivity"
-            android:label="@string/title_activity_web"
-            android:parentActivityName="com.xi.android.kantukuang.MainActivity"
-            android:screenOrientation="portrait" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-        <activity
             android:name="com.xi.android.kantukuang.ImageViewActivity"
             android:label="@string/title_activity_image_view"
             android:parentActivityName="com.xi.android.kantukuang.MainActivity" >
