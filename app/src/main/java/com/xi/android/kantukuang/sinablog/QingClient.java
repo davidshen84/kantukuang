@@ -1,6 +1,8 @@
 package com.xi.android.kantukuang.sinablog;
 
 
+import android.util.Log;
+
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.json.JsonObjectParser;
@@ -20,6 +22,8 @@ import java.util.Collection;
 public class QingClient {
 
     private static final String BASE_URI = "qing.blog.sina.com.cn";
+    private static final String TAG = QingClient.class.getName();
+    private final TagResultUrl tagResultUrl = new TagResultUrl();
     private String mTag;
     private int mPageNumber = 1;
     @Inject
@@ -28,7 +32,6 @@ public class QingClient {
     private HttpRequestFactory httpRequestFactory;
     private TagResult tagResult;
     private ArrayList<ArticleInfo> articleArrayList;
-    private final TagResultUrl tagResultUrl = new TagResultUrl();
 
     private QingClient() {
         KanTuKuangModule.getInjector().injectMembers(this);
@@ -101,13 +104,16 @@ public class QingClient {
         articleArrayList = new ArrayList<ArticleInfo>();
         for (String i : list) {
             Document article = Jsoup.parse(i, BASE_URI);
-            Elements infos = article.select(".itemArticle > .itemInfo > :first-child");
-            for (Element e : infos) {
-                ArticleInfo articleInfo = new ArticleInfo();
+            Elements articleInfoElements = article.select(".itemArticle > .itemInfo > :first-child");
+            for (Element e : articleInfoElements) {
+                Elements imgElements = e.select("img");
+                if (imgElements.size() > 0) {
+                    ArticleInfo articleInfo = new ArticleInfo();
 
-                articleInfo.href = e.attr("href");
-                articleInfo.imageSrc = e.select("img").first().attr("src");
-                articleArrayList.add(articleInfo);
+                    articleInfo.href = e.attr("href");
+                    articleInfo.imageSrc = imgElements.first().attr("src");
+                    articleArrayList.add(articleInfo);
+                }
             }
         }
     }

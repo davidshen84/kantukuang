@@ -220,7 +220,7 @@ public class MainActivity extends ActionBarActivity {
 
             case 1:
                 // Qing
-                itemFragment = QingItemFragmentFragment.newInstance("猫");
+                itemFragment = QingItemFragment.newInstance("猫");
 
                 break;
 

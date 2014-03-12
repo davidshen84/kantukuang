@@ -35,15 +35,9 @@ public class WeiboClientManager {
 
     @Subscribe
     public void refreshStatus(RefreshWeiboEvent event) {
-
         new AsyncTask<String, Integer, List<WeiboStatus>>() {
 
             private final RefreshStatusCompleteEvent completeEvent = new RefreshStatusCompleteEvent();
-
-            /**
-             * Predicate the status has image url
-             */
-
 
             @Override
             protected List<WeiboStatus> doInBackground(String... strings) {
