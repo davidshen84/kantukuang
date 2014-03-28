@@ -27,7 +27,7 @@ public class ImageViewFragment extends Fragment {
     @Inject
     private Bus mBus;
 
-    private ImageViewFragment() {
+    public ImageViewFragment() {
         KanTuKuangModule.getInjector().injectMembers(this);
     }
 
