@@ -121,10 +121,10 @@ public class KanTuKuangModule extends AbstractModule {
 
     @Provides
     private BitmapFactory.Options provideBitmapOptions() {
-        BitmapFactory.Options imageItemViewDecodingOptions = new BitmapFactory.Options();
-        imageItemViewDecodingOptions.inSampleSize = 2;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inSampleSize = 2;
 
-        return imageItemViewDecodingOptions;
+        return options;
     }
 
     @Provides

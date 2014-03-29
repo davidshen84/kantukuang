@@ -1,9 +1,11 @@
 package com.xi.android.kantukuang;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.xi.android.kantukuang.sinablog.ArticleInfo;
 import com.xi.android.kantukuang.sinablog.QingClient;
 
@@ -33,6 +36,8 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_TAG = "Qing Tag";
+    private static final String TAG = QingItemFragment.class.getName();
+    private static final int OPENGL_MAX_MEASURE = 2048;
     private final List<ArticleInfo> articleInfoList = new ArrayList<ArticleInfo>();
     private String mQingTag;
     /**
@@ -136,7 +141,10 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ArticleInfo articleInfo = articleInfoList.get(position);
 
+        Log.d(TAG, articleInfo.href);
+        Log.d(TAG, articleInfo.imageSrc);
     }
 
     /**
@@ -181,7 +189,22 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
 
             mImageLoader.displayImage(getItem(position).imageSrc,
                                       (ImageView) convertView,
-                                      displayImageOptions);
+                                      displayImageOptions, new SimpleImageLoadingListener() {
+                        @Override
+                        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                            boolean overWidth = loadedImage.getWidth() > OPENGL_MAX_MEASURE;
+                            boolean overHeight = loadedImage.getHeight() > OPENGL_MAX_MEASURE;
+
+                            if (overWidth || overHeight) {
+                                int imageWidth = overWidth ? OPENGL_MAX_MEASURE : loadedImage.getWidth();
+                                int imageHeight = overHeight ? OPENGL_MAX_MEASURE : loadedImage.getHeight();
+                                loadedImage = Bitmap.createBitmap(loadedImage, 0, 0, imageWidth, imageHeight);
+                            }
+
+                            ((ImageView) view).setImageBitmap(loadedImage);
+                        }
+                    }
+            );
 
             return convertView;
         }
