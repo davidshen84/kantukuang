@@ -1,14 +1,17 @@
 package com.xi.android.kantukuang;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -16,12 +19,15 @@ import android.widget.Toast;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonParser;
 import com.google.inject.Inject;
+import com.nostra13.universalimageloader.cache.disc.DiscCacheAware;
+import com.nostra13.universalimageloader.core.assist.DiscCacheUtil;
 import com.squareup.otto.Bus;
 import com.viewpagerindicator.UnderlinePageIndicator;
 import com.xi.android.kantukuang.event.FilterStatusEvent;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -33,6 +39,9 @@ public class ImageViewActivity extends ActionBarActivity {
     public static final String PREF_BLACKLIST = "blacklist set";
     private static final String TAG = ImageViewActivity.class.getName();
     private final FilterStatusEvent mFilterStatusEvent = new FilterStatusEvent();
+    @Inject
+    DiscCacheAware mDiscCache;
+
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -44,6 +53,7 @@ public class ImageViewActivity extends ActionBarActivity {
     private List<WeiboStatus> mStatusList;
     @Inject
     private Bus mBus;
+    private ShareActionProvider mActionProvider;
 
     public ImageViewActivity() {
         KanTuKuangModule.getInjector().injectMembers(this);
@@ -117,6 +127,23 @@ public class ImageViewActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.image_view, menu);
 
+        // get current image url
+        String imageUrl = mStatusList.get(mViewPager.getCurrentItem()).imageUrl;
+        // this logic assume the user loaded the image first
+        // so a copy can be found from the disk cache
+        File imageFile = DiscCacheUtil.findInCache(imageUrl, mDiscCache);
+        if (imageFile.exists()) {
+            MenuItem item = menu.findItem(R.id.action_share);
+            Intent shareIntent = new Intent();
+            mActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+
+            shareIntent.setAction(Intent.ACTION_SEND);
+            shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(imageFile));
+            shareIntent.setType("image/*");
+
+            mActionProvider.setShareIntent(shareIntent);
+        }
+
         return true;
     }
 
@@ -129,9 +156,11 @@ public class ImageViewActivity extends ActionBarActivity {
         switch (id) {
             case R.id.menu_settings:
                 return true;
+
             case android.R.id.home:
                 this.finish();
                 return true;
+
             case R.id.action_weibo_add_blacklist:
                 long uid;
                 WeiboStatus status = mStatusList.get(mViewPager.getCurrentItem());
@@ -142,6 +171,7 @@ public class ImageViewActivity extends ActionBarActivity {
                 }
 
                 blockAccount(uid);
+
                 return true;
         }
 

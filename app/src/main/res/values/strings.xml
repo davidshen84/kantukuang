@@ -39,5 +39,6 @@
     <string name="full_image_view">full image view</string>
     <string name="weibo_user_image">weibo user image</string>
     <string name="narrow_image_view">narrow image view</string>
+    <string name="action_share">Share with friends</string>
 
 </resources>

@@ -27,6 +27,7 @@ import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
+import com.nostra13.universalimageloader.cache.disc.DiscCacheAware;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -172,6 +173,12 @@ public class KanTuKuangModule extends AbstractModule {
                 request.setParser(jsonObjectParser);
             }
         });
+    }
+
+    @Provides
+    @Singleton
+    private DiscCacheAware provideDiscCacheAware(ImageLoader imageLoader) {
+        return imageLoader.getDiscCache();
     }
 
     private static class TypeLiteralCollectionString extends TypeLiteral<Collection<String>> {
