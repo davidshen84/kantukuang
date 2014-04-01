@@ -1,9 +1,7 @@
 package com.xi.android.kantukuang;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
@@ -86,10 +84,6 @@ public class MainActivity extends ActionBarActivity {
         // set up action bar title
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(getTitle());
-
-        // restore weibo access token
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        String mAccessToken = sp.getString(PREF_USER_WEIBO_ACCESS_TOKEN, "");
 
         setUpWeiboClientAndLoader();
         if (mHasAttachedSection)
