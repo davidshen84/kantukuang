@@ -4,7 +4,6 @@ import com.google.api.client.util.Key;
 
 public final class WeiboStatus {
 
-
     @Key("created_at")
     public String createdAt;
     @Key

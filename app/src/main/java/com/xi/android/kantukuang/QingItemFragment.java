@@ -1,5 +1,6 @@
 package com.xi.android.kantukuang;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -37,8 +38,8 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_TAG = "Qing Tag";
     private static final String TAG = QingItemFragment.class.getName();
-    private static final int OPENGL_MAX_MEASURE = 2048;
     private final List<ArticleInfo> articleInfoList = new ArrayList<ArticleInfo>();
+
     private String mQingTag;
     /**
      * The fragment's ListView/GridView.
@@ -51,6 +52,8 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     private ArrayAdapter mAdapter;
     private QingClient mQingClient;
     private PullToRefreshLayout mPullToRefreshLayout;
+    private int mMaxImageWidth;
+    private int mMaxImageHeight;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -79,33 +82,11 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         mQingClient = QingClient.createForTag(mQingTag);
     }
 
-    private void asyncLoad() {
-        new AsyncTask<String, String, List<ArticleInfo>>() {
-            @Override
-            protected List<ArticleInfo> doInBackground(String... strings) {
-                mQingClient.load();
-
-                return mQingClient.hasLoaded() ? mQingClient.getArticleInfoList() : null;
-            }
-
-            @Override
-            protected void onPostExecute(List<ArticleInfo> articleInfos) {
-                if (articleInfos != null && articleInfos.size() > 0) {
-                    articleInfoList.addAll(0, articleInfos);
-                    mAdapter.notifyDataSetChanged();
-                    if (mPullToRefreshLayout.isRefreshing())
-                        mPullToRefreshLayout.setRefreshComplete();
-                } else {
-                    Toast.makeText(getActivity(), "no more", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }.execute();
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_qingitemfragment, container, false);
+
 
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
@@ -113,13 +94,18 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         mAdapter = new ArticleInfoArrayAdapter(getActivity(), articleInfoList);
         ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
 
-        // TODO: display waite message
-        asyncLoad();
-
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
 
         return view;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        mMaxImageHeight = getResources().getDimensionPixelSize(
+                R.dimen.item_image_height);
     }
 
     @Override
@@ -132,6 +118,9 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
                 .theseChildrenArePullable(mListView)
                 .listener(this)
                 .setup(mPullToRefreshLayout);
+
+        // TODO: display waite message
+        asyncLoad();
     }
 
     @Override
@@ -166,6 +155,29 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         asyncLoad();
     }
 
+    private void asyncLoad() {
+        new AsyncTask<String, String, List<ArticleInfo>>() {
+            @Override
+            protected List<ArticleInfo> doInBackground(String... strings) {
+                mQingClient.load();
+
+                return mQingClient.hasLoaded() ? mQingClient.getArticleInfoList() : null;
+            }
+
+            @Override
+            protected void onPostExecute(List<ArticleInfo> articleInfos) {
+                if (articleInfos != null && articleInfos.size() > 0) {
+                    articleInfoList.addAll(0, articleInfos);
+                    mAdapter.notifyDataSetChanged();
+                    if (mPullToRefreshLayout.isRefreshing())
+                        mPullToRefreshLayout.setRefreshComplete();
+                } else {
+                    Toast.makeText(getActivity(), "no more", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }.execute();
+    }
+
     private class ArticleInfoArrayAdapter extends ArrayAdapter<ArticleInfo> {
         @Inject
         private LayoutInflater mInflater;
@@ -187,21 +199,28 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
                 convertView = mInflater.inflate(R.layout.item_image, parent, false);
             }
 
+            if (mMaxImageWidth == 0)
+                mMaxImageWidth = QingItemFragment.this.getView().getWidth();
+
             mImageLoader.displayImage(getItem(position).imageSrc,
                                       (ImageView) convertView,
                                       displayImageOptions, new SimpleImageLoadingListener() {
                         @Override
-                        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                            boolean overWidth = loadedImage.getWidth() > OPENGL_MAX_MEASURE;
-                            boolean overHeight = loadedImage.getHeight() > OPENGL_MAX_MEASURE;
+                        public void onLoadingComplete(String imageUri, View view,
+                                                      Bitmap loadedImage) {
 
-                            if (overWidth || overHeight) {
-                                int imageWidth = overWidth ? OPENGL_MAX_MEASURE : loadedImage.getWidth();
-                                int imageHeight = overHeight ? OPENGL_MAX_MEASURE : loadedImage.getHeight();
-                                loadedImage = Bitmap.createBitmap(loadedImage, 0, 0, imageWidth, imageHeight);
+                            int imageWidth = loadedImage.getWidth();
+                            int imageHeight = loadedImage.getHeight();
+
+                            boolean overWidth = imageWidth > mMaxImageWidth;
+                            boolean overHeight = imageHeight > mMaxImageHeight;
+                            if (overHeight || overWidth) {
+                                loadedImage = Bitmap.createBitmap(loadedImage, 0, 0,
+                                                                  overWidth ? mMaxImageWidth : imageWidth,
+                                                                  overHeight ? mMaxImageHeight : imageHeight);
                             }
-
                             ((ImageView) view).setImageBitmap(loadedImage);
+
                         }
                     }
             );
