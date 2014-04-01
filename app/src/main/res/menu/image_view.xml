@@ -5,7 +5,7 @@
     <item
         android:id="@+id/action_weibo_add_blacklist"
         android:title="@string/action_add_blacklist"
-        android:icon="@android:drawable/ic_menu_report_image"
+        android:icon="@drawable/ic_action_rating_bad"
         app:showAsAction="ifRoom"/>
 
     <item
