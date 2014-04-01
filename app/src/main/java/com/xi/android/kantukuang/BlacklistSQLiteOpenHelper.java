@@ -22,22 +22,10 @@ class BlacklistSQLiteOpenHelper extends SQLiteOpenHelper {
     private static final String FIELD_UID = "_id";
     private static final String SQL_QUERY_ALL_UID =
             String.format("SELECT %s FROM %s", FIELD_UID, TABLE_NAME);
-    private static final String FIELD_SCREEN_NAME = "screen_name";
-    private static final String FIELD_PROFILE_IMAGE_URL = "profile_image_url";
-    private static final String FIELD_REASON_STATUS_ID = "reason_status_id";
     private static final String SQL_CREATE =
-            String.format("CREATE TABLE %s (" +
-                                  "%s INTEGER PRIMARY KEY," +
-                                  "%s TEXT NOT NULL," +
-                                  "%s TEXT," +
-                                  "%s TEXT);",
-                          TABLE_NAME, FIELD_UID, FIELD_SCREEN_NAME,
-                          FIELD_PROFILE_IMAGE_URL,
-                          FIELD_REASON_STATUS_ID);
+            String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY);", TABLE_NAME, FIELD_UID);
     private static final String SQL_QUERY_ALL =
-            String.format("SELECT %s, %s, %s, %s FROM %s",
-                          FIELD_UID, FIELD_SCREEN_NAME, FIELD_PROFILE_IMAGE_URL,
-                          FIELD_REASON_STATUS_ID, TABLE_NAME);
+            String.format("SELECT %s FROM %s", FIELD_UID, TABLE_NAME);
     private SQLiteDatabase mDatabase;
 
     public BlacklistSQLiteOpenHelper(Context context) {
@@ -54,12 +42,9 @@ class BlacklistSQLiteOpenHelper extends SQLiteOpenHelper {
 
     }
 
-    public void insert(long uid, String screenName, String profileImage, String statusId) {
+    public void insert(long uid) {
         ContentValues values = new ContentValues();
         values.put(FIELD_UID, uid);
-        values.put(FIELD_SCREEN_NAME, screenName);
-        values.put(FIELD_PROFILE_IMAGE_URL, profileImage);
-        values.put(FIELD_REASON_STATUS_ID, statusId);
 
         ensureDatabase(true);
         mDatabase.insert(TABLE_NAME, null, values);
@@ -107,6 +92,6 @@ class BlacklistSQLiteOpenHelper extends SQLiteOpenHelper {
     public void remove(String uid) {
         ensureDatabase(true);
 
-        mDatabase.delete(TABLE_NAME, "_id=?", new String[]{uid});
+        mDatabase.delete(TABLE_NAME, FIELD_UID + "=?", new String[]{uid});
     }
 }

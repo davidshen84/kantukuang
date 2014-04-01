@@ -21,7 +21,6 @@ import com.viewpagerindicator.UnderlinePageIndicator;
 import com.xi.android.kantukuang.event.FilterStatusEvent;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
-import com.xi.android.kantukuang.weibo.WeiboUserAccount;
 
 import java.io.IOException;
 import java.util.List;
@@ -135,17 +134,14 @@ public class ImageViewActivity extends ActionBarActivity {
                 return true;
             case R.id.action_weibo_add_blacklist:
                 long uid;
-                String statusId;
                 WeiboStatus status = mStatusList.get(mViewPager.getCurrentItem());
                 if (status.repostedStatus != null) {
-                    statusId = status.repostedStatus.id;
                     uid = status.repostedStatus.uid;
                 } else {
-                    statusId = status.id;
                     uid = status.uid;
                 }
 
-                blockAccount(uid, statusId);
+                blockAccount(uid);
                 return true;
         }
 
@@ -153,35 +149,31 @@ public class ImageViewActivity extends ActionBarActivity {
     }
 
 
-    private void blockAccount(long uid, String statusId) {
+    private void blockAccount(long uid) {
 
-        new AsyncTask<String, Integer, Object[]>() {
+        new AsyncTask<Long, Long, Long>() {
 
             @Override
-            protected Object[] doInBackground(String... strings) {
-                WeiboUserAccount userAccount = weiboClient.show(strings[0]);
-                if (userAccount != null)
-                    return new Object[]{userAccount, strings[1]};
-                else return null;
+            protected Long doInBackground(Long... longs) {
+                BlacklistSQLiteOpenHelper sqLiteOpenHelper =
+                        new BlacklistSQLiteOpenHelper(ImageViewActivity.this);
+
+                Long uid = longs[0];
+                sqLiteOpenHelper.insert(uid);
+                sqLiteOpenHelper.close();
+
+                return uid;
             }
 
             @Override
-            protected void onPostExecute(Object[] objects) {
-                if (objects != null) {
-                    WeiboUserAccount account = (WeiboUserAccount) objects[0];
-                    BlacklistSQLiteOpenHelper sqLiteOpenHelper =
-                            new BlacklistSQLiteOpenHelper(ImageViewActivity.this);
-
-                    sqLiteOpenHelper.insert(account.id, account.screenName,
-                                            account.photoUrl, objects[1].toString());
-                    sqLiteOpenHelper.close();
-                    String text = String.format(getString(R.string.format_info_add_blacklist),
-                                                account.screenName);
-                    Toast.makeText(ImageViewActivity.this, text, Toast.LENGTH_SHORT).show();
-                    mFilterStatusEvent.shouldFilter = true;
-                }
+            protected void onPostExecute(Long uid) {
+                String text = String.format(getString(R.string.format_info_add_blacklist), uid);
+                Toast.makeText(ImageViewActivity.this, text, Toast.LENGTH_SHORT).show();
+                mFilterStatusEvent.shouldFilter = true;
             }
-        }.execute(String.valueOf(uid), statusId);
+
+        }.execute(uid);
+
     }
 
     public String getImageUrlByOrder(int order) {

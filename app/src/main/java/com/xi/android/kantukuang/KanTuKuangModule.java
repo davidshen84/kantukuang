@@ -136,30 +136,6 @@ public class KanTuKuangModule extends AbstractModule {
                 .build();
     }
 
-/*
-    @Provides
-         @Singleton
-         private AuthorizationCodeFlow provideAuthorizationCodeFlow(Credential.AccessMethod method,
-                                                                    HttpTransport transport,
-                                                                    JsonFactory jsonFactory,
-                                                                    @Named("token_server_url") String tokenServerUrl,
-                                                                    HttpExecuteInterceptor clientAuthentication,
-                                                                    @Named("client_id") String clientId,
-                                                                    @Named("authorization_server_encoded_url") String authorizationServerEncodedUrl,
-                                                                    @Named("scope") Collection<String> scope) {
-
-
-        return new AuthorizationCodeFlow
-                .Builder(method, transport, jsonFactory, new GenericUrl(tokenServerUrl),
-                         clientAuthentication,
-                         clientId, authorizationServerEncodedUrl)
-                .setScopes(scope)
-                .build();
-
-
-    }
-*/
-
     @Provides
     @Singleton
     private JsonObjectParser provideJsonObjectParser(JsonFactory jsonFactory) {
