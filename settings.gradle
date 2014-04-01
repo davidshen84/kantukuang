@@ -1,1 +1,1 @@
-include ':app', 'libViewPageIndicator'
+include ':app', 'libs/:ViewPageIndicator'
