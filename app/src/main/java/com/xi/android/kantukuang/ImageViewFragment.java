@@ -62,7 +62,6 @@ public class ImageViewFragment extends Fragment {
         if (arguments != null) {
             mOrder = arguments.getInt(ARG_ORDER);
         }
-
     }
 
     @Override
@@ -71,7 +70,6 @@ public class ImageViewFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.image_view_full, container, false);
 
-        assert view != null;
         ImageView imageView = (ImageView) view.findViewById(android.R.id.content);
 
         mImageLoader.displayImage(mImageViewActivity.getImageUrlByOrder(mOrder), imageView,

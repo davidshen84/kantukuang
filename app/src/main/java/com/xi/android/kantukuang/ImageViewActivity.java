@@ -1,70 +1,44 @@
 package com.xi.android.kantukuang;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.ShareActionProvider;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonParser;
 import com.google.inject.Inject;
-import com.nostra13.universalimageloader.cache.disc.DiscCacheAware;
-import com.nostra13.universalimageloader.core.assist.DiscCacheUtil;
-import com.squareup.otto.Bus;
-import com.viewpagerindicator.UnderlinePageIndicator;
 import com.xi.android.kantukuang.event.FilterStatusEvent;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 
-public class ImageViewActivity extends ActionBarActivity {
+public class ImageViewActivity extends AbstractImageViewActivity {
 
     public static final String ITEM_POSITION = "item position";
     public static final String STATUS_JSON = "weibo status in json";
-    public static final String PREF_BLACKLIST = "blacklist set";
     private static final String TAG = ImageViewActivity.class.getName();
     private final FilterStatusEvent mFilterStatusEvent = new FilterStatusEvent();
-    @Inject
-    DiscCacheAware mDiscCache;
+    private List<WeiboStatus> mStatusList;
 
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
-    private ViewPager mViewPager;
     @Inject
     private WeiboClient weiboClient;
     @Inject
     private JsonFactory mJsonFactory;
-    private List<WeiboStatus> mStatusList;
-    @Inject
-    private Bus mBus;
-    private ShareActionProvider mActionProvider;
 
     public ImageViewActivity() {
+        super(R.menu.image_view);
+
         KanTuKuangModule.getInjector().injectMembers(this);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_image_view);
-        setUpActionBar();
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -80,24 +54,16 @@ public class ImageViewActivity extends ActionBarActivity {
             finish();
         }
         /*
-      The {@link android.support.v4.view.PagerAdapter} that will provide
-      fragments for each of the sections. We use a
-      {@link FragmentPagerAdapter} derivative, which will keep every
-      loaded fragment in memory. If this becomes too memory intensive, it
-      may be best to switch to a
-      {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
+          The {@link android.support.v4.view.PagerAdapter} that will provide
+          fragments for each of the sections. We use a
+          {@link FragmentPagerAdapter} derivative, which will keep every
+          loaded fragment in memory. If this becomes too memory intensive, it
+          may be best to switch to a
+          {@link android.support.v4.app.FragmentStatePagerAdapter}.
+        */
         SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(
                 getSupportFragmentManager(), mStatusList);
-
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-        mViewPager.setCurrentItem(currentPosition);
-
-        // set up pager indicator
-        UnderlinePageIndicator indicator = (UnderlinePageIndicator) findViewById(R.id.indicator);
-        indicator.setViewPager(mViewPager);
+        setupPager(currentPosition, mSectionsPagerAdapter);
     }
 
     @Override
@@ -105,7 +71,6 @@ public class ImageViewActivity extends ActionBarActivity {
         super.onResume();
 
         mFilterStatusEvent.shouldFilter = false;
-        mBus.register(this);
     }
 
     @Override
@@ -113,38 +78,11 @@ public class ImageViewActivity extends ActionBarActivity {
         super.onPause();
 
         mBus.post(mFilterStatusEvent);
-        mBus.unregister(this);
-    }
-
-    private void setUpActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.image_view, menu);
-
-        // get current image url
-        String imageUrl = mStatusList.get(mViewPager.getCurrentItem()).imageUrl;
-        // this logic assume the user loaded the image first
-        // so a copy can be found from the disk cache
-        File imageFile = DiscCacheUtil.findInCache(imageUrl, mDiscCache);
-        if (imageFile.exists()) {
-            MenuItem item = menu.findItem(R.id.action_share);
-            Intent shareIntent = new Intent();
-            mActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
-
-            shareIntent.setAction(Intent.ACTION_SEND);
-            shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(imageFile));
-            shareIntent.setType("image/*");
-
-            mActionProvider.setShareIntent(shareIntent);
-        }
-
-        return true;
+    public String getImageUrlByOrder(int order) {
+        return mStatusList.get(order).getImageUrl();
     }
 
     @Override
@@ -163,7 +101,7 @@ public class ImageViewActivity extends ActionBarActivity {
 
             case R.id.action_weibo_add_blacklist:
                 long uid;
-                WeiboStatus status = mStatusList.get(mViewPager.getCurrentItem());
+                WeiboStatus status = mStatusList.get(getCurrentItem());
                 if (status.repostedStatus != null) {
                     uid = status.repostedStatus.uid;
                 } else {
@@ -177,7 +115,6 @@ public class ImageViewActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
 
     private void blockAccount(long uid) {
 
@@ -204,40 +141,5 @@ public class ImageViewActivity extends ActionBarActivity {
 
         }.execute(uid);
 
-    }
-
-    public String getImageUrlByOrder(int order) {
-        return mStatusList.get(order).getImageUrl();
-    }
-
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-        private final List<WeiboStatus> mStatusList;
-
-        public SectionsPagerAdapter(FragmentManager fm, List<WeiboStatus> statusList) {
-            super(fm);
-
-            mStatusList = statusList;
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            return ImageViewFragment.newInstance(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mStatusList.size();
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return String.format(getString(R.string.format_info_page_order), position);
-        }
     }
 }
