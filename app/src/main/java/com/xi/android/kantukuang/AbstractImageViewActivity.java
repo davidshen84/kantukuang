@@ -57,7 +57,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
         // set up pager indicator
         UnderlinePageIndicator indicator = (UnderlinePageIndicator) findViewById(R.id.indicator);
         indicator.setViewPager(mViewPager);
-        indicator.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener(){
+        indicator.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
@@ -112,7 +112,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
         // this logic assume the user loaded the image first
         // so a copy can be found from the disk cache
         File imageFile = DiscCacheUtil.findInCache(imageUrl, mDiscCache);
-        if (imageFile.exists()) {
+        if (imageFile != null && imageFile.exists()) {
 
             Intent shareIntent = new Intent();
 
