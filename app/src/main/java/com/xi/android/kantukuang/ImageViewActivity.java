@@ -43,11 +43,11 @@ public class ImageViewActivity extends AbstractImageViewActivity {
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         Intent intent = getIntent();
-        int currentPosition = intent.getIntExtra(ITEM_POSITION, 0);
+        int item = intent.getIntExtra(ITEM_POSITION, 0);
+        String json = intent.getStringExtra(STATUS_JSON);
 
         try {
-            String stringExtra = intent.getStringExtra(STATUS_JSON);
-            JsonParser jsonParser = mJsonFactory.createJsonParser(stringExtra);
+            JsonParser jsonParser = mJsonFactory.createJsonParser(json);
             mStatusList = (List<WeiboStatus>) jsonParser.parseArray(List.class, WeiboStatus.class);
         } catch (IOException e) {
             e.printStackTrace();
@@ -61,9 +61,9 @@ public class ImageViewActivity extends AbstractImageViewActivity {
           may be best to switch to a
           {@link android.support.v4.app.FragmentStatePagerAdapter}.
         */
-        SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(
+        WeiboPagerAdapter pagerAdapter = new WeiboPagerAdapter(
                 getSupportFragmentManager(), mStatusList);
-        setupPager(currentPosition, mSectionsPagerAdapter);
+        setupPager(pagerAdapter, item);
     }
 
     @Override

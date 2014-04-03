@@ -48,11 +48,11 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
         actionBar.setHomeButtonEnabled(true);
     }
 
-    protected void setupPager(int currentPosition,
-                              FragmentPagerAdapter pagerAdapter) {
+    protected void setupPager(FragmentPagerAdapter pagerAdapter, int item) {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(pagerAdapter);
+        mViewPager.setCurrentItem(item);
 
         // set up pager indicator
         UnderlinePageIndicator indicator = (UnderlinePageIndicator) findViewById(R.id.indicator);
@@ -64,7 +64,6 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
                 doEasyShare(position);
             }
         });
-        indicator.setCurrentItem(currentPosition);
     }
 
     protected int getCurrentItem() {
@@ -77,6 +76,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
         setContentView(R.layout.activity_image_view);
         setUpActionBar();
     }
+
 
     @Override
     protected void onResume() {
@@ -96,7 +96,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(mMenuId, menu);
         setupShareActionProvider(menu);
-        // ViewPager.setCurrentItem will not trigger onPageSelected event
+        // initialize easy share on load
         doEasyShare(getCurrentItem());
 
         return true;
@@ -138,11 +138,11 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
      * A {@link android.support.v4.app.FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    public class WeiboPagerAdapter extends FragmentPagerAdapter {
 
         private final List<WeiboStatus> mStatusList;
 
-        public SectionsPagerAdapter(FragmentManager fm, List<WeiboStatus> statusList) {
+        public WeiboPagerAdapter(FragmentManager fm, List<WeiboStatus> statusList) {
             super(fm);
 
             mStatusList = statusList;
