@@ -24,7 +24,6 @@ public class WeiboClientTest extends TestCase {
     public void setUp() throws Exception {
         Injector injector = Guice.createInjector(new KanTuKuangModule(new Application()));
         client = injector.getInstance(WeiboClient.class);
-        client.setAccessToken("2.00uOPaHD1JlHSDcc83013405KD6O9D");
     }
 
     public void testGetPublicTimeline() throws IOException, InterruptedException, WeiboTimelineException {
@@ -42,7 +41,6 @@ public class WeiboClientTest extends TestCase {
         WeiboStatus status = timeline.statuses.get(0);
         assertNotNull(status.uid);
         assertFalse(0L == status.uid);
-
     }
 
 }

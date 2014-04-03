@@ -165,6 +165,29 @@ public class KanTuKuangModule extends AbstractModule {
 
     @Provides
     @Singleton
+    private Credential provideCredential(Credential.AccessMethod accessMethod,
+                                         @Named("access token") String accessToken) {
+        return new Credential(accessMethod).setAccessToken(accessToken);
+    }
+
+    @Provides
+    @Singleton
+    @Named("Weibo")
+    private HttpRequestFactory provideWeiboRequestFactory(final HttpTransport httpTransport,
+                                                          final JsonObjectParser jsonObjectParser,
+                                                          final Credential credential) {
+        return httpTransport.createRequestFactory(new HttpRequestInitializer() {
+            @Override
+            public void initialize(HttpRequest request) throws IOException {
+                credential.initialize(request);
+                request.setParser(jsonObjectParser);
+            }
+        });
+    }
+
+    @Provides
+    @Singleton
+    @Named("Qing")
     private HttpRequestFactory provideRequestFactory(HttpTransport httpTransport,
                                                      final JsonObjectParser jsonObjectParser) {
         return httpTransport.createRequestFactory(new HttpRequestInitializer() {
