@@ -1,8 +1,6 @@
 package com.xi.android.kantukuang;
 
-import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -22,7 +20,6 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.xi.android.kantukuang.sinablog.ArticleInfo;
 import com.xi.android.kantukuang.sinablog.QingClient;
 
@@ -52,8 +49,6 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     private ArrayAdapter mAdapter;
     private QingClient mQingClient;
     private PullToRefreshLayout mPullToRefreshLayout;
-    private int mMaxImageWidth;
-    private int mMaxImageHeight;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -98,14 +93,6 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         mListView.setOnItemClickListener(this);
 
         return view;
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        mMaxImageHeight = getResources().getDimensionPixelSize(
-                R.dimen.item_image_height);
     }
 
     @Override
@@ -195,37 +182,25 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+            MySimpleImageLoadingListener listener = null;
+
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.item_image, parent, false);
             }
 
-            if (mMaxImageWidth == 0)
-                mMaxImageWidth = QingItemFragment.this.getView().getWidth();
+            if (listener == null) {
+                int maxWidth = QingItemFragment.this.getView().getWidth();
+                int maxHeight = getResources().getDimensionPixelSize(R.dimen.item_image_height);
+                listener = new MySimpleImageLoadingListener(maxWidth,
+                                                            maxHeight);
+            }
 
-            mImageLoader.displayImage(getItem(position).imageSrc,
-                                      (ImageView) convertView,
-                                      displayImageOptions, new SimpleImageLoadingListener() {
-                        @Override
-                        public void onLoadingComplete(String imageUri, View view,
-                                                      Bitmap loadedImage) {
-
-                            int imageWidth = loadedImage.getWidth();
-                            int imageHeight = loadedImage.getHeight();
-
-                            boolean overWidth = imageWidth > mMaxImageWidth;
-                            boolean overHeight = imageHeight > mMaxImageHeight;
-                            if (overHeight || overWidth) {
-                                loadedImage = Bitmap.createBitmap(loadedImage, 0, 0,
-                                                                  overWidth ? mMaxImageWidth : imageWidth,
-                                                                  overHeight ? mMaxImageHeight : imageHeight);
-                            }
-                            ((ImageView) view).setImageBitmap(loadedImage);
-
-                        }
-                    }
-            );
+            mImageLoader.displayImage(getItem(position).imageSrc, (ImageView) convertView,
+                                      displayImageOptions, listener);
 
             return convertView;
         }
+
     }
+
 }

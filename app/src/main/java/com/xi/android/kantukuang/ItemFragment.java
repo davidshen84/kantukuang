@@ -3,7 +3,6 @@ package com.xi.android.kantukuang;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -50,7 +49,6 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 public class ItemFragment extends Fragment implements OnRefreshListener {
 
     private static final String ARG_TAG = "tag";
-    private static final int FORCE_TOP_PADDING = 256;
     private static final String TAG = ItemFragment.class.getName();
     private static final String ARG_ID = "id";
     private static final String PREF_FILTER_BLACKLIST = "filter blacklist";
@@ -290,22 +288,16 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
                 ((ImageView) convertView).setImageBitmap(null);
             }
 
+            SimpleImageLoadingListener listener = null;
+            if (listener == null) {
+                int maxWidth = ItemFragment.this.getView().getWidth();
+                int maxHeight = getResources().getDimensionPixelSize(R.dimen.item_image_height);
+                listener = new MySimpleImageLoadingListener(maxWidth,
+                                                            maxHeight);
+            }
+
             mImageLoader.displayImage(getItem(position).getImageUrl(), (ImageView) convertView,
-                                      displayImageOptions,
-                                      new SimpleImageLoadingListener() {
-                                          @Override
-                                          public void onLoadingComplete(String imageUri,
-                                                                        View view,
-                                                                        Bitmap loadedImage) {
-                                              if (loadedImage.getHeight() / 2 < FORCE_TOP_PADDING) {
-                                                  view.setPadding(0, 0, 0, 0);
-                                              } else {
-                                                  view.setPadding(0, FORCE_TOP_PADDING, 0,
-                                                                  0);
-                                              }
-                                          }
-                                      }
-            );
+                                      displayImageOptions, listener);
 
             return convertView;
         }
