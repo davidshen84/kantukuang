@@ -140,12 +140,11 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
      */
     public class WeiboPagerAdapter extends FragmentPagerAdapter {
 
-        private final List<WeiboStatus> mStatusList;
+        private final int mPageCount;
 
-        public WeiboPagerAdapter(FragmentManager fm, List<WeiboStatus> statusList) {
+        public WeiboPagerAdapter(FragmentManager fm, int pageCount) {
             super(fm);
-
-            mStatusList = statusList;
+            mPageCount = pageCount;
         }
 
         @Override
@@ -156,7 +155,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
 
         @Override
         public int getCount() {
-            return mStatusList.size();
+            return mPageCount;
         }
 
         @Override

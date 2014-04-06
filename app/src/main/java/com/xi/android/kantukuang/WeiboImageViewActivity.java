@@ -62,7 +62,7 @@ public class WeiboImageViewActivity extends AbstractImageViewActivity {
           {@link android.support.v4.app.FragmentStatePagerAdapter}.
         */
         WeiboPagerAdapter pagerAdapter = new WeiboPagerAdapter(
-                getSupportFragmentManager(), mStatusList);
+                getSupportFragmentManager(), mStatusList.size());
         setupPager(pagerAdapter, item);
     }
 
