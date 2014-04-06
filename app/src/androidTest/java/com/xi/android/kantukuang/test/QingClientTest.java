@@ -15,7 +15,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class QingClientClientTest extends TestCase {
+public class QingClientTest extends TestCase {
 
     private QingClient qingClient;
 
