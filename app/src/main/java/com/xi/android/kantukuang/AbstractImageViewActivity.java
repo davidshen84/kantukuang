@@ -14,6 +14,7 @@ import android.support.v7.widget.ShareActionProvider;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.api.client.json.JsonFactory;
 import com.google.inject.Inject;
 import com.nostra13.universalimageloader.cache.disc.DiscCacheAware;
 import com.nostra13.universalimageloader.core.assist.DiscCacheUtil;
@@ -30,6 +31,8 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
     public static final String JSON_LIST = "json list";
     @Inject
     protected Bus mBus;
+    @Inject
+    protected JsonFactory mJsonFactory;
     /**
      * The {@link android.support.v4.view.ViewPager} that will host the section contents.
      */
@@ -41,6 +44,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
 
     public AbstractImageViewActivity(int menuId) {
         mMenuId = menuId;
+        KanTuKuangModule.getInjector().injectMembers(this);
     }
 
     private void setUpActionBar() {

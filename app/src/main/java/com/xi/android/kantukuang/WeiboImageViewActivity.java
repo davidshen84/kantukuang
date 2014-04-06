@@ -24,8 +24,6 @@ public class WeiboImageViewActivity extends AbstractImageViewActivity {
 
     @Inject
     private WeiboClient weiboClient;
-    @Inject
-    private JsonFactory mJsonFactory;
 
 
     public WeiboImageViewActivity() {

@@ -4,19 +4,21 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonParser;
-import com.google.inject.Inject;
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.xi.android.kantukuang.sinablog.ArticleInfo;
 
 import java.io.IOException;
 import java.util.List;
 
+import static com.xi.android.kantukuang.MainActivity.SelectEventSource;
+import static com.xi.android.kantukuang.MainActivity.SelectEventSource.Qing;
+import static com.xi.android.kantukuang.MainActivity.SelectEventSource.Unknown;
+
 
 public class QingImageViewActivity extends AbstractImageViewActivity {
 
-    @Inject
-    private JsonFactory mJsonFactory;
+    private static final String QING_SOURCE = "qing source";
     private List<ArticleInfo> mArticleInfos;
 
     public QingImageViewActivity() {
@@ -28,18 +30,32 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        SelectEventSource selectEventSource = Unknown;
         Intent intent = getIntent();
+
         int item = intent.getIntExtra(ITEM_POSITION, 0);
+        String sourceString = intent.getStringExtra(QING_SOURCE);
         String jsonList = intent.getStringExtra(JSON_LIST);
 
-        try {
-            JsonParser jsonParser = mJsonFactory.createJsonParser(jsonList);
-            mArticleInfos = (List<ArticleInfo>) jsonParser.parseArray(List.class, ArticleInfo.class);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (!Strings.isNullOrEmpty(sourceString)) {
+            try {
+                selectEventSource = SelectEventSource.valueOf(sourceString);
+            } catch (IllegalArgumentException e) {
+                selectEventSource = Unknown;
+            }
         }
-        ImagePagerAdapter imagePagerAdapter = new ImagePagerAdapter(getSupportFragmentManager(), mArticleInfos.size());
 
+        // TODO create different adapter, depending on the source
+        ImagePagerAdapter imagePagerAdapter = null;
+        if (selectEventSource == Unknown || selectEventSource == Qing) {
+            try {
+                JsonParser jsonParser = mJsonFactory.createJsonParser(jsonList);
+                mArticleInfos = (List<ArticleInfo>) jsonParser.parseArray(List.class, ArticleInfo.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            imagePagerAdapter = new ImagePagerAdapter(getSupportFragmentManager(), mArticleInfos.size());
+        }
         setupPager(imagePagerAdapter, item);
     }
 

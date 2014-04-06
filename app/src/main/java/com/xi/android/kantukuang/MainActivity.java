@@ -48,7 +48,7 @@ public class MainActivity extends ActionBarActivity {
     private boolean mHasAttachedSection = false;
 
     public enum SelectEventSource {
-        Weibo, Qing
+        Unknown, Weibo, Qing
     }
 
     public MainActivity() {
@@ -192,7 +192,6 @@ public class MainActivity extends ActionBarActivity {
                 intent = getQingIntent(position);
                 break;
         }
-
 
         if (intent != null)
             startActivity(intent);
