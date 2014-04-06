@@ -48,6 +48,10 @@ public class MainActivity extends ActionBarActivity {
     private int mCurrentDrawerSelectedId;
     private boolean mHasAttachedSection = false;
 
+    public enum SelectEventSource {
+        Weibo, Qing
+    }
+
     public MainActivity() {
         Injector mInjector = KanTuKuangModule.getInjector();
         mInjector.injectMembers(this);
@@ -180,20 +184,21 @@ public class MainActivity extends ActionBarActivity {
     @Subscribe
     public void selectedItem(SelectItemEvent event) {
         // start image view activity
-        ItemFragment itemFragment = (ItemFragment)
+        WeiboItemFragment itemFragment = (WeiboItemFragment)
                 getSupportFragmentManager().findFragmentById(R.id.container);
-        Intent intent = new Intent(this, ImageViewActivity.class);
+        Intent intent;
+        intent = new Intent(this, WeiboImageViewActivity.class);
 
         ArrayList<WeiboStatus> statuses = itemFragment.getStatuses();
 
-        intent.putExtra(ImageViewActivity.ITEM_POSITION, event.getPosition());
+        intent.putExtra(WeiboImageViewActivity.ITEM_POSITION, event.position);
 
         try {
-            intent.putExtra(ImageViewActivity.STATUS_JSON, mJsonFactory.toString(statuses));
+            intent.putExtra(WeiboImageViewActivity.STATUS_JSON, mJsonFactory.toString(statuses));
         } catch (IOException e) {
             e.printStackTrace();
 
-            intent.putExtra(ImageViewActivity.STATUS_JSON, "[]");
+            intent.putExtra(WeiboImageViewActivity.STATUS_JSON, "[]");
         }
 
         startActivity(intent);
@@ -208,7 +213,7 @@ public class MainActivity extends ActionBarActivity {
 
             case 0:
                 // Weibo
-                itemFragment = ItemFragment.newInstance(getString(R.string.section_name_public));
+                itemFragment = WeiboItemFragment.newInstance(getString(R.string.section_name_public));
 
                 break;
 

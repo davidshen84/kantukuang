@@ -22,7 +22,7 @@ public class ImageViewFragment extends Fragment {
     @Inject
     private ImageLoader mImageLoader;
     private PhotoViewAttacher mPhotoViewAttacher;
-    private ImageViewActivity mImageViewActivity;
+    private WeiboImageViewActivity mImageViewActivity;
     private int mOrder;
     @Inject
     private Bus mBus;
@@ -51,7 +51,7 @@ public class ImageViewFragment extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        mImageViewActivity = (ImageViewActivity) activity;
+        mImageViewActivity = (WeiboImageViewActivity) activity;
     }
 
     @Override

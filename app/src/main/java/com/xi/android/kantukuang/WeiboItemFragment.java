@@ -45,16 +45,19 @@ import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLa
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
+import static com.xi.android.kantukuang.MainActivity.SelectEventSource.Weibo;
 
-public class ItemFragment extends Fragment implements OnRefreshListener {
+
+public class WeiboItemFragment extends Fragment implements AbsListView.OnItemClickListener, OnRefreshListener {
 
     private static final String ARG_TAG = "tag";
-    private static final String TAG = ItemFragment.class.getName();
+    private static final String TAG = WeiboItemFragment.class.getName();
     private static final String ARG_ID = "id";
     private static final String PREF_FILTER_BLACKLIST = "filter blacklist";
     private final SectionAttachEvent mSectionAttachEvent = new SectionAttachEvent();
     private final RefreshWeiboEvent mRefreshWeiboEvent = new RefreshWeiboEvent();
     private final List<WeiboStatus> mWeiboStatuses = new ArrayList<WeiboStatus>();
+    private final SelectItemEvent mSelectItemEvent = new SelectItemEvent();
     /**
      * The fragment's ListView/GridView.
      */
@@ -79,13 +82,15 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public ItemFragment() {
+    public WeiboItemFragment() {
         Injector injector = KanTuKuangModule.getInjector();
         injector.injectMembers(this);
+
+        mSelectItemEvent.source = Weibo;
     }
 
-    public static ItemFragment newInstance(String tag) {
-        ItemFragment fragment = new ItemFragment();
+    public static WeiboItemFragment newInstance(String tag) {
+        WeiboItemFragment fragment = new WeiboItemFragment();
         fragment.setRetainInstance(true);
 
         Bundle args = new Bundle();
@@ -135,16 +140,17 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
             setEmptyText(null);
         }
 
+        mListView.setOnItemClickListener(this);
         // Set OnItemClickListener so we can be notified on item clicks
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            private final SelectItemEvent event = new SelectItemEvent();
-
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                event.setPosition(position);
-                mBus.post(event);
-            }
-        });
+//        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            private final SelectItemEvent event = new SelectItemEvent();
+//
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+//                event.setPosition(position);
+//                mBus.post(event);
+//            }
+//        });
 
         mSectionAttachEvent.sectionName = mSectionName;
         mSectionAttachEvent.sectionId = mSectionId;
@@ -264,6 +270,12 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
         return (ArrayList<WeiboStatus>) mWeiboStatuses;
     }
 
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        mSelectItemEvent.position = i;
+        mBus.post(mSelectItemEvent);
+    }
+
     private class WeiboItemViewArrayAdapter extends ArrayAdapter<WeiboStatus> {
         @Inject
         @Named("low resolution")
@@ -290,7 +302,7 @@ public class ItemFragment extends Fragment implements OnRefreshListener {
 
             SimpleImageLoadingListener listener = null;
             if (listener == null) {
-                int maxWidth = ItemFragment.this.getView().getWidth();
+                int maxWidth = WeiboItemFragment.this.getView().getWidth();
                 int maxHeight = getResources().getDimensionPixelSize(R.dimen.item_image_height);
                 listener = new MySimpleImageLoadingListener(maxWidth,
                                                             maxHeight);

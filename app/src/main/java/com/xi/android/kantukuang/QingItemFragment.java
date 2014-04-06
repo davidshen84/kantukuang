@@ -17,9 +17,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
+import com.squareup.otto.Bus;
+import com.xi.android.kantukuang.event.SelectItemEvent;
 import com.xi.android.kantukuang.sinablog.ArticleInfo;
 import com.xi.android.kantukuang.sinablog.QingClient;
 
@@ -29,6 +33,8 @@ import java.util.List;
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
+
+import static com.xi.android.kantukuang.MainActivity.SelectEventSource.Qing;
 
 public class QingItemFragment extends Fragment implements AbsListView.OnItemClickListener, OnRefreshListener {
 
@@ -50,11 +56,19 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     private QingClient mQingClient;
     private PullToRefreshLayout mPullToRefreshLayout;
 
+    @Inject
+    private Bus mBus;
+    private final SelectItemEvent mSelectItemEvent = new SelectItemEvent();
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
     public QingItemFragment() {
+        Injector injector = KanTuKuangModule.getInjector();
+        injector.injectMembers(this);
+
+        mSelectItemEvent.source= Qing;
     }
 
     public static QingItemFragment newInstance(String tag) {
@@ -118,6 +132,8 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ArticleInfo articleInfo = articleInfoList.get(position);
+
+        mSelectItemEvent.position = position;
 
         Log.d(TAG, articleInfo.href);
         Log.d(TAG, articleInfo.imageSrc);

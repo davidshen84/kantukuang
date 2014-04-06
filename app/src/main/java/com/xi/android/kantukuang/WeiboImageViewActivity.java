@@ -17,11 +17,11 @@ import java.io.IOException;
 import java.util.List;
 
 
-public class ImageViewActivity extends AbstractImageViewActivity {
-
+public class WeiboImageViewActivity extends AbstractImageViewActivity {
     public static final String ITEM_POSITION = "item position";
     public static final String STATUS_JSON = "weibo status in json";
-    private static final String TAG = ImageViewActivity.class.getName();
+    public static final String PREF_BLACKLIST = "blacklist set";
+    private static final String TAG = WeiboImageViewActivity.class.getName();
     private final FilterStatusEvent mFilterStatusEvent = new FilterStatusEvent();
     private List<WeiboStatus> mStatusList;
 
@@ -30,9 +30,9 @@ public class ImageViewActivity extends AbstractImageViewActivity {
     @Inject
     private JsonFactory mJsonFactory;
 
-    public ImageViewActivity() {
-        super(R.menu.image_view);
 
+    public WeiboImageViewActivity() {
+        super(R.menu.weibo_image_view);
         KanTuKuangModule.getInjector().injectMembers(this);
     }
 
@@ -123,7 +123,7 @@ public class ImageViewActivity extends AbstractImageViewActivity {
             @Override
             protected Long doInBackground(Long... longs) {
                 BlacklistSQLiteOpenHelper sqLiteOpenHelper =
-                        new BlacklistSQLiteOpenHelper(ImageViewActivity.this);
+                        new BlacklistSQLiteOpenHelper(WeiboImageViewActivity.this);
 
                 Long uid = longs[0];
                 sqLiteOpenHelper.insert(uid);
@@ -134,8 +134,8 @@ public class ImageViewActivity extends AbstractImageViewActivity {
 
             @Override
             protected void onPostExecute(Long uid) {
-                String text = String.format(getString(R.string.format_info_add_blacklist), uid);
-                Toast.makeText(ImageViewActivity.this, text, Toast.LENGTH_SHORT).show();
+                String text = String.format(getString(R.string.format_info_add_blacklist), uid.intValue());
+                Toast.makeText(WeiboImageViewActivity.this, text, Toast.LENGTH_SHORT).show();
                 mFilterStatusEvent.shouldFilter = true;
             }
 
