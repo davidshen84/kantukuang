@@ -23,11 +23,11 @@ import com.xi.android.kantukuang.event.RefreshCompleteEvent;
 import com.xi.android.kantukuang.event.RefreshStatusCompleteEvent;
 import com.xi.android.kantukuang.event.SectionAttachEvent;
 import com.xi.android.kantukuang.event.SelectItemEvent;
+import com.xi.android.kantukuang.sinablog.ArticleInfo;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
@@ -35,7 +35,6 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 public class MainActivity extends ActionBarActivity {
 
     private static final String TAG = MainActivity.class.getName();
-    private static final String PREF_USER_WEIBO_ACCESS_TOKEN = "weibo access token";
     private static final String STATE_DRAWER_SELECTED_ID = "selected navigation drawer position";
     private final RefreshCompleteEvent mRefreshCompleteEvent = new RefreshCompleteEvent();
     @Inject
@@ -183,25 +182,58 @@ public class MainActivity extends ActionBarActivity {
 
     @Subscribe
     public void selectedItem(SelectItemEvent event) {
-        // start image view activity
-        WeiboItemFragment itemFragment = (WeiboItemFragment)
-                getSupportFragmentManager().findFragmentById(R.id.container);
-        Intent intent;
-        intent = new Intent(this, WeiboImageViewActivity.class);
-
-        ArrayList<WeiboStatus> statuses = itemFragment.getStatuses();
-
-        intent.putExtra(WeiboImageViewActivity.ITEM_POSITION, event.position);
-
-        try {
-            intent.putExtra(WeiboImageViewActivity.STATUS_JSON, mJsonFactory.toString(statuses));
-        } catch (IOException e) {
-            e.printStackTrace();
-
-            intent.putExtra(WeiboImageViewActivity.STATUS_JSON, "[]");
+        int position = event.position;
+        Intent intent = null;
+        switch (mCurrentDrawerSelectedId) {
+            case 0:
+                intent = getWeiboIntent(position);
+                break;
+            case 1:
+                intent = getQingIntent(position);
+                break;
         }
 
-        startActivity(intent);
+
+        if (intent != null)
+            startActivity(intent);
+    }
+
+    private Intent getQingIntent(int position) {
+        QingItemFragment fragment = (QingItemFragment) getSupportFragmentManager().findFragmentById(R.id.container);
+        List<ArticleInfo> articleInfoList = fragment.getArticleInfoList();
+        Intent intent = new Intent(this, QingImageViewActivity.class);
+
+        intent.putExtra(QingImageViewActivity.ITEM_POSITION, position);
+
+        String jsonList = "[]";
+        try {
+            jsonList = mJsonFactory.toString(articleInfoList);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        intent.putExtra(AbstractImageViewActivity.JSON_LIST, jsonList);
+
+        return intent;
+    }
+
+    private Intent getWeiboIntent(int position) {
+        // start weibo image view activity
+        WeiboItemFragment itemFragment = (WeiboItemFragment)
+                getSupportFragmentManager().findFragmentById(R.id.container);
+        List<WeiboStatus> statuses = itemFragment.getStatuses();
+        Intent intent = new Intent(this, WeiboImageViewActivity.class);
+
+        intent.putExtra(AbstractImageViewActivity.ITEM_POSITION, position);
+
+        String jsonList = "[]";
+        try {
+            jsonList = mJsonFactory.toString(statuses);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        intent.putExtra(AbstractImageViewActivity.JSON_LIST, jsonList);
+
+        return intent;
     }
 
     @Subscribe

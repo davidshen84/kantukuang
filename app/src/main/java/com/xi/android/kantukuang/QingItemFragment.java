@@ -21,7 +21,6 @@ import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.squareup.otto.Bus;
 import com.xi.android.kantukuang.event.SelectItemEvent;
 import com.xi.android.kantukuang.sinablog.ArticleInfo;
@@ -68,7 +67,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         Injector injector = KanTuKuangModule.getInjector();
         injector.injectMembers(this);
 
-        mSelectItemEvent.source= Qing;
+        mSelectItemEvent.source = Qing;
     }
 
     public static QingItemFragment newInstance(String tag) {
@@ -131,12 +130,8 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        ArticleInfo articleInfo = articleInfoList.get(position);
-
         mSelectItemEvent.position = position;
-
-        Log.d(TAG, articleInfo.href);
-        Log.d(TAG, articleInfo.imageSrc);
+        mBus.post(mSelectItemEvent);
     }
 
     /**
@@ -154,7 +149,6 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
 
     @Override
     public void onRefreshStarted(View view) {
-// mBus.post(RefreshQingEvent)
         asyncLoad();
     }
 
@@ -179,6 +173,10 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
                 }
             }
         }.execute();
+    }
+
+    public List<ArticleInfo> getArticleInfoList() {
+        return mQingClient.getArticleInfoList();
     }
 
     private class ArticleInfoArrayAdapter extends ArrayAdapter<ArticleInfo> {

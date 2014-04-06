@@ -26,6 +26,8 @@ import java.util.List;
 
 
 public abstract class AbstractImageViewActivity extends ActionBarActivity {
+    public static final String ITEM_POSITION = "item position";
+    public static final String JSON_LIST = "json list";
     @Inject
     protected Bus mBus;
     /**
@@ -138,11 +140,11 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
      * A {@link android.support.v4.app.FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class WeiboPagerAdapter extends FragmentPagerAdapter {
+    public class ImagePagerAdapter extends FragmentPagerAdapter {
 
         private final int mPageCount;
 
-        public WeiboPagerAdapter(FragmentManager fm, int pageCount) {
+        public ImagePagerAdapter(FragmentManager fm, int pageCount) {
             super(fm);
             mPageCount = pageCount;
         }

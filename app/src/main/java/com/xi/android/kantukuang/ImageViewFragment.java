@@ -1,6 +1,5 @@
 package com.xi.android.kantukuang;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -22,7 +21,6 @@ public class ImageViewFragment extends Fragment {
     @Inject
     private ImageLoader mImageLoader;
     private PhotoViewAttacher mPhotoViewAttacher;
-    private WeiboImageViewActivity mImageViewActivity;
     private int mOrder;
     @Inject
     private Bus mBus;
@@ -48,13 +46,6 @@ public class ImageViewFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        mImageViewActivity = (WeiboImageViewActivity) activity;
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -72,7 +63,7 @@ public class ImageViewFragment extends Fragment {
 
         ImageView imageView = (ImageView) view.findViewById(android.R.id.content);
 
-        mImageLoader.displayImage(mImageViewActivity.getImageUrlByOrder(mOrder), imageView,
+        mImageLoader.displayImage(((AbstractImageViewActivity) getActivity()).getImageUrlByOrder(mOrder), imageView,
                                   new SimpleImageLoadingListener() {
                                       @Override
                                       public void onLoadingComplete(String imageUri, View view,
@@ -94,13 +85,6 @@ public class ImageViewFragment extends Fragment {
             mPhotoViewAttacher.cleanup();
 
         super.onStop();
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-
-        mImageViewActivity = null;
     }
 
 }

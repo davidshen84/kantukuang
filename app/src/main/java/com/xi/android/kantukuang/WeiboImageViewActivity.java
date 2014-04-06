@@ -18,9 +18,6 @@ import java.util.List;
 
 
 public class WeiboImageViewActivity extends AbstractImageViewActivity {
-    public static final String ITEM_POSITION = "item position";
-    public static final String STATUS_JSON = "weibo status in json";
-    public static final String PREF_BLACKLIST = "blacklist set";
     private static final String TAG = WeiboImageViewActivity.class.getName();
     private final FilterStatusEvent mFilterStatusEvent = new FilterStatusEvent();
     private List<WeiboStatus> mStatusList;
@@ -44,10 +41,10 @@ public class WeiboImageViewActivity extends AbstractImageViewActivity {
         // primary sections of the activity.
         Intent intent = getIntent();
         int item = intent.getIntExtra(ITEM_POSITION, 0);
-        String json = intent.getStringExtra(STATUS_JSON);
+        String jsonList = intent.getStringExtra(JSON_LIST);
 
         try {
-            JsonParser jsonParser = mJsonFactory.createJsonParser(json);
+            JsonParser jsonParser = mJsonFactory.createJsonParser(jsonList);
             mStatusList = (List<WeiboStatus>) jsonParser.parseArray(List.class, WeiboStatus.class);
         } catch (IOException e) {
             e.printStackTrace();
@@ -61,7 +58,7 @@ public class WeiboImageViewActivity extends AbstractImageViewActivity {
           may be best to switch to a
           {@link android.support.v4.app.FragmentStatePagerAdapter}.
         */
-        WeiboPagerAdapter pagerAdapter = new WeiboPagerAdapter(
+        ImagePagerAdapter pagerAdapter = new ImagePagerAdapter(
                 getSupportFragmentManager(), mStatusList.size());
         setupPager(pagerAdapter, item);
     }
