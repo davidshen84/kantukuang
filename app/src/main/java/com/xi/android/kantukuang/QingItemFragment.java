@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +15,7 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.api.client.http.HttpRequest;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
@@ -24,7 +24,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.otto.Bus;
 import com.xi.android.kantukuang.event.SelectItemEvent;
 import com.xi.android.kantukuang.sinablog.ArticleInfo;
-import com.xi.android.kantukuang.sinablog.QingClient;
+import com.xi.android.kantukuang.sinablog.QingTagDriver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     private static final String ARG_TAG = "Qing Tag";
     private static final String TAG = QingItemFragment.class.getName();
     private final List<ArticleInfo> articleInfoList = new ArrayList<ArticleInfo>();
-
+    private final SelectItemEvent mSelectItemEvent = new SelectItemEvent();
     private String mQingTag;
     /**
      * The fragment's ListView/GridView.
@@ -52,12 +52,12 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
      * Views.
      */
     private ArrayAdapter mAdapter;
-    private QingClient mQingClient;
+    @Inject
+    private QingTagDriver mQingTagDriver;
     private PullToRefreshLayout mPullToRefreshLayout;
-
     @Inject
     private Bus mBus;
-    private final SelectItemEvent mSelectItemEvent = new SelectItemEvent();
+    private int mPage = 1;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -86,8 +86,6 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         if (getArguments() != null) {
             mQingTag = getArguments().getString(ARG_TAG);
         }
-
-        mQingClient = QingClient.createForTag(mQingTag);
     }
 
     @Override
@@ -120,7 +118,10 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
                 .setup(mPullToRefreshLayout);
 
         // TODO: display waite message
-        asyncLoad();
+
+        HttpRequest httpRequest = mQingTagDriver.buildTagRequest(mQingTag, mPage);
+
+        asyncLoad(httpRequest);
     }
 
     @Override
@@ -149,22 +150,31 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
 
     @Override
     public void onRefreshStarted(View view) {
-        asyncLoad();
+        HttpRequest httpRequest;
+
+        if (mQingTagDriver.isLast()) {
+            return;
+        } else {
+            httpRequest = mQingTagDriver.buildTagRequest(mQingTag, mPage);
+        }
+
+        asyncLoad(httpRequest);
     }
 
-    private void asyncLoad() {
-        new AsyncTask<String, String, List<ArticleInfo>>() {
+    private void asyncLoad(HttpRequest httpRequest) {
+        new AsyncTask<HttpRequest, String, List<ArticleInfo>>() {
             @Override
-            protected List<ArticleInfo> doInBackground(String... strings) {
-                mQingClient.load();
+            protected List<ArticleInfo> doInBackground(HttpRequest... requests) {
+                if (mQingTagDriver.load(requests[0]))
+                    mPage++;
 
-                return mQingClient.hasLoaded() ? mQingClient.getArticleInfoList() : null;
+                return mQingTagDriver.hasLoaded() ? mQingTagDriver.getArticleInfoList() : null;
             }
 
             @Override
-            protected void onPostExecute(List<ArticleInfo> articleInfos) {
-                if (articleInfos != null && articleInfos.size() > 0) {
-                    articleInfoList.addAll(0, articleInfos);
+            protected void onPostExecute(List<ArticleInfo> articleInfoList) {
+                if (articleInfoList != null && articleInfoList.size() > 0) {
+                    QingItemFragment.this.articleInfoList.addAll(0, articleInfoList);
                     mAdapter.notifyDataSetChanged();
                     if (mPullToRefreshLayout.isRefreshing())
                         mPullToRefreshLayout.setRefreshComplete();
@@ -172,11 +182,11 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
                     Toast.makeText(getActivity(), "no more", Toast.LENGTH_SHORT).show();
                 }
             }
-        }.execute();
+        }.execute(httpRequest);
     }
 
     public List<ArticleInfo> getArticleInfoList() {
-        return mQingClient.getArticleInfoList();
+        return mQingTagDriver.getArticleInfoList();
     }
 
     private class ArticleInfoArrayAdapter extends ArrayAdapter<ArticleInfo> {
