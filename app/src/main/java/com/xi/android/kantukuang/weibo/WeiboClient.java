@@ -3,15 +3,10 @@ package com.xi.android.kantukuang.weibo;
 
 import android.util.Log;
 
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.http.EmptyContent;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonObjectParser;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -19,45 +14,11 @@ import java.io.IOException;
 
 public class WeiboClient {
     private static final String TAG = WeiboClient.class.getName();
-    private static final EmptyContent EMPTY_CONTENT = new EmptyContent();
-    private final Credential.AccessMethod mAccessMethod;
-    private final HttpTransport mHttpTransport;
-    private final JsonObjectParser mJsonObjectParser;
-    private Credential mCredential;
     private HttpRequestFactory mRequestFactory;
-    private String mAccessToken;
 
     @Inject
-    public WeiboClient(Credential.AccessMethod accessMethod,
-                       HttpTransport httpTransport,
-                       JsonObjectParser jsonObjectParser,
-                       @Named("access token") String accessToken,
-                       @Named("redirect uri") String redirectUri) {
-        mAccessMethod = accessMethod;
-        mHttpTransport = httpTransport;
-        mJsonObjectParser = jsonObjectParser;
-        mAccessToken = accessToken;
-    }
-
-    private HttpRequestFactory getRequestFactory() {
-        if (mRequestFactory == null) {
-            // build credential
-            mCredential = new Credential(mAccessMethod).setAccessToken(mAccessToken);
-            Log.d(TAG, String.format("created credential with token: %s", mAccessToken));
-
-            // create request factory
-            mRequestFactory = mHttpTransport.createRequestFactory(new HttpRequestInitializer() {
-                @Override
-                public void initialize(HttpRequest httpRequest) throws IOException {
-                    mCredential.initialize(httpRequest);
-                    httpRequest.setParser(mJsonObjectParser);
-                }
-
-            });
-            Log.v(TAG, "created new request factory");
-        }
-
-        return mRequestFactory;
+    public WeiboClient(@Named("weibo") HttpRequestFactory requestFactory) {
+        mRequestFactory = requestFactory;
     }
 
     private WeiboTimeline getWeiboTimelineByUrl(
@@ -67,8 +28,7 @@ public class WeiboClient {
 
         boolean hasException = false;
         try {
-            HttpRequest httpRequest = getRequestFactory().buildGetRequest(url);
-
+            HttpRequest httpRequest = mRequestFactory.buildGetRequest(url);
             httpResponse = httpRequest.execute();
             Log.d(TAG, String.format("status: %d", httpResponse.getStatusCode()));
 
@@ -117,10 +77,6 @@ public class WeiboClient {
             url.sinceId = sinceId;
 
         return getWeiboTimelineByUrl(url);
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.mAccessToken = accessToken;
     }
 
 }

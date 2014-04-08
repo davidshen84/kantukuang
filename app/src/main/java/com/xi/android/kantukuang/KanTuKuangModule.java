@@ -83,9 +83,6 @@ public class KanTuKuangModule extends AbstractModule {
         bind(String.class).annotatedWith(Names.named("authorization_server_encoded_url"))
                 .toInstance("https://api.weibo.com/oauth2/authorize");
 
-        bind(String.class).annotatedWith(Names.named("access token"))
-                .toInstance("2.00uOPaHD1JlHSDcc83013405KD6O9D");
-
         bind(String.class).annotatedWith(Names.named("redirect uri")).toInstance("kantukuang.com/");
         bind(HttpTransport.class).to(NetHttpTransport.class);
         bind(JsonFactory.class).to(JacksonFactory.class).in(Scopes.SINGLETON);
@@ -170,6 +167,27 @@ public class KanTuKuangModule extends AbstractModule {
         return httpTransport.createRequestFactory(new HttpRequestInitializer() {
             @Override
             public void initialize(HttpRequest request) throws IOException {
+                request.setParser(jsonObjectParser);
+            }
+        });
+    }
+
+    @Provides
+    @Singleton
+    private Credential provideWeiboCredential(Credential.AccessMethod accessMethod, @Named("access token") String accessToken){
+        return new Credential(accessMethod).setAccessToken(accessToken);
+    }
+
+    @Provides
+    @Singleton
+    @Named("weibo")
+    private HttpRequestFactory provideRequestFactoryForWeiboClient(HttpTransport httpTransport,
+                                                                   final JsonObjectParser jsonObjectParser,
+                                                                   final Credential credential) {
+        return httpTransport.createRequestFactory(new HttpRequestInitializer() {
+            @Override
+            public void initialize(HttpRequest request) throws IOException {
+                credential.initialize(request);
                 request.setParser(jsonObjectParser);
             }
         });
