@@ -7,10 +7,10 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="C:\Users\Xi\Documents\kantukuang" />
-            <option value="C:\Users\Xi\Documents\kantukuang\app" />
-            <option value="C:\Users\Xi\Documents\kantukuang\libs" />
-            <option value="C:\Users\Xi\Documents\kantukuang\libs\ViewPageIndicator" />
+            <option value="C:\Users\shend\AndroidStudioProjects\kantukuang" />
+            <option value="C:\Users\shend\AndroidStudioProjects\kantukuang\app" />
+            <option value="C:\Users\shend\AndroidStudioProjects\kantukuang\libs" />
+            <option value="C:\Users\shend\AndroidStudioProjects\kantukuang\libs\ViewPageIndicator" />
           </set>
         </option>
       </GradleProjectSettings>
