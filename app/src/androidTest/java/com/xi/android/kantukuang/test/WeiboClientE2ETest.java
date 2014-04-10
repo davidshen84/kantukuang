@@ -28,7 +28,7 @@ public class WeiboClientE2ETest extends TestCase {
     }
 
     public void testGetPublicTimeline() throws IOException, InterruptedException, WeiboTimelineException {
-        WeiboTimeline timeline = mClient.getPublicTimeline(null);
+        WeiboTimeline timeline = mClient.getHomeTimeline(null);
 
         assertNotNull(timeline);
         assertTrue(timeline.statuses.size() > 0);

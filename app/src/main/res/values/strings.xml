@@ -24,7 +24,7 @@
     <string name="action_weibo_repost">Repost</string>
     <string name="message_info_success">Success!</string>
     <string name="message_error_fail">Fail!</string>
-    <string name="section_name_public">Public</string>
+    <string name="section_name_weibo">Weibo</string>
     <string name="section_name_home">Home</string>
     <string name="message_info_no_new">No new status</string>
     <string name="format_info_page_order">page %d</string>

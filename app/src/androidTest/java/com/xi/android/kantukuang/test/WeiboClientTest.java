@@ -48,7 +48,7 @@ public class WeiboClientTest extends TestCase {
     }
 
     public void testGetPublicTimeline() throws IOException, InterruptedException, WeiboTimelineException {
-        WeiboTimeline timeline = mClient.getPublicTimeline(null);
+        WeiboTimeline timeline = mClient.getHomeTimeline(null);
 
         assertNotNull(timeline);
         assertTrue(timeline.statuses.size() > 0);
@@ -56,7 +56,7 @@ public class WeiboClientTest extends TestCase {
     }
 
     public void testGetTimeline_uid() throws WeiboTimelineException {
-        WeiboTimeline timeline = mClient.getPublicTimeline(null);
+        WeiboTimeline timeline = mClient.getHomeTimeline(null);
 
         WeiboStatus status = timeline.statuses.get(0);
         assertNotNull(status.uid);

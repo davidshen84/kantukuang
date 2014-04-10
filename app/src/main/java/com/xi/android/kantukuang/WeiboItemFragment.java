@@ -141,16 +141,6 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
         }
 
         mListView.setOnItemClickListener(this);
-        // Set OnItemClickListener so we can be notified on item clicks
-//        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            private final SelectItemEvent event = new SelectItemEvent();
-//
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-//                event.setPosition(position);
-//                mBus.post(event);
-//            }
-//        });
 
         mSectionAttachEvent.sectionName = mSectionName;
         mSectionAttachEvent.sectionId = mSectionId;
@@ -284,6 +274,7 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
         private LayoutInflater mInflater;
         @Inject
         private ImageLoader mImageLoader;
+        private SimpleImageLoadingListener mListener = null;
 
         public WeiboItemViewArrayAdapter(Context context, List<WeiboStatus> statuses) {
             super(context, R.layout.item_image, statuses);
@@ -300,16 +291,15 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
                 ((ImageView) convertView).setImageBitmap(null);
             }
 
-            SimpleImageLoadingListener listener = null;
-            if (listener == null) {
+            if (mListener == null) {
                 int maxWidth = WeiboItemFragment.this.getView().getWidth();
                 int maxHeight = getResources().getDimensionPixelSize(R.dimen.item_image_height);
-                listener = new MySimpleImageLoadingListener(maxWidth,
+                mListener = new MySimpleImageLoadingListener(maxWidth,
                                                             maxHeight);
             }
 
             mImageLoader.displayImage(getItem(position).getImageUrl(), (ImageView) convertView,
-                                      displayImageOptions, listener);
+                                      displayImageOptions, mListener);
 
             return convertView;
         }

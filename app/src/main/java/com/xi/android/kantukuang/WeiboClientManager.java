@@ -45,7 +45,7 @@ public class WeiboClientManager {
 
                 try {
                     String sinceId = strings[0];
-                    WeiboTimeline timeline = mClient.getPublicTimeline(sinceId);
+                    WeiboTimeline timeline = mClient.getHomeTimeline(sinceId);
 
                     if (timeline != null && timeline.statuses.size() > 0) {
                         Collection<WeiboStatus> statusCollection =

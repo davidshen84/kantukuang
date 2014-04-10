@@ -71,8 +71,8 @@ public class WeiboClient {
      * @return {@link com.xi.android.kantukuang.weibo.WeiboTimeline}
      * @throws WeiboTimelineException
      */
-    public WeiboTimeline getPublicTimeline(String sinceId) throws WeiboTimelineException {
-        AbstractWeiboTimelineUrl url = new PublicTimelineUrl();
+    public WeiboTimeline getHomeTimeline(String sinceId) throws WeiboTimelineException {
+        AbstractWeiboTimelineUrl url = new HomeTimelineUrl();
         if (sinceId != null)
             url.sinceId = sinceId;
 

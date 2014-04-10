@@ -244,7 +244,7 @@ public class MainActivity extends ActionBarActivity {
 
             case 0:
                 // Weibo
-                itemFragment = WeiboItemFragment.newInstance(getString(R.string.section_name_public));
+                itemFragment = WeiboItemFragment.newInstance(getString(R.string.section_name_weibo));
 
                 break;
 
