@@ -17,18 +17,19 @@ public class WeiboClient {
     private HttpRequestFactory mRequestFactory;
 
     @Inject
-    public WeiboClient(@Named("weibo") HttpRequestFactory requestFactory) {
+    public WeiboClient(@Named("Weibo") HttpRequestFactory requestFactory) {
         mRequestFactory = requestFactory;
     }
 
-    private WeiboTimeline getWeiboTimelineByUrl(
-            AbstractWeiboTimelineUrl url) throws WeiboTimelineException {
+    private WeiboTimeline getWeiboTimelineByUrl(AbstractTimelineUrl url)
+            throws WeiboTimelineException {
         WeiboTimeline weiboTimeline = null;
         HttpResponse httpResponse = null;
 
         boolean hasException = false;
         try {
             HttpRequest httpRequest = mRequestFactory.buildGetRequest(url);
+
             httpResponse = httpRequest.execute();
             Log.d(TAG, String.format("status: %d", httpResponse.getStatusCode()));
 
@@ -71,8 +72,23 @@ public class WeiboClient {
      * @return {@link com.xi.android.kantukuang.weibo.WeiboTimeline}
      * @throws WeiboTimelineException
      */
+    public WeiboTimeline getPublicTimeline(String sinceId) throws WeiboTimelineException {
+        PublicTimelineUrl url = new PublicTimelineUrl();
+        if (sinceId != null)
+            url.sinceId = sinceId;
+
+        return getWeiboTimelineByUrl(url);
+    }
+
+    /**
+     * get public timeline with all ids greater than {@code sinceId}
+     *
+     * @param sinceId the "since_id" parameter
+     * @return {@link com.xi.android.kantukuang.weibo.WeiboTimeline}
+     * @throws WeiboTimelineException
+     */
     public WeiboTimeline getHomeTimeline(String sinceId) throws WeiboTimelineException {
-        AbstractWeiboTimelineUrl url = new HomeTimelineUrl();
+        HomeTimelineUrl url = new HomeTimelineUrl();
         if (sinceId != null)
             url.sinceId = sinceId;
 
