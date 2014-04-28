@@ -18,7 +18,7 @@
 
     <string name="title_activity_image_view">Image View</string>
     <string name="action_refresh">Refresh</string>
-    <string name="message_info_bind_weibo">Please use settings\n to bind with Weibo</string>
+    <string name="message_info_welcome">Welcome ;)</string>
     <string name="message_warning_bind_weibo">Bind with Weibo first</string>
     <string name="default_section_private">Private</string>
     <string name="action_weibo_repost">Repost</string>

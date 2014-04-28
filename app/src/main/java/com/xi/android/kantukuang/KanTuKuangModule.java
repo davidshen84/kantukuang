@@ -40,9 +40,9 @@ import java.util.Collection;
 
 public class KanTuKuangModule extends AbstractModule {
 
-    private static final String CLIENT_ID = "3016222086";
-    private static final String CLIENT_SECRET = "2f23dcc09bc9ebd1d2fa1d316d3cf87a";
-    private static final String ACCESS_TOKEN = "2.00uOPaHD1JlHSDcc83013405KD6O9D";
+    private static final String WEIBO_CLIENT_ID = "3016222086";
+    private static final String WEIBO_CLIENT_SECRET = "2f23dcc09bc9ebd1d2fa1d316d3cf87a";
+    private static final String WEIBO_ACCESS_TOKEN = "2.00uOPaHD1JlHSDcc83013405KD6O9D";
     private static final String ClassName = KanTuKuangModule.class.getName();
     private static Injector injectorInstance;
     private final Application mApplication;
@@ -66,14 +66,14 @@ public class KanTuKuangModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(String.class)
-                .annotatedWith(Names.named("client_id"))
-                .toInstance(CLIENT_ID);
+                .annotatedWith(Names.named("weibo client id"))
+                .toInstance(WEIBO_CLIENT_ID);
         bind(String.class)
-                .annotatedWith(Names.named("client_secret"))
-                .toInstance(CLIENT_SECRET);
+                .annotatedWith(Names.named("weibo client secret"))
+                .toInstance(WEIBO_CLIENT_SECRET);
         bind(String.class)
-                .annotatedWith(Names.named("access token"))
-                .toInstance(ACCESS_TOKEN);
+                .annotatedWith(Names.named("weibo access token"))
+                .toInstance(WEIBO_ACCESS_TOKEN);
         bind(String.class)
                 .annotatedWith(Names.named("token_server_url"))
                 .toInstance("https://api.weibo.com/oauth2/access_token");
@@ -143,7 +143,7 @@ public class KanTuKuangModule extends AbstractModule {
     @Provides
     @Singleton
     private HttpExecuteInterceptor provideHttpExecuteInterceptor(
-            @Named("client_id") String clientId, @Named("client_secret") String clientSecret) {
+            @Named("weibo client id") String clientId, @Named("weibo client secret") String clientSecret) {
         return new ClientParametersAuthentication(clientId, clientSecret);
     }
 
@@ -163,7 +163,7 @@ public class KanTuKuangModule extends AbstractModule {
     @Provides
     @Singleton
     private Credential provideCredential(Credential.AccessMethod accessMethod,
-                                         @Named("access token") String accessToken) {
+                                         @Named("weibo access token") String accessToken) {
         return new Credential(accessMethod).setAccessToken(accessToken);
     }
 
@@ -184,7 +184,7 @@ public class KanTuKuangModule extends AbstractModule {
 
     @Provides
     @Singleton
-    @Named("Qing")
+    @Named("qing request factory")
     private HttpRequestFactory provideRequestFactory(HttpTransport httpTransport,
                                                      final JsonObjectParser jsonObjectParser) {
         return httpTransport.createRequestFactory(new HttpRequestInitializer() {
@@ -197,13 +197,7 @@ public class KanTuKuangModule extends AbstractModule {
 
     @Provides
     @Singleton
-    private Credential provideWeiboCredential(Credential.AccessMethod accessMethod, @Named("access token") String accessToken){
-        return new Credential(accessMethod).setAccessToken(accessToken);
-    }
-
-    @Provides
-    @Singleton
-    @Named("weibo")
+    @Named("weibo request factory")
     private HttpRequestFactory provideRequestFactoryForWeiboClient(HttpTransport httpTransport,
                                                                    final JsonObjectParser jsonObjectParser,
                                                                    final Credential credential) {

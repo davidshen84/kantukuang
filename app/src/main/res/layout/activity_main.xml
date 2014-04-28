@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="@string/message_info_bind_weibo"
+            android:text="@string/message_info_welcome"
             android:id="@+id/main_activity_message"
             android:layout_gravity="center"/>
     </FrameLayout>

@@ -7,6 +7,7 @@ import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -27,7 +28,7 @@ public class QingTagDriver {
     private ArrayList<ArticleInfo> articleInfoList;
 
     @Inject
-    public QingTagDriver(HttpRequestFactory requestFactory) {
+    public QingTagDriver(@Named("qing request factory") HttpRequestFactory requestFactory) {
         httpRequestFactory = requestFactory;
     }
 

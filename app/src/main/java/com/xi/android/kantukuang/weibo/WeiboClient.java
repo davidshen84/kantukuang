@@ -17,7 +17,7 @@ public class WeiboClient {
     private HttpRequestFactory mRequestFactory;
 
     @Inject
-    public WeiboClient(@Named("Weibo") HttpRequestFactory requestFactory) {
+    public WeiboClient(@Named("weibo request factory") HttpRequestFactory requestFactory) {
         mRequestFactory = requestFactory;
     }
 
