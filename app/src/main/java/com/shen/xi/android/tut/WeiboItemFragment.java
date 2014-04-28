@@ -16,8 +16,8 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
+import com.google.ads.AdRequest;
+import com.google.ads.AdView;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.util.Lists;
 import com.google.common.base.Predicate;
@@ -149,15 +149,8 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
 
         // set up ads
         AdView adView = (AdView) view.findViewById(R.id.adView);
-        adView.loadAd(new AdRequest.Builder()
-                              .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
-                              .build());
-
-        // set up ads
-        AdView adView = (AdView) view.findViewById(R.id.adView);
-        adView.loadAd(new AdRequest.Builder()
-                               .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
-                               .build());
+        adView.loadAd(new AdRequest()
+                              .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808"));
 
         return view;
     }

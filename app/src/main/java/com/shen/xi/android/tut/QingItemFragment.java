@@ -16,8 +16,8 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
+import com.google.ads.AdRequest;
+import com.google.ads.AdView;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.json.JsonFactory;
 import com.google.inject.Inject;
@@ -129,9 +129,8 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         mEmptyView = (TextView) view.findViewById(android.R.id.empty);
         // set up ads
         AdView adView = (AdView) view.findViewById(R.id.adView);
-        adView.loadAd(new AdRequest.Builder()
-                              .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
-                              .build());
+        adView.loadAd(new AdRequest()
+                              .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808"));
 
         return view;
     }

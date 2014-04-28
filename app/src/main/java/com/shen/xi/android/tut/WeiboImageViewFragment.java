@@ -1,4 +1,4 @@
-package com.xi.android.kantukuang;
+package com.shen.xi.android.tut;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -26,7 +26,7 @@ public class WeiboImageViewFragment extends Fragment {
     private Bus mBus;
 
     public WeiboImageViewFragment() {
-        KanTuKuangModule.getInjector().injectMembers(this);
+        TuTModule.getInjector().injectMembers(this);
     }
 
     /**
