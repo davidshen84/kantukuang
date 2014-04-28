@@ -20,10 +20,8 @@ import com.nostra13.universalimageloader.cache.disc.DiscCacheAware;
 import com.nostra13.universalimageloader.core.assist.DiscCacheUtil;
 import com.squareup.otto.Bus;
 import com.viewpagerindicator.UnderlinePageIndicator;
-import com.xi.android.kantukuang.weibo.WeiboStatus;
 
 import java.io.File;
-import java.util.List;
 
 
 public abstract class AbstractImageViewActivity extends ActionBarActivity {
@@ -156,7 +154,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
-            return ImageViewFragment.newInstance(position);
+            return WeiboImageViewFragment.newInstance(position);
         }
 
         @Override

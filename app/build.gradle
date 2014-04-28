@@ -9,7 +9,7 @@ android {
     buildToolsVersion '19.0.3'
 
     defaultConfig {
-        minSdkVersion 7
+        minSdkVersion 9
         targetSdkVersion 19
         versionCode 1
         versionName "1.0"
@@ -51,5 +51,7 @@ dependencies {
     compile 'com.google.http-client:google-http-client-jackson2:1.17.0-rc'
     compile 'com.google.inject:guice:3.0:no_aop'
     compile project(':libs/:ViewPagerIndicator')
+    compile 'com.google.android.gms:play-services:+'
+
     androidTestCompile 'com.squareup:fest-android:1.0.+'
 }

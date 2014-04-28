@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.api.client.json.JsonParser;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.xi.android.kantukuang.sinablog.ArticleInfo;
@@ -57,6 +59,12 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
             imagePagerAdapter = new ImagePagerAdapter(getSupportFragmentManager(), mArticleInfos.size());
         }
         setupPager(imagePagerAdapter, item);
+
+        // set up ads
+        AdView adView = (AdView) findViewById(R.id.adView);
+        adView.loadAd(new AdRequest.Builder()
+                              .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
+                              .build());
     }
 
     @Override

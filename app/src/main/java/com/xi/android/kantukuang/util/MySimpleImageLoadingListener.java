@@ -1,4 +1,4 @@
-package com.xi.android.kantukuang;
+package com.xi.android.kantukuang.util;
 
 import android.graphics.Bitmap;
 import android.view.View;
@@ -7,7 +7,7 @@ import android.widget.ImageView;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 
 
-class MySimpleImageLoadingListener extends SimpleImageLoadingListener {
+public class MySimpleImageLoadingListener extends SimpleImageLoadingListener {
 
     private final int mMaxWidth;
     private final int mMaxHeight;

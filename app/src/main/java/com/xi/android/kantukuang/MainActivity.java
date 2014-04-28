@@ -66,7 +66,7 @@ public class MainActivity extends ActionBarActivity {
             mCurrentDrawerSelectedId = savedInstanceState.getInt(STATE_DRAWER_SELECTED_ID, 0);
         }
 
-//      Fragment managing the behaviors, interactions and presentation of the navigation drawer.
+//      Fragment managing the behaviours, interactions and presentation of the navigation drawer.
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 supportFragmentManager.findFragmentById(R.id.navigation_drawer);

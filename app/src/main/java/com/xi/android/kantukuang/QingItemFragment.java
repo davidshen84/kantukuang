@@ -15,6 +15,8 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.api.client.http.HttpRequest;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -22,9 +24,11 @@ import com.google.inject.name.Named;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.otto.Bus;
+import com.xi.android.kantukuang.event.SectionAttachEvent;
 import com.xi.android.kantukuang.event.SelectItemEvent;
 import com.xi.android.kantukuang.sinablog.ArticleInfo;
 import com.xi.android.kantukuang.sinablog.QingTagDriver;
+import com.xi.android.kantukuang.util.MySimpleImageLoadingListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +62,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     @Inject
     private Bus mBus;
     private int mPage = 1;
+    private final SectionAttachEvent mSectionAttachEvent = new SectionAttachEvent();
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -86,13 +91,16 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         if (getArguments() != null) {
             mQingTag = getArguments().getString(ARG_TAG);
         }
+
+        mSectionAttachEvent.sectionName = mQingTag;
+        mSectionAttachEvent.sectionId = mQingTag.hashCode();
+        mBus.post(mSectionAttachEvent);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_qingitemfragment, container, false);
-
+        View view = inflater.inflate(R.layout.fragment_qing_item, container, false);
 
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
@@ -102,6 +110,12 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
+
+        // set up ads
+        AdView adView = (AdView) view.findViewById(R.id.adView);
+        adView.loadAd(new AdRequest.Builder()
+                              .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
+                              .build());
 
         return view;
     }
@@ -199,7 +213,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         private DisplayImageOptions displayImageOptions;
 
         public ArticleInfoArrayAdapter(Context context, List<ArticleInfo> list) {
-            super(context, R.layout.fragment_qingitemfragment, list);
+            super(context, R.layout.fragment_qing_item, list);
 
             KanTuKuangModule.getInjector().injectMembers(this);
         }

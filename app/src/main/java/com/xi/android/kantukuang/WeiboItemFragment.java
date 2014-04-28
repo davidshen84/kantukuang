@@ -16,6 +16,8 @@ import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.util.Lists;
 import com.google.common.base.Predicate;
@@ -33,6 +35,7 @@ import com.xi.android.kantukuang.event.RefreshCompleteEvent;
 import com.xi.android.kantukuang.event.RefreshWeiboEvent;
 import com.xi.android.kantukuang.event.SectionAttachEvent;
 import com.xi.android.kantukuang.event.SelectItemEvent;
+import com.xi.android.kantukuang.util.MySimpleImageLoadingListener;
 import com.xi.android.kantukuang.util.Util;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
@@ -119,12 +122,16 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
             mSectionName = mArguments.getString(ARG_TAG);
             mSectionId = mArguments.getInt(ARG_ID);
         }
+
+        mSectionAttachEvent.sectionName = mSectionName;
+        mSectionAttachEvent.sectionId = mSectionId;
+        mBus.post(mSectionAttachEvent);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_item, container, false);
+        View view = inflater.inflate(R.layout.fragment_weibo_item, container, false);
 
         // Set the adapter
         assert view != null;
@@ -142,9 +149,11 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
 
         mListView.setOnItemClickListener(this);
 
-        mSectionAttachEvent.sectionName = mSectionName;
-        mSectionAttachEvent.sectionId = mSectionId;
-        mBus.post(mSectionAttachEvent);
+        // set up ads
+        AdView adView = (AdView) view.findViewById(R.id.adView);
+        adView.loadAd(new AdRequest.Builder()
+                               .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
+                               .build());
 
         return view;
     }
@@ -295,7 +304,7 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
                 int maxWidth = WeiboItemFragment.this.getView().getWidth();
                 int maxHeight = getResources().getDimensionPixelSize(R.dimen.item_image_height);
                 mListener = new MySimpleImageLoadingListener(maxWidth,
-                                                            maxHeight);
+                                                             maxHeight);
             }
 
             mImageLoader.displayImage(getItem(position).getImageUrl(), (ImageView) convertView,
