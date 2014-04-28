@@ -79,7 +79,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_image_view);
+        setContentView(R.layout.activity_weibo_image_view);
         setUpActionBar();
 
         // set up ads
@@ -162,7 +162,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
-            return ImageViewFragment.newInstance(position);
+            return WeiboImageViewFragment.newInstance(position);
         }
 
         @Override

@@ -153,6 +153,12 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
                               .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
                               .build());
 
+        // set up ads
+        AdView adView = (AdView) view.findViewById(R.id.adView);
+        adView.loadAd(new AdRequest.Builder()
+                               .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
+                               .build());
+
         return view;
     }
 
