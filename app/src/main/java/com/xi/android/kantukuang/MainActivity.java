@@ -181,7 +181,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     @Subscribe
-    public void selectedItem(SelectItemEvent event) {
+    public void itemSelected(SelectItemEvent event) {
         int position = event.position;
         Intent intent = null;
         switch (mCurrentDrawerSelectedId) {
