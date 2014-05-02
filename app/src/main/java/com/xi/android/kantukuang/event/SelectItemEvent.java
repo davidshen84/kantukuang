@@ -1,11 +1,11 @@
 package com.xi.android.kantukuang.event;
 
 
-import com.xi.android.kantukuang.MainActivity;
+import static com.xi.android.kantukuang.MainActivity.ImageSource;
 
 public class SelectItemEvent {
     public int position;
-    public MainActivity.SelectEventSource source;
+    public ImageSource source;
 
     public SelectItemEvent() {
         position = 0;

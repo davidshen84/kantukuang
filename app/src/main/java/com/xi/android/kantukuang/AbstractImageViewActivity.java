@@ -154,7 +154,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
-            return WeiboImageViewFragment.newInstance(position);
+            return ImageViewFragment.newInstance(position);
         }
 
         @Override

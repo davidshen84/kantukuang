@@ -13,15 +13,17 @@ import com.xi.android.kantukuang.sinablog.ArticleInfo;
 import java.io.IOException;
 import java.util.List;
 
-import static com.xi.android.kantukuang.MainActivity.SelectEventSource;
-import static com.xi.android.kantukuang.MainActivity.SelectEventSource.Qing;
-import static com.xi.android.kantukuang.MainActivity.SelectEventSource.Unknown;
+import static com.xi.android.kantukuang.MainActivity.ImageSource.Qing;
+import static com.xi.android.kantukuang.MainActivity.ImageSource.QingPage;
+import static com.xi.android.kantukuang.MainActivity.ImageSource.Unknown;
 
 
 public class QingImageViewActivity extends AbstractImageViewActivity {
 
-    private static final String QING_SOURCE = "qing source";
-    private List<ArticleInfo> mArticleInfos;
+    public static final String QING_SOURCE = "qing mSource";
+    private List<ArticleInfo> mArticleInfoList;
+    private MainActivity.ImageSource mSource = Unknown;
+    private List<String> mImageUrlList;
 
     public QingImageViewActivity() {
         super(R.menu.qing_image_view);
@@ -32,7 +34,6 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SelectEventSource selectEventSource = Unknown;
         Intent intent = getIntent();
 
         int item = intent.getIntExtra(ITEM_POSITION, 0);
@@ -41,35 +42,48 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
 
         if (!Strings.isNullOrEmpty(sourceString)) {
             try {
-                selectEventSource = SelectEventSource.valueOf(sourceString);
+                mSource = MainActivity.ImageSource.valueOf(sourceString);
             } catch (IllegalArgumentException e) {
-                selectEventSource = Unknown;
+                mSource = Unknown;
             }
         }
 
-        // TODO create different adapter, depending on the source
+        // TODO create different adapter, depending on the mSource
         ImagePagerAdapter imagePagerAdapter = null;
-        if (selectEventSource == Unknown || selectEventSource == Qing) {
+        if (mSource == Qing) {
             try {
                 JsonParser jsonParser = mJsonFactory.createJsonParser(jsonList);
-                mArticleInfos = (List<ArticleInfo>) jsonParser.parseArray(List.class, ArticleInfo.class);
+                mArticleInfoList = (List<ArticleInfo>) jsonParser.parseArray(List.class, ArticleInfo.class);
+                imagePagerAdapter = new ImagePagerAdapter(getSupportFragmentManager(), mArticleInfoList.size());
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            imagePagerAdapter = new ImagePagerAdapter(getSupportFragmentManager(), mArticleInfos.size());
+        } else if (mSource == QingPage) {
+            try {
+                JsonParser jsonParser = mJsonFactory.createJsonParser(jsonList);
+                mImageUrlList = (List<String>) jsonParser.parseArray(List.class, String.class);
+                imagePagerAdapter = new ImagePagerAdapter(getSupportFragmentManager(), mImageUrlList.size());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        setupPager(imagePagerAdapter, item);
+        if (imagePagerAdapter != null)
+            setupPager(imagePagerAdapter, item);
+        else {
+            finish();
+            return;
+        }
 
         // set up ads
         AdView adView = (AdView) findViewById(R.id.adView);
         adView.loadAd(new AdRequest.Builder()
-                              .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
-                              .build());
+                .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
+                .build());
     }
 
     @Override
     protected String getImageUrlByOrder(int order) {
-        return mArticleInfos.get(order).imageSrc;
+        return mSource == Qing ? mArticleInfoList.get(order).imageSrc : mImageUrlList.get(order);
     }
 
     @Override

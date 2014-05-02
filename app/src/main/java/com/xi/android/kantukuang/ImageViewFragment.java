@@ -16,7 +16,7 @@ import com.squareup.otto.Bus;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 
-public class WeiboImageViewFragment extends Fragment {
+public class ImageViewFragment extends Fragment {
     private static final String ARG_ORDER = "weibo status position in context";
     @Inject
     private ImageLoader mImageLoader;
@@ -25,18 +25,18 @@ public class WeiboImageViewFragment extends Fragment {
     @Inject
     private Bus mBus;
 
-    public WeiboImageViewFragment() {
+    public ImageViewFragment() {
         KanTuKuangModule.getInjector().injectMembers(this);
     }
 
     /**
-     * create a new instance of {@link WeiboImageViewFragment}
+     * create a new instance of {@link ImageViewFragment}
      *
      * @param order the order of the item in its parent context
-     * @return a new instance of {@link WeiboImageViewFragment}
+     * @return a new instance of {@link ImageViewFragment}
      */
     public static Fragment newInstance(int order) {
-        WeiboImageViewFragment fragment = new WeiboImageViewFragment();
+        ImageViewFragment fragment = new ImageViewFragment();
         Bundle bundle = new Bundle();
         bundle.putInt(ARG_ORDER, order);
 

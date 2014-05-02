@@ -48,7 +48,7 @@ import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLa
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
-import static com.xi.android.kantukuang.MainActivity.SelectEventSource.Weibo;
+import static com.xi.android.kantukuang.MainActivity.ImageSource.Weibo;
 
 
 public class WeiboItemFragment extends Fragment implements AbsListView.OnItemClickListener, OnRefreshListener {
@@ -78,7 +78,6 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
     private boolean mFilterBlackList;
     @Inject
     private JsonFactory mJsonFactory;
-    private int mSectionId;
 
 
     /**
@@ -120,11 +119,9 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
         Bundle mArguments = getArguments();
         if (mArguments != null) {
             mSectionName = mArguments.getString(ARG_TAG);
-            mSectionId = mArguments.getInt(ARG_ID);
         }
 
         mSectionAttachEvent.sectionName = mSectionName;
-        mSectionAttachEvent.sectionId = mSectionId;
         mBus.post(mSectionAttachEvent);
     }
 

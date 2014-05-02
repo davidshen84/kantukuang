@@ -2,11 +2,13 @@ package com.xi.android.kantukuang.test;
 
 import android.app.Application;
 
-import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
+import com.google.api.client.http.HttpRequestFactory;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Key;
 import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 import com.xi.android.kantukuang.KanTuKuangModule;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 
@@ -29,17 +31,16 @@ public class GuiceInjectorConfigurationTest extends TestCase {
         assertTrue(WeiboClient.class.isInstance(client));
     }
 
-    public void testInjectAuthorizationCodeFlow() {
-        AuthorizationCodeFlow object = injector.getInstance(AuthorizationCodeFlow.class);
-        assertNotNull(object);
-        assertFalse(object.getScopes().isEmpty());
-    }
-
     public void testInjectWeiboScope() {
         WeiboScope object = injector.getInstance(WeiboScope.class);
 
         assertNotNull(object);
         assertFalse(object.getScope().isEmpty());
+    }
+
+    public void testInjectQingRequestFactory() {
+        HttpRequestFactory instance = injector.getInstance(Key.get(HttpRequestFactory.class, Names.named("qing request factory")));
+        assertNotNull(instance);
     }
 
     private static class WeiboScope {

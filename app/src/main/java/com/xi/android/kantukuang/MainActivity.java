@@ -1,6 +1,7 @@
 package com.xi.android.kantukuang;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,9 +14,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.json.JsonFactory;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.name.Named;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import com.xi.android.kantukuang.event.NavigationEvent;
@@ -24,6 +27,7 @@ import com.xi.android.kantukuang.event.RefreshStatusCompleteEvent;
 import com.xi.android.kantukuang.event.SectionAttachEvent;
 import com.xi.android.kantukuang.event.SelectItemEvent;
 import com.xi.android.kantukuang.sinablog.ArticleInfo;
+import com.xi.android.kantukuang.sinablog.QingPageDriver;
 import com.xi.android.kantukuang.weibo.WeiboClient;
 import com.xi.android.kantukuang.weibo.WeiboStatus;
 
@@ -46,9 +50,14 @@ public class MainActivity extends ActionBarActivity {
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private int mCurrentDrawerSelectedId;
     private boolean mHasAttachedSection = false;
+    @Inject
+    @Named("qing request factory")
+    private HttpRequestFactory mHttpRequestFactory;
+    @Inject
+    private QingPageDriver mQingPageDriver;
 
-    public enum SelectEventSource {
-        Unknown, Weibo, Qing
+    public enum ImageSource {
+        Unknown, Weibo, Qing, QingPage
     }
 
     public MainActivity() {
@@ -162,7 +171,6 @@ public class MainActivity extends ActionBarActivity {
                 return true;
 
             case R.id.action_refresh:
-
                 OnRefreshListener refreshListener = (OnRefreshListener)
                         getSupportFragmentManager().findFragmentById(R.id.container);
                 refreshListener.onRefreshStarted(null);
@@ -183,27 +191,70 @@ public class MainActivity extends ActionBarActivity {
     @Subscribe
     public void itemSelected(SelectItemEvent event) {
         int position = event.position;
-        Intent intent = null;
-        switch (mCurrentDrawerSelectedId) {
-            case 0:
-                intent = getWeiboIntent(position);
+
+        switch (event.source) {
+            case Weibo:
+                startActivity(getWeiboIntent(position));
                 break;
-            case 1:
-                intent = getQingIntent(position);
+
+            case Qing:
+                startActivity(getQingIntent(position));
+                break;
+
+            case QingPage:
+                startQingPageIntent(position);
                 break;
         }
 
-        if (intent != null)
-            startActivity(intent);
+    }
+
+    private void startQingPageIntent(final int position) {
+        QingItemFragment fragment = (QingItemFragment) getSupportFragmentManager().findFragmentById(R.id.container);
+        List<ArticleInfo> articleInfoList = fragment.getImageUrlList();
+        final String url = articleInfoList.get(position).href;
+
+        new AsyncTask<String, Integer, List<String>>() {
+
+            @Override
+            protected List<String> doInBackground(String... strings) {
+                if (mQingPageDriver.load(strings[0]))
+                    return mQingPageDriver.getImageUrlList();
+                else
+                    return null;
+            }
+
+            @Override
+            protected void onPostExecute(List<String> strings) {
+                if (strings != null && strings.size() > 0) {
+                    Intent intent = new Intent(MainActivity.this, QingImageViewActivity.class);
+                    intent.putExtra(AbstractImageViewActivity.ITEM_POSITION, 0);
+
+                    String jsonList = "[]";
+                    try {
+                        jsonList = mJsonFactory.toString(strings);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    intent.putExtra(AbstractImageViewActivity.JSON_LIST, jsonList);
+                    intent.putExtra(QingImageViewActivity.QING_SOURCE, ImageSource.QingPage.toString());
+                    startActivity(intent);
+                } else {
+                    Log.w(TAG, "no images");
+                    Toast.makeText(MainActivity.this, R.string.no_image, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+        }.execute(url);
+
     }
 
     private Intent getQingIntent(int position) {
         QingItemFragment fragment = (QingItemFragment) getSupportFragmentManager().findFragmentById(R.id.container);
-        List<ArticleInfo> articleInfoList = fragment.getArticleInfoList();
+        List<ArticleInfo> articleInfoList = fragment.getImageUrlList();
         Intent intent = new Intent(this, QingImageViewActivity.class);
 
-        intent.putExtra(QingImageViewActivity.ITEM_POSITION, position);
-
+        intent.putExtra(AbstractImageViewActivity.ITEM_POSITION, position);
+        intent.putExtra(QingImageViewActivity.QING_SOURCE, ImageSource.Qing.toString());
         String jsonList = "[]";
         try {
             jsonList = mJsonFactory.toString(articleInfoList);
@@ -249,8 +300,14 @@ public class MainActivity extends ActionBarActivity {
                 break;
 
             case 1:
-                // Qing
-                itemFragment = QingItemFragment.newInstance("猫");
+                // Qing - mao
+                itemFragment = QingItemFragment.newInstance("猫", false);
+
+                break;
+
+            case 2:
+                // Qing - Wei Mei
+                itemFragment = QingItemFragment.newInstance("唯美", true);
 
                 break;
 
@@ -284,14 +341,13 @@ public class MainActivity extends ActionBarActivity {
         }
         // update view
         mBus.post(mRefreshCompleteEvent
-                          .setStatusList(statusList)
-                          .setLastId(lastId));
+                .setStatusList(statusList)
+                .setLastId(lastId));
     }
 
     @Subscribe
     public void sectionAttach(SectionAttachEvent event) {
         setTitle(event.sectionName);
-        mCurrentDrawerSelectedId = event.sectionId;
     }
 
 }

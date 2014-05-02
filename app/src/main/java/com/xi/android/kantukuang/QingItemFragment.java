@@ -37,13 +37,15 @@ import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
-import static com.xi.android.kantukuang.MainActivity.SelectEventSource.Qing;
+import static com.xi.android.kantukuang.MainActivity.ImageSource.Qing;
+import static com.xi.android.kantukuang.MainActivity.ImageSource.QingPage;
 
 public class QingItemFragment extends Fragment implements AbsListView.OnItemClickListener, OnRefreshListener {
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_TAG = "Qing Tag";
     private static final String TAG = QingItemFragment.class.getName();
+    private static final String ARG_PARSE_PAGE = "Parse Page";
     private final List<ArticleInfo> articleInfoList = new ArrayList<ArticleInfo>();
     private final SelectItemEvent mSelectItemEvent = new SelectItemEvent();
     private String mQingTag;
@@ -63,6 +65,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     private Bus mBus;
     private int mPage = 1;
     private final SectionAttachEvent mSectionAttachEvent = new SectionAttachEvent();
+    private boolean mParsePage;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -75,10 +78,11 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         mSelectItemEvent.source = Qing;
     }
 
-    public static QingItemFragment newInstance(String tag) {
+    public static QingItemFragment newInstance(String tag, boolean parsePage) {
         QingItemFragment fragment = new QingItemFragment();
         Bundle args = new Bundle();
         args.putString(ARG_TAG, tag);
+        args.putBoolean(ARG_PARSE_PAGE, parsePage);
         fragment.setArguments(args);
 
         return fragment;
@@ -87,13 +91,18 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Bundle arguments = getArguments();
 
-        if (getArguments() != null) {
-            mQingTag = getArguments().getString(ARG_TAG);
+        if (arguments != null) {
+            mQingTag = arguments.getString(ARG_TAG);
+            mParsePage = getArguments().getBoolean(ARG_PARSE_PAGE);
         }
 
+        // TODO: display waite message
+        HttpRequest httpRequest = mQingTagDriver.buildTagRequest(mQingTag, mPage);
+        asyncLoad(httpRequest);
+
         mSectionAttachEvent.sectionName = mQingTag;
-        mSectionAttachEvent.sectionId = mQingTag.hashCode();
         mBus.post(mSectionAttachEvent);
     }
 
@@ -114,8 +123,8 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         // set up ads
         AdView adView = (AdView) view.findViewById(R.id.adView);
         adView.loadAd(new AdRequest.Builder()
-                              .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
-                              .build());
+                .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
+                .build());
 
         return view;
     }
@@ -131,11 +140,6 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
                 .listener(this)
                 .setup(mPullToRefreshLayout);
 
-        // TODO: display waite message
-
-        HttpRequest httpRequest = mQingTagDriver.buildTagRequest(mQingTag, mPage);
-
-        asyncLoad(httpRequest);
     }
 
     @Override
@@ -146,6 +150,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         mSelectItemEvent.position = position;
+        mSelectItemEvent.source = mParsePage ? QingPage : Qing;
         mBus.post(mSelectItemEvent);
     }
 
@@ -199,7 +204,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         }.execute(httpRequest);
     }
 
-    public List<ArticleInfo> getArticleInfoList() {
+    public List<ArticleInfo> getImageUrlList() {
         return mQingTagDriver.getArticleInfoList();
     }
 
@@ -224,17 +229,18 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
 
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.item_image, parent, false);
+            } else {
+                ((ImageView) convertView).setImageBitmap(null);
             }
 
             if (listener == null) {
                 int maxWidth = QingItemFragment.this.getView().getWidth();
                 int maxHeight = getResources().getDimensionPixelSize(R.dimen.item_image_height);
-                listener = new MySimpleImageLoadingListener(maxWidth,
-                                                            maxHeight);
+                listener = new MySimpleImageLoadingListener(maxWidth, maxHeight);
             }
 
             mImageLoader.displayImage(getItem(position).imageSrc, (ImageView) convertView,
-                                      displayImageOptions, listener);
+                    displayImageOptions, listener);
 
             return convertView;
         }
