@@ -93,7 +93,6 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         }
 
         mSectionAttachEvent.sectionName = mQingTag;
-        mSectionAttachEvent.sectionId = mQingTag.hashCode();
         mBus.post(mSectionAttachEvent);
     }
 

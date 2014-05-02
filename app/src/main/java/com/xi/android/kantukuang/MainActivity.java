@@ -291,7 +291,6 @@ public class MainActivity extends ActionBarActivity {
     @Subscribe
     public void sectionAttach(SectionAttachEvent event) {
         setTitle(event.sectionName);
-        mCurrentDrawerSelectedId = event.sectionId;
     }
 
 }
