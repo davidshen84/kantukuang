@@ -48,7 +48,7 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
             }
         }
 
-        // TODO create different adapter, depending on the mSource
+        // TODO create different adapter, depending on the source
         ImagePagerAdapter imagePagerAdapter = null;
         if (mSource == Qing) {
             try {
@@ -83,7 +83,7 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
 
     @Override
     protected String getImageUrlByOrder(int order) {
-        return mSource == Qing ? mArticleInfoList.get(order).imageSrc : mImageUrlList.get(order);
+        return mSource == Qing ? mArticleInfoList.get(order).imageSrc.replace("mw205", "mw600") : mImageUrlList.get(order);
     }
 
     @Override

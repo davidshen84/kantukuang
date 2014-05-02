@@ -107,7 +107,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
     }
 
     /**
-     * Delegate to derivate class to implement how to retrieve image url
+     * Delegate to derivative class to implement how to retrieve image url
      */
     protected abstract String getImageUrlByOrder(int order);
 
