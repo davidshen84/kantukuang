@@ -69,7 +69,7 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
 
     @Override
     protected String getImageUrlByOrder(int order) {
-        return mArticleInfos.get(order).imageSrc;
+        return mArticleInfos.get(order).imageSrc.replace("mw205", "mw600");
     }
 
     @Override
