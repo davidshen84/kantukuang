@@ -5,5 +5,5 @@
     android:layout_height="match_parent"
     android:id="@android:id/list"
     android:layout_gravity="center_horizontal|top"
-    tools:context="com.xi.android.kantukuang.EditBlacklistActivity"/>
+    tools:context="com.shen.xi.android.tut.EditBlacklistActivity"/>
 
