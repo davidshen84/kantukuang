@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.api.client.json.JsonParser;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.xi.android.kantukuang.sinablog.ArticleInfo;
@@ -20,7 +18,7 @@ import static com.xi.android.kantukuang.MainActivity.ImageSource.Unknown;
 
 public class QingImageViewActivity extends AbstractImageViewActivity {
 
-    public static final String QING_SOURCE = "qing mSource";
+    public static final String QING_SOURCE = "qing source";
     private List<ArticleInfo> mArticleInfoList;
     private MainActivity.ImageSource mSource = Unknown;
     private List<String> mImageUrlList;
@@ -50,11 +48,12 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
 
         // TODO create different adapter, depending on the source
         ImagePagerAdapter imagePagerAdapter = null;
+        int size = 0;
         if (mSource == Qing) {
             try {
                 JsonParser jsonParser = mJsonFactory.createJsonParser(jsonList);
                 mArticleInfoList = (List<ArticleInfo>) jsonParser.parseArray(List.class, ArticleInfo.class);
-                imagePagerAdapter = new ImagePagerAdapter(getSupportFragmentManager(), mArticleInfoList.size());
+                size = mArticleInfoList.size();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -62,23 +61,20 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
             try {
                 JsonParser jsonParser = mJsonFactory.createJsonParser(jsonList);
                 mImageUrlList = (List<String>) jsonParser.parseArray(List.class, String.class);
-                imagePagerAdapter = new ImagePagerAdapter(getSupportFragmentManager(), mImageUrlList.size());
+                size = mImageUrlList.size();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        if (imagePagerAdapter != null)
+
+        if (size != 0) {
+            imagePagerAdapter = new ImagePagerAdapter(getSupportFragmentManager(), size);
             setupPager(imagePagerAdapter, item);
+        }
         else {
             finish();
-            return;
         }
-
-        // set up ads
-        AdView adView = (AdView) findViewById(R.id.adView);
-        adView.loadAd(new AdRequest.Builder()
-                .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
-                .build());
     }
 
     @Override

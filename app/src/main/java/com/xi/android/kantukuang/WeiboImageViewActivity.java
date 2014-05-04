@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.api.client.json.JsonParser;
 import com.google.inject.Inject;
 import com.xi.android.kantukuang.event.FilterStatusEvent;
@@ -60,12 +58,6 @@ public class WeiboImageViewActivity extends AbstractImageViewActivity {
         ImagePagerAdapter pagerAdapter = new ImagePagerAdapter(
                 getSupportFragmentManager(), mStatusList.size());
         setupPager(pagerAdapter, item);
-
-        // set up ads
-        AdView adView = (AdView) findViewById(R.id.adView);
-        adView.loadAd(new AdRequest.Builder()
-                              .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
-                              .build());
     }
 
     @Override

@@ -56,10 +56,6 @@ public class MainActivity extends ActionBarActivity {
     @Inject
     private QingPageDriver mQingPageDriver;
 
-    public enum ImageSource {
-        Unknown, Weibo, Qing, QingPage
-    }
-
     public MainActivity() {
         Injector mInjector = KanTuKuangModule.getInjector();
         mInjector.injectMembers(this);
@@ -181,8 +177,8 @@ public class MainActivity extends ActionBarActivity {
                 Intent intent = new Intent(this, EditBlacklistActivity.class);
                 startActivity(intent);
             }
-            return true;
 
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -209,7 +205,8 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void startQingPageIntent(final int position) {
-        QingItemFragment fragment = (QingItemFragment) getSupportFragmentManager().findFragmentById(R.id.container);
+        QingItemFragment fragment = (QingItemFragment) getSupportFragmentManager().findFragmentById(
+                R.id.container);
         List<ArticleInfo> articleInfoList = fragment.getImageUrlList();
         final String url = articleInfoList.get(position).href;
 
@@ -236,7 +233,8 @@ public class MainActivity extends ActionBarActivity {
                         e.printStackTrace();
                     }
                     intent.putExtra(AbstractImageViewActivity.JSON_LIST, jsonList);
-                    intent.putExtra(QingImageViewActivity.QING_SOURCE, ImageSource.QingPage.toString());
+                    intent.putExtra(QingImageViewActivity.QING_SOURCE,
+                                    ImageSource.QingPage.toString());
                     startActivity(intent);
                 } else {
                     Log.w(TAG, "no images");
@@ -249,7 +247,8 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private Intent getQingIntent(int position) {
-        QingItemFragment fragment = (QingItemFragment) getSupportFragmentManager().findFragmentById(R.id.container);
+        QingItemFragment fragment = (QingItemFragment) getSupportFragmentManager().findFragmentById(
+                R.id.container);
         List<ArticleInfo> articleInfoList = fragment.getImageUrlList();
         Intent intent = new Intent(this, QingImageViewActivity.class);
 
@@ -295,7 +294,8 @@ public class MainActivity extends ActionBarActivity {
 
             case 0:
                 // Weibo
-                itemFragment = WeiboItemFragment.newInstance(getString(R.string.section_name_weibo));
+                itemFragment = WeiboItemFragment.newInstance(getString(
+                        R.string.section_name_weibo));
 
                 break;
 
@@ -341,13 +341,17 @@ public class MainActivity extends ActionBarActivity {
         }
         // update view
         mBus.post(mRefreshCompleteEvent
-                .setStatusList(statusList)
-                .setLastId(lastId));
+                          .setStatusList(statusList)
+                          .setLastId(lastId));
     }
 
     @Subscribe
     public void sectionAttach(SectionAttachEvent event) {
         setTitle(event.sectionName);
+    }
+
+    public enum ImageSource {
+        Unknown, Weibo, Qing, QingPage
     }
 
 }
