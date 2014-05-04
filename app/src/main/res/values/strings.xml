@@ -1,6 +1,6 @@
 <resources>
 
-    <string name="app_name">KanTuKuang</string>
+    <string name="app_name">TuT</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="menu_settings">Settings</string>
@@ -8,7 +8,7 @@
     <string name="menu_bind_weibo">Bind with Weibo</string>
     <string name="loading_message">Loading</string>
     <string name="message_info_empty_list">No content</string>
-    <string name="message_error_load">Load failed</string>
+    <string name="message_info_no_update">No update</string>
     <string name="format_info_new_data">loaded %d items</string>
 
     <string-array name="default_sections">
@@ -27,7 +27,6 @@
     <string name="message_error_fail">Fail!</string>
     <string name="section_name_weibo">Weibo</string>
     <string name="section_name_home">Home</string>
-    <string name="message_info_no_new">No new status</string>
     <string name="format_info_page_order">page %d</string>
     <string name="action_add_blacklist">Add to blacklist</string>
     <string name="button_ok">OK</string>

@@ -131,9 +131,7 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
         View view = inflater.inflate(R.layout.fragment_weibo_item, container, false);
 
         // Set the adapter
-        assert view != null;
-        mPullToRefreshLayout = (PullToRefreshLayout) view.findViewById(
-                R.id.ptr_layout);
+        mPullToRefreshLayout = (PullToRefreshLayout) view.findViewById(R.id.ptr_layout);
         mListView = (AbsListView) view.findViewById(android.R.id.list);
         mEmptyView = view.findViewById(android.R.id.empty);
         // set up data adapter

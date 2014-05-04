@@ -206,8 +206,8 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void startQingPageIntent(final int position) {
-        QingItemFragment fragment = (QingItemFragment) getSupportFragmentManager().findFragmentById(
-                R.id.container);
+        QingItemFragment fragment = (QingItemFragment)
+                getSupportFragmentManager().findFragmentById(R.id.container);
         List<ArticleInfo> articleInfoList = fragment.getImageUrlList();
         final String url = articleInfoList.get(position).href;
 
@@ -301,7 +301,7 @@ public class MainActivity extends ActionBarActivity {
                 break;
 
             case 1:
-                // Qing - mao
+                // Qing - Mao
                 itemFragment = QingItemFragment.newInstance("猫", false);
 
                 break;
@@ -330,10 +330,8 @@ public class MainActivity extends ActionBarActivity {
     public void refreshStatusComplete(RefreshStatusCompleteEvent event) {
         List<WeiboStatus> statusList = event.getStatus();
         String lastId = null;
-        if (statusList == null) {
-            Toast.makeText(this, R.string.message_error_load, Toast.LENGTH_SHORT).show();
-        } else if (statusList.size() == 0) {
-            Toast.makeText(this, R.string.message_info_no_new, Toast.LENGTH_SHORT).show();
+        if (statusList == null || statusList.size() == 0) {
+            Toast.makeText(this, R.string.message_info_no_update, Toast.LENGTH_SHORT).show();
         } else {
             String message = getResources()
                     .getString(R.string.format_info_new_data, statusList.size());

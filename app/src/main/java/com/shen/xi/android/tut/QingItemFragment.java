@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.ContentLoadingProgressBar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,6 +49,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     private static final String ARG_PARSE_PAGE = "Parse Page";
     private final List<ArticleInfo> articleInfoList = new ArrayList<ArticleInfo>();
     private final SelectItemEvent mSelectItemEvent = new SelectItemEvent();
+    private final SectionAttachEvent mSectionAttachEvent = new SectionAttachEvent();
     private String mQingTag;
     /**
      * The fragment's ListView/GridView.
@@ -64,8 +66,9 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     @Inject
     private Bus mBus;
     private int mPage = 1;
-    private final SectionAttachEvent mSectionAttachEvent = new SectionAttachEvent();
     private boolean mParsePage;
+    private ContentLoadingProgressBar mProgressHint;
+    private TextView mEmptyText;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -98,7 +101,6 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
             mParsePage = getArguments().getBoolean(ARG_PARSE_PAGE);
         }
 
-        // TODO: display waite message
         HttpRequest httpRequest = mQingTagDriver.buildTagRequest(mQingTag, mPage);
         asyncLoad(httpRequest);
 
@@ -121,11 +123,13 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
 
+        mEmptyText = (TextView) view.findViewById(android.R.id.empty);
+        mProgressHint = (ContentLoadingProgressBar) view.findViewById(android.R.id.hint);
         // set up ads
         AdView adView = (AdView) view.findViewById(R.id.adView);
         adView.loadAd(new AdRequest.Builder()
-                .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
-                .build());
+                              .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
+                              .build());
 
         return view;
     }
@@ -144,15 +148,29 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+
+        // simply hide the progress bar
+        // when the activity goes to background
+        mProgressHint.hide();
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        mSelectItemEvent.position = position;
-        mSelectItemEvent.source = mParsePage ? QingPage : Qing;
-        mBus.post(mSelectItemEvent);
+        // do not post when loading
+        if (mProgressHint.getVisibility() != View.VISIBLE) {
+            mSelectItemEvent.position = position;
+            mSelectItemEvent.source = mParsePage ? QingPage : Qing;
+            mBus.post(mSelectItemEvent);
+        }
+
+        mProgressHint.show();
     }
 
     /**
@@ -199,8 +217,13 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
                     if (mPullToRefreshLayout.isRefreshing())
                         mPullToRefreshLayout.setRefreshComplete();
                 } else {
+                    if (mAdapter.getCount() == 0)
+                        mEmptyText.setVisibility(View.VISIBLE);
+
                     Toast.makeText(getActivity(), "no more", Toast.LENGTH_SHORT).show();
                 }
+
+                mProgressHint.hide();
             }
         }.execute(httpRequest);
     }
@@ -242,7 +265,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
             }
 
             mImageLoader.displayImage(getItem(position).imageSrc, (ImageView) convertView,
-                    displayImageOptions, listener);
+                                      displayImageOptions, listener);
 
             return convertView;
         }
