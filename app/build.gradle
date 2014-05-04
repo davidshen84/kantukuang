@@ -17,7 +17,7 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("kantukuang.keystore")
+            storeFile file("tut.keystore")
             storePassword "kantukuang"
             keyAlias "kantukuang-key"
             keyPassword "kantukuang"
@@ -27,6 +27,8 @@ android {
     buildTypes {
         release {
             runProguard true
+            debuggable false
+            jniDebugBuild false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             signingConfig signingConfigs.release
         }
