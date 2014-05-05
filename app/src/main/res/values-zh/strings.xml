@@ -1,0 +1,41 @@
+<resources>
+
+    <string name="app_name">TuT</string>
+    <string name="navigation_drawer_open">开启导航栏</string>
+    <string name="navigation_drawer_close">关闭导航栏</string>
+    <string name="menu_settings">设置</string>
+    <string name="title_activity_web">Web Activity</string>
+    <string name="loading_message">加载。。。</string>
+    <string name="message_info_empty_list">空内容</string>
+    <string name="message_info_no_update">无更新</string>
+    <string name="format_info_new_data">加载了 %d 条</string>
+
+    <string-array name="default_sections">
+        <item>微博</item>
+        <item>猫</item>
+        <item>唯美</item>
+        <item>艺术</item>
+    </string-array>
+
+    <string name="title_activity_image_view">视图</string>
+    <string name="action_refresh">刷新</string>
+    <string name="message_info_welcome">欢迎 ;)</string>
+    <string name="message_info_success">成功!</string>
+    <string name="message_error_fail">失败!</string>
+    <string name="section_name_home">主页</string>
+    <string name="format_info_page_order">第 %d 页</string>
+    <string name="action_add_blacklist">加入黑名单</string>
+    <string name="button_ok">OK</string>
+    <string name="format_info_add_blacklist">用户 %d 已被加入黑名单</string>
+    <string name="action_edit_blacklist">编辑黑名单</string>
+    <string name="title_activity_edit_blacklist">编辑黑名单</string>
+    <string name="full_image_view">大视图</string>
+    <string name="weibo_user_image">weibo user image</string>
+    <string name="narrow_image_view">窄试图</string>
+    <string name="title_activity_qing_image_view">QingImageViewActivity</string>
+    <string name="action_settings">设置</string>
+    <string name="action_share">分享</string>
+    <string name="ad_unit_id">a1535dd46535368</string>
+    <string name="no_image">无图片</string>
+
+</resources>
