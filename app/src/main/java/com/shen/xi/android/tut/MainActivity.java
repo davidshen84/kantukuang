@@ -1,7 +1,6 @@
 package com.shen.xi.android.tut;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -24,14 +23,12 @@ import com.shen.xi.android.tut.event.RefreshCompleteEvent;
 import com.shen.xi.android.tut.event.RefreshStatusCompleteEvent;
 import com.shen.xi.android.tut.event.SectionAttachEvent;
 import com.shen.xi.android.tut.event.SelectItemEvent;
-import com.shen.xi.android.tut.sinablog.ArticleInfo;
 import com.shen.xi.android.tut.sinablog.QingPageDriver;
 import com.shen.xi.android.tut.weibo.WeiboClient;
 import com.shen.xi.android.tut.weibo.WeiboStatus;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
-import java.io.IOException;
 import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
@@ -187,103 +184,27 @@ public class MainActivity extends ActionBarActivity {
 
     @Subscribe
     public void itemSelected(SelectItemEvent event) {
-        int position = event.position;
-
+        Intent intent = null;
         switch (event.source) {
             case Weibo:
-                startActivity(getWeiboIntent(position));
+                intent = new Intent(this, WeiboImageViewActivity.class);
                 break;
 
-            case Qing:
-                startActivity(getQingIntent(position));
+            case QingTag:
+                intent = new Intent(this, QingImageViewActivity.class);
                 break;
 
             case QingPage:
-                startQingPageIntent(position);
+
+                intent = new Intent(this, QingImageViewActivity.class);
+
                 break;
         }
 
-    }
-
-    private void startQingPageIntent(final int position) {
-        QingItemFragment fragment = (QingItemFragment)
-                getSupportFragmentManager().findFragmentById(R.id.container);
-        List<ArticleInfo> articleInfoList = fragment.getImageUrlList();
-        final String url = articleInfoList.get(position).href;
-
-        new AsyncTask<String, Integer, List<String>>() {
-
-            @Override
-            protected List<String> doInBackground(String... strings) {
-                if (mQingPageDriver.load(strings[0]))
-                    return mQingPageDriver.getImageUrlList();
-                else
-                    return null;
-            }
-
-            @Override
-            protected void onPostExecute(List<String> strings) {
-                if (strings != null && strings.size() > 0) {
-                    Intent intent = new Intent(MainActivity.this, QingImageViewActivity.class);
-                    intent.putExtra(AbstractImageViewActivity.ITEM_POSITION, 0);
-
-                    String jsonList = "[]";
-                    try {
-                        jsonList = mJsonFactory.toString(strings);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    intent.putExtra(AbstractImageViewActivity.JSON_LIST, jsonList);
-                    intent.putExtra(QingImageViewActivity.QING_SOURCE,
-                                    ImageSource.QingPage.toString());
-                    startActivity(intent);
-                } else {
-                    Log.w(TAG, "no images");
-                    Toast.makeText(MainActivity.this, R.string.no_image, Toast.LENGTH_SHORT).show();
-                }
-            }
-
-        }.execute(url);
-
-    }
-
-    private Intent getQingIntent(int position) {
-        QingItemFragment fragment = (QingItemFragment) getSupportFragmentManager().findFragmentById(
-                R.id.container);
-        List<ArticleInfo> articleInfoList = fragment.getImageUrlList();
-        Intent intent = new Intent(this, QingImageViewActivity.class);
-
-        intent.putExtra(AbstractImageViewActivity.ITEM_POSITION, position);
-        intent.putExtra(QingImageViewActivity.QING_SOURCE, ImageSource.Qing.toString());
-        String jsonList = "[]";
-        try {
-            jsonList = mJsonFactory.toString(articleInfoList);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (intent != null) {
+            intent.putExtras(event.extras);
+            startActivity(intent);
         }
-        intent.putExtra(AbstractImageViewActivity.JSON_LIST, jsonList);
-
-        return intent;
-    }
-
-    private Intent getWeiboIntent(int position) {
-        // start weibo image view activity
-        WeiboItemFragment itemFragment = (WeiboItemFragment)
-                getSupportFragmentManager().findFragmentById(R.id.container);
-        List<WeiboStatus> statuses = itemFragment.getStatuses();
-        Intent intent = new Intent(this, WeiboImageViewActivity.class);
-
-        intent.putExtra(AbstractImageViewActivity.ITEM_POSITION, position);
-
-        String jsonList = "[]";
-        try {
-            jsonList = mJsonFactory.toString(statuses);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        intent.putExtra(AbstractImageViewActivity.JSON_LIST, jsonList);
-
-        return intent;
     }
 
     @Subscribe
@@ -350,7 +271,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public enum ImageSource {
-        Unknown, Weibo, Qing, QingPage
+        Unknown, Weibo, QingTag, QingPage
     }
 
 }

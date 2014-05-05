@@ -40,6 +40,7 @@ import com.shen.xi.android.tut.weibo.WeiboStatus;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -267,7 +268,19 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        mSelectItemEvent.position = i;
+        Bundle extras = new Bundle();
+        extras.putInt(AbstractImageViewActivity.ITEM_POSITION, i);
+
+        String jsonList = "[]";
+        try {
+            jsonList = mJsonFactory.toString(mWeiboStatuses);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        extras.putString(AbstractImageViewActivity.JSON_LIST, jsonList);
+
+        mSelectItemEvent.extras = extras;
+        mSelectItemEvent.source = Weibo;
         mBus.post(mSelectItemEvent);
     }
 

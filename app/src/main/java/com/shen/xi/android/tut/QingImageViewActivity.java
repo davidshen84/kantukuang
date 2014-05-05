@@ -1,6 +1,5 @@
 package com.shen.xi.android.tut;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -11,8 +10,7 @@ import com.shen.xi.android.tut.sinablog.ArticleInfo;
 import java.io.IOException;
 import java.util.List;
 
-import static com.shen.xi.android.tut.MainActivity.ImageSource.Qing;
-import static com.shen.xi.android.tut.MainActivity.ImageSource.QingPage;
+import static com.shen.xi.android.tut.MainActivity.ImageSource.QingTag;
 import static com.shen.xi.android.tut.MainActivity.ImageSource.Unknown;
 
 
@@ -32,11 +30,10 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent intent = getIntent();
-
-        int item = intent.getIntExtra(ITEM_POSITION, 0);
-        String sourceString = intent.getStringExtra(QING_SOURCE);
-        String jsonList = intent.getStringExtra(JSON_LIST);
+        Bundle extras = getIntent().getExtras();
+        int item = extras.getInt(ITEM_POSITION, 0);
+        String sourceString = extras.getString(QING_SOURCE);
+        String jsonList = extras.getString(JSON_LIST);
 
         if (!Strings.isNullOrEmpty(sourceString)) {
             try {
@@ -46,40 +43,41 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
             }
         }
 
-        // TODO create different adapter, depending on the source
-        ImagePagerAdapter imagePagerAdapter = null;
+        ImagePagerAdapter imagePagerAdapter;
         int size = 0;
-        if (mSource == Qing) {
-            try {
-                JsonParser jsonParser = mJsonFactory.createJsonParser(jsonList);
-                mArticleInfoList = (List<ArticleInfo>) jsonParser.parseArray(List.class, ArticleInfo.class);
-                size = mArticleInfoList.size();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else if (mSource == QingPage) {
-            try {
-                JsonParser jsonParser = mJsonFactory.createJsonParser(jsonList);
-                mImageUrlList = (List<String>) jsonParser.parseArray(List.class, String.class);
-                size = mImageUrlList.size();
+        try {
+            JsonParser jsonParser = mJsonFactory.createJsonParser(jsonList);
+            switch (mSource) {
+                case QingTag:
+                    mArticleInfoList = (List<ArticleInfo>)
+                            jsonParser.parseArray(List.class, ArticleInfo.class);
+                    size = mArticleInfoList.size();
+                    break;
 
-            } catch (IOException e) {
-                e.printStackTrace();
+                case QingPage:
+                    mImageUrlList = (List<String>) jsonParser.parseArray(List.class, String.class);
+                    size = mImageUrlList.size();
+                    break;
+
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         if (size != 0) {
             imagePagerAdapter = new ImagePagerAdapter(getSupportFragmentManager(), size);
             setupPager(imagePagerAdapter, item);
-        }
-        else {
+        } else {
             finish();
         }
     }
 
     @Override
     protected String getImageUrlByOrder(int order) {
-        return mSource == Qing ? mArticleInfoList.get(order).imageSrc.replace("mw205", "mw600") : mImageUrlList.get(order);
+        return mSource == QingTag
+                // switch to the high-def version
+                ? mArticleInfoList.get(order).imageSrc.replace("mw205", "mw600")
+                : mImageUrlList.get(order);
     }
 
     @Override
@@ -88,10 +86,8 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 
 

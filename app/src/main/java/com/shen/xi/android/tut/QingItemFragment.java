@@ -4,7 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.ContentLoadingProgressBar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.api.client.http.HttpRequest;
+import com.google.api.client.json.JsonFactory;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
@@ -27,10 +28,12 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.shen.xi.android.tut.event.SectionAttachEvent;
 import com.shen.xi.android.tut.event.SelectItemEvent;
 import com.shen.xi.android.tut.sinablog.ArticleInfo;
+import com.shen.xi.android.tut.sinablog.QingPageDriver;
 import com.shen.xi.android.tut.sinablog.QingTagDriver;
 import com.shen.xi.android.tut.util.MySimpleImageLoadingListener;
 import com.squareup.otto.Bus;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,8 +41,8 @@ import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
-import static com.shen.xi.android.tut.MainActivity.ImageSource.Qing;
 import static com.shen.xi.android.tut.MainActivity.ImageSource.QingPage;
+import static com.shen.xi.android.tut.MainActivity.ImageSource.QingTag;
 
 public class QingItemFragment extends Fragment implements AbsListView.OnItemClickListener, OnRefreshListener {
 
@@ -47,7 +50,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     private static final String ARG_TAG = "Qing Tag";
     private static final String TAG = QingItemFragment.class.getName();
     private static final String ARG_PARSE_PAGE = "Parse Page";
-    private final List<ArticleInfo> articleInfoList = new ArrayList<ArticleInfo>();
+    private final List<ArticleInfo> mArticleInfoList = new ArrayList<ArticleInfo>();
     private final SelectItemEvent mSelectItemEvent = new SelectItemEvent();
     private final SectionAttachEvent mSectionAttachEvent = new SectionAttachEvent();
     private String mQingTag;
@@ -66,9 +69,12 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     @Inject
     private Bus mBus;
     private int mPage = 1;
-    private boolean mParsePage;
-    private ContentLoadingProgressBar mProgressHint;
-    private TextView mEmptyText;
+    private MainActivity.ImageSource mPageType;
+    private TextView mEmptyView;
+    @Inject
+    private JsonFactory mJsonFactory;
+    @Inject
+    private QingPageDriver mQingPageDriver;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -78,7 +84,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         Injector injector = TuTModule.getInjector();
         injector.injectMembers(this);
 
-        mSelectItemEvent.source = Qing;
+        mSelectItemEvent.source = QingTag;
     }
 
     public static QingItemFragment newInstance(String tag, boolean parsePage) {
@@ -98,11 +104,8 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
 
         if (arguments != null) {
             mQingTag = arguments.getString(ARG_TAG);
-            mParsePage = getArguments().getBoolean(ARG_PARSE_PAGE);
+            mPageType = getArguments().getBoolean(ARG_PARSE_PAGE) ? QingPage : QingTag;
         }
-
-        HttpRequest httpRequest = mQingTagDriver.buildTagRequest(mQingTag, mPage);
-        asyncLoad(httpRequest);
 
         mSectionAttachEvent.sectionName = mQingTag;
         mBus.post(mSectionAttachEvent);
@@ -115,16 +118,14 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
 
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
-        mPullToRefreshLayout = (PullToRefreshLayout) view.findViewById(
-                R.id.ptr_layout);
-        mAdapter = new ArticleInfoArrayAdapter(getActivity(), articleInfoList);
+        mPullToRefreshLayout = (PullToRefreshLayout) view.findViewById(R.id.ptr_layout);
+        mAdapter = new ArticleInfoArrayAdapter(getActivity(), mArticleInfoList);
         ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
 
-        mEmptyText = (TextView) view.findViewById(android.R.id.empty);
-        mProgressHint = (ContentLoadingProgressBar) view.findViewById(android.R.id.hint);
+        mEmptyView = (TextView) view.findViewById(android.R.id.empty);
         // set up ads
         AdView adView = (AdView) view.findViewById(R.id.adView);
         adView.loadAd(new AdRequest.Builder()
@@ -148,12 +149,21 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        if (mAdapter.getCount() == 0) {
+            mPullToRefreshLayout.setRefreshing(true);
+            HttpRequest httpRequest = mQingTagDriver.buildTagRequest(mQingTag, mPage);
+            asyncLoad(httpRequest);
+        }
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
-
-        // simply hide the progress bar
-        // when the activity goes to background
-        mProgressHint.hide();
+        if (mPullToRefreshLayout.isRefreshing())
+            mPullToRefreshLayout.setRefreshComplete();
     }
 
     @Override
@@ -164,13 +174,73 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         // do not post when loading
-        if (mProgressHint.getVisibility() != View.VISIBLE) {
-            mSelectItemEvent.position = position;
-            mSelectItemEvent.source = mParsePage ? QingPage : Qing;
-            mBus.post(mSelectItemEvent);
-        }
+        if (!mPullToRefreshLayout.isRefreshing()) {
+            switch (mPageType) {
+                case QingTag:
+                    Bundle extras = new Bundle();
+                    extras.putInt(AbstractImageViewActivity.ITEM_POSITION, position);
+                    extras.putString(QingImageViewActivity.QING_SOURCE, QingTag.toString());
+                    String jsonList = "[]";
+                    try {
+                        jsonList = mJsonFactory.toString(mArticleInfoList);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    extras.putString(AbstractImageViewActivity.JSON_LIST, jsonList);
 
-        mProgressHint.show();
+                    mSelectItemEvent.source = QingTag;
+                    mSelectItemEvent.extras = extras;
+                    mBus.post(mSelectItemEvent);
+                    break;
+
+                case QingPage:
+                    loadQingPage(position);
+                    break;
+            }
+        }
+    }
+
+    private void loadQingPage(int position) {
+        mPullToRefreshLayout.setRefreshing(true);
+        new AsyncTask<String, Integer, List<String>>() {
+
+            @Override
+            protected List<String> doInBackground(String... strings) {
+                if (mQingPageDriver.load(strings[0]))
+                    return mQingPageDriver.getImageUrlList();
+                else
+                    return null;
+            }
+
+            @Override
+            protected void onPostExecute(List<String> strings) {
+                mPullToRefreshLayout.setRefreshComplete();
+                if (strings != null && strings.size() > 0) {
+                    Bundle extras = new Bundle();
+                    extras.putInt(AbstractImageViewActivity.ITEM_POSITION, 0);
+
+                    String jsonList = "[]";
+                    try {
+                        jsonList = mJsonFactory.toString(strings);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    extras.putInt(AbstractImageViewActivity.ITEM_POSITION, 0);
+                    extras.putString(AbstractImageViewActivity.JSON_LIST, jsonList);
+                    extras.putString(QingImageViewActivity.QING_SOURCE,
+                                     QingPage.toString());
+
+                    mSelectItemEvent.source = QingPage;
+                    mSelectItemEvent.extras = extras;
+                    mBus.post(mSelectItemEvent);
+                } else {
+                    Log.w(TAG, "no images");
+                    Toast.makeText(getActivity(), R.string.no_image,
+                                   Toast.LENGTH_SHORT).show();
+                }
+            }
+
+        }.execute(mArticleInfoList.get(position).href);
     }
 
     /**
@@ -179,10 +249,11 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
      * to supply the text it should use.
      */
     public void setEmptyText(CharSequence emptyText) {
-        View emptyView = mListView.getEmptyView();
-
-        if (emptyText instanceof TextView) {
-            ((TextView) emptyView).setText(emptyText);
+        if (emptyText == null) {
+            mEmptyView.setVisibility(View.GONE);
+        } else {
+            mEmptyView.setVisibility(View.VISIBLE);
+            mEmptyView.setText(emptyText);
         }
     }
 
@@ -200,6 +271,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     }
 
     private void asyncLoad(HttpRequest httpRequest) {
+
         new AsyncTask<HttpRequest, String, List<ArticleInfo>>() {
             @Override
             protected List<ArticleInfo> doInBackground(HttpRequest... requests) {
@@ -211,21 +283,21 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
 
             @Override
             protected void onPostExecute(List<ArticleInfo> articleInfoList) {
+                if (mPullToRefreshLayout.isRefreshing())
+                    mPullToRefreshLayout.setRefreshComplete();
+
                 if (articleInfoList != null && articleInfoList.size() > 0) {
-                    QingItemFragment.this.articleInfoList.addAll(0, articleInfoList);
+                    QingItemFragment.this.mArticleInfoList.addAll(0, articleInfoList);
                     mAdapter.notifyDataSetChanged();
-                    if (mPullToRefreshLayout.isRefreshing())
-                        mPullToRefreshLayout.setRefreshComplete();
+
+                    setEmptyText(null);
                 } else {
                     if (mAdapter.getCount() == 0)
-                        mEmptyText.setVisibility(View.VISIBLE);
-
-                    Toast.makeText(getActivity(), "no more", Toast.LENGTH_SHORT).show();
+                        setEmptyText(getString(R.string.message_info_empty_list));
                 }
-
-                mProgressHint.hide();
             }
         }.execute(httpRequest);
+
     }
 
     public List<ArticleInfo> getImageUrlList() {
