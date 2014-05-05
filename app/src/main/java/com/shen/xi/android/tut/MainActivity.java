@@ -230,6 +230,12 @@ public class MainActivity extends ActionBarActivity {
 
                 break;
 
+            case 3:
+                // Qing - Yi Shu
+                itemFragment = QingItemFragment.newInstance("艺术", true);
+
+                break;
+
             default:
                 Log.d(TAG, String.format("%d not ready", mCurrentDrawerSelectedId));
 
