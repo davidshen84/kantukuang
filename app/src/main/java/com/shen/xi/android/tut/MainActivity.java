@@ -207,32 +207,32 @@ public class MainActivity extends ActionBarActivity {
     @Subscribe
     public void navigateSection(NavigationEvent event) {
         Fragment itemFragment;
-
+        String[] sections = getResources().getStringArray(R.array.default_sections);
         mCurrentDrawerSelectedId = event.getPosition();
+        String currentSectionName = sections[mCurrentDrawerSelectedId];
         switch (mCurrentDrawerSelectedId) {
 
             case 0:
                 // Weibo
-                itemFragment = WeiboItemFragment.newInstance(getString(
-                        R.string.section_name_weibo));
+                itemFragment = WeiboItemFragment.newInstance(currentSectionName);
 
                 break;
 
             case 1:
                 // Qing - Mao
-                itemFragment = QingItemFragment.newInstance("猫", false);
+                itemFragment = QingItemFragment.newInstance(currentSectionName,"猫", false);
 
                 break;
 
             case 2:
                 // Qing - Wei Mei
-                itemFragment = QingItemFragment.newInstance("唯美", true);
+                itemFragment = QingItemFragment.newInstance(currentSectionName, "唯美", true);
 
                 break;
 
             case 3:
                 // Qing - Yi Shu
-                itemFragment = QingItemFragment.newInstance("艺术", true);
+                itemFragment = QingItemFragment.newInstance(currentSectionName, "艺术", true);
 
                 break;
 

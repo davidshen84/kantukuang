@@ -50,6 +50,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     private static final String ARG_TAG = "Qing Tag";
     private static final String TAG = QingItemFragment.class.getName();
     private static final String ARG_PARSE_PAGE = "Parse Page";
+    private static final String ARG_SECTION = "section name displayed as title";
     private final List<ArticleInfo> mArticleInfoList = new ArrayList<ArticleInfo>();
     private final SelectItemEvent mSelectItemEvent = new SelectItemEvent();
     private final SectionAttachEvent mSectionAttachEvent = new SectionAttachEvent();
@@ -87,9 +88,10 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         mSelectItemEvent.source = QingTag;
     }
 
-    public static QingItemFragment newInstance(String tag, boolean parsePage) {
+    public static QingItemFragment newInstance(String section, String tag, boolean parsePage) {
         QingItemFragment fragment = new QingItemFragment();
         Bundle args = new Bundle();
+        args.putString(ARG_SECTION, section);
         args.putString(ARG_TAG, tag);
         args.putBoolean(ARG_PARSE_PAGE, parsePage);
         fragment.setArguments(args);
@@ -102,12 +104,14 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         super.onCreate(savedInstanceState);
         Bundle arguments = getArguments();
 
+        String title = null;
         if (arguments != null) {
+            title = arguments.getString(ARG_SECTION);
             mQingTag = arguments.getString(ARG_TAG);
-            mPageType = getArguments().getBoolean(ARG_PARSE_PAGE) ? QingPage : QingTag;
+            mPageType = arguments.getBoolean(ARG_PARSE_PAGE) ? QingPage : QingTag;
         }
 
-        mSectionAttachEvent.sectionName = mQingTag;
+        mSectionAttachEvent.sectionName = title;
         mSectionAttachEvent.source = mPageType;
         mBus.post(mSectionAttachEvent);
     }
