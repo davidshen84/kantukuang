@@ -123,6 +123,7 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
         }
 
         mSectionAttachEvent.sectionName = mSectionName;
+        mSectionAttachEvent.source = Weibo;
         mBus.post(mSectionAttachEvent);
     }
 

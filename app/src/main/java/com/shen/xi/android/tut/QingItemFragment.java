@@ -108,6 +108,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         }
 
         mSectionAttachEvent.sectionName = mQingTag;
+        mSectionAttachEvent.source = mPageType;
         mBus.post(mSectionAttachEvent);
     }
 

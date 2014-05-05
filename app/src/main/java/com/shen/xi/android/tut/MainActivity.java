@@ -33,6 +33,8 @@ import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
+import static com.shen.xi.android.tut.MainActivity.ImageSource.Weibo;
+
 public class MainActivity extends ActionBarActivity {
 
     private static final String TAG = MainActivity.class.getName();
@@ -52,6 +54,7 @@ public class MainActivity extends ActionBarActivity {
     private HttpRequestFactory mHttpRequestFactory;
     @Inject
     private QingPageDriver mQingPageDriver;
+    private ImageSource mSectionType;
 
     public MainActivity() {
         Injector mInjector = TuTModule.getInjector();
@@ -90,7 +93,7 @@ public class MainActivity extends ActionBarActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(getTitle());
 
-        setUpWeiboClientAndLoader();
+        restoreNavigationDrawerState();
         if (mHasAttachedSection)
             findViewById(R.id.main_activity_message).setVisibility(View.GONE);
     }
@@ -124,6 +127,8 @@ public class MainActivity extends ActionBarActivity {
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.main, menu);
+            if (mSectionType != Weibo)
+                menu.findItem(R.id.action_edit_blacklist).setVisible(false);
             restoreActionBar();
 
             return true;
@@ -131,14 +136,6 @@ public class MainActivity extends ActionBarActivity {
 
         return super.onCreateOptionsMenu(menu);
 
-    }
-
-    /**
-     * initialize the loader
-     * then restore the drawer state
-     */
-    private void setUpWeiboClientAndLoader() {
-        restoreNavigationDrawerState();
     }
 
     private void restoreNavigationDrawerState() {
@@ -267,6 +264,7 @@ public class MainActivity extends ActionBarActivity {
 
     @Subscribe
     public void sectionAttach(SectionAttachEvent event) {
+        mSectionType = event.source;
         setTitle(event.sectionName);
     }
 
