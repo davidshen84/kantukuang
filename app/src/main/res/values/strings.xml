@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">TuT</string>
@@ -35,7 +36,8 @@
     <string name="title_activity_qing_image_view">QingImageViewActivity</string>
     <string name="action_settings">Settings</string>
     <string name="action_share">Share with friends</string>
-    <string name="ad_unit_id">a1535dd46535368</string>
     <string name="no_image">No Image</string>
+    <string name="disclaimer">All images are from network and belong to the original creator or uploader.</string>
+    <string name="button_iagree">I Agree</string>
 
 </resources>

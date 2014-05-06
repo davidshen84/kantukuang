@@ -2,6 +2,7 @@ package com.shen.xi.android.tut;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
@@ -85,17 +86,25 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
         mBus.register(this);
-        mHasAttachedSection = getSupportFragmentManager().findFragmentById(R.id.container) != null;
 
-        // set up action bar title
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle(getTitle());
+        // switch to disclaimer
+        if (!PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean(DisclaimerActivity.PREF_DISCLAIMER_AGREE, false)) {
+            Intent intent = new Intent(this, DisclaimerActivity.class);
+            startActivity(intent);
+        } else {
+            mHasAttachedSection = getSupportFragmentManager()
+                    .findFragmentById(R.id.container) != null;
 
-        restoreNavigationDrawerState();
-        if (mHasAttachedSection)
-            findViewById(R.id.main_activity_message).setVisibility(View.GONE);
+            // set up action bar title
+            ActionBar actionBar = getSupportActionBar();
+            actionBar.setTitle(getTitle());
+
+            restoreNavigationDrawerState();
+            if (mHasAttachedSection)
+                findViewById(R.id.main_activity_message).setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -220,7 +229,7 @@ public class MainActivity extends ActionBarActivity {
 
             case 1:
                 // Qing - Mao
-                itemFragment = QingItemFragment.newInstance(currentSectionName,"猫", false);
+                itemFragment = QingItemFragment.newInstance(currentSectionName, "猫", false);
 
                 break;
 

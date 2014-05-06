@@ -35,7 +35,8 @@
     <string name="title_activity_qing_image_view">QingImageViewActivity</string>
     <string name="action_settings">设置</string>
     <string name="action_share">分享</string>
-    <string name="ad_unit_id">a1535dd46535368</string>
     <string name="no_image">无图片</string>
+    <string name="disclaimer">所有图片都来之网络，版权都归属原作者。</string>
+    <string name="button_iagree">同意</string>
 
 </resources>
