@@ -41,7 +41,7 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:+'
+    compile 'com.android.support:support-v4:19+'
     compile 'com.android.support:appcompat-v7:+'
     compile 'com.nostra13.universalimageloader:universal-image-loader:+'
     compile 'com.google.guava:guava:+'

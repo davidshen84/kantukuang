@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -38,9 +39,9 @@ import static com.shen.xi.android.tut.MainActivity.ImageSource.Weibo;
 
 public class MainActivity extends ActionBarActivity {
 
+    public static final String PREF_DISCLAIMER_AGREE = "agree to disclaimer";
     private static final String TAG = MainActivity.class.getName();
     private static final String STATE_DRAWER_SELECTED_ID = "selected navigation drawer position";
-    private static final String PREF_DISCLAIMER_AGREE = "agree to disclaimer";
     private final RefreshCompleteEvent mRefreshCompleteEvent = new RefreshCompleteEvent();
     @Inject
     private Bus mBus;
@@ -89,21 +90,25 @@ public class MainActivity extends ActionBarActivity {
         super.onResume();
         mBus.register(this);
 
+        mHasAttachedSection = getSupportFragmentManager()
+                .findFragmentById(R.id.container) != null;
+
+        // set up action bar title
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle(getTitle());
+
+        restoreNavigationDrawerState();
+        if (mHasAttachedSection)
+            findViewById(R.id.main_activity_message).setVisibility(View.GONE);
         // switch to disclaimer
         if (!PreferenceManager.getDefaultSharedPreferences(this)
                 .getBoolean(PREF_DISCLAIMER_AGREE, false)) {
-
-        } else {
-            mHasAttachedSection = getSupportFragmentManager()
-                    .findFragmentById(R.id.container) != null;
-
-            // set up action bar title
-            ActionBar actionBar = getSupportActionBar();
-            actionBar.setTitle(getTitle());
-
-            restoreNavigationDrawerState();
-            if (mHasAttachedSection)
-                findViewById(R.id.main_activity_message).setVisibility(View.GONE);
+            DisclaimerFragment fragment = DisclaimerFragment.newInstance();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .add(R.id.container, fragment)
+                    .commit();
         }
     }
 

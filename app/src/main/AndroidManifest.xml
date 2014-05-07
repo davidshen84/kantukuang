@@ -36,7 +36,7 @@
         <activity
             android:name=".WeiboImageViewActivity"
             android:label="ImageView"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
@@ -45,7 +45,7 @@
             android:name=".EditBlacklistActivity"
             android:label="@string/title_activity_edit_blacklist"
             android:parentActivityName=".MainActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
@@ -53,7 +53,7 @@
         <activity
             android:name=".QingImageViewActivity"
             android:label="ImageView"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" />
