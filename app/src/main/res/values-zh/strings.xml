@@ -1,10 +1,9 @@
 <resources>
 
-    <string name="app_name">TuT</string>
+    <string name="app_name">优图</string>
     <string name="navigation_drawer_open">开启导航栏</string>
     <string name="navigation_drawer_close">关闭导航栏</string>
     <string name="menu_settings">设置</string>
-    <string name="title_activity_web">Web Activity</string>
     <string name="loading_message">加载。。。</string>
     <string name="message_info_empty_list">空内容</string>
     <string name="message_info_no_update">无更新</string>
@@ -17,7 +16,6 @@
         <item>艺术</item>
     </string-array>
 
-    <string name="title_activity_image_view">视图</string>
     <string name="action_refresh">刷新</string>
     <string name="message_info_welcome">欢迎 ;)</string>
     <string name="message_info_success">成功!</string>

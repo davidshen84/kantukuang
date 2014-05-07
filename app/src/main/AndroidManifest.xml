@@ -35,7 +35,7 @@
         </activity>
         <activity
             android:name=".WeiboImageViewActivity"
-            android:label="@string/title_activity_image_view"
+            android:label="ImageView"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -52,7 +52,7 @@
         </activity>
         <activity
             android:name=".QingImageViewActivity"
-            android:label="@string/title_activity_qing_image_view"
+            android:label="ImageView"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -62,7 +62,7 @@
             android:name="com.google.android.gms.ads.AdActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
         <activity
-            android:name="com.shen.xi.android.tut.DisclaimerActivity"
+            android:name=".DisclaimerActivity"
             android:label="Disclaimer"
             android:parentActivityName="com.shen.xi.android.tut.MainActivity" >
             <meta-data
