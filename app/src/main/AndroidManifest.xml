@@ -61,14 +61,7 @@
         <activity
             android:name="com.google.android.gms.ads.AdActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
-        <activity
-            android:name=".DisclaimerActivity"
-            android:label="Disclaimer"
-            android:parentActivityName="com.shen.xi.android.tut.MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="MainActivity" />
-        </activity>
+
     </application>
 
 </manifest>

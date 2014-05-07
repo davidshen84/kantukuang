@@ -40,6 +40,7 @@ public class MainActivity extends ActionBarActivity {
 
     private static final String TAG = MainActivity.class.getName();
     private static final String STATE_DRAWER_SELECTED_ID = "selected navigation drawer position";
+    private static final String PREF_DISCLAIMER_AGREE = "agree to disclaimer";
     private final RefreshCompleteEvent mRefreshCompleteEvent = new RefreshCompleteEvent();
     @Inject
     private Bus mBus;
@@ -90,9 +91,8 @@ public class MainActivity extends ActionBarActivity {
 
         // switch to disclaimer
         if (!PreferenceManager.getDefaultSharedPreferences(this)
-                .getBoolean(DisclaimerActivity.PREF_DISCLAIMER_AGREE, false)) {
-            Intent intent = new Intent(this, DisclaimerActivity.class);
-            startActivity(intent);
+                .getBoolean(PREF_DISCLAIMER_AGREE, false)) {
+
         } else {
             mHasAttachedSection = getSupportFragmentManager()
                     .findFragmentById(R.id.container) != null;
