@@ -35,7 +35,7 @@
         </activity>
         <activity
             android:name=".WeiboImageViewActivity"
-            android:label="ImageView"
+            android:label="@string/weibo_image_view"
             android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
