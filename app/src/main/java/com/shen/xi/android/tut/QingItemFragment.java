@@ -76,6 +76,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     private JsonFactory mJsonFactory;
     @Inject
     private QingPageDriver mQingPageDriver;
+    private String mTitle = null;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -104,14 +105,13 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         super.onCreate(savedInstanceState);
         Bundle arguments = getArguments();
 
-        String title = null;
         if (arguments != null) {
-            title = arguments.getString(ARG_SECTION);
+            mTitle = arguments.getString(ARG_SECTION);
             mQingTag = arguments.getString(ARG_TAG);
             mPageType = arguments.getBoolean(ARG_PARSE_PAGE) ? QingPage : QingTag;
         }
 
-        mSectionAttachEvent.sectionName = title;
+        mSectionAttachEvent.sectionName = mTitle;
         mSectionAttachEvent.source = mPageType;
         mBus.post(mSectionAttachEvent);
     }
@@ -192,6 +192,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
                         e.printStackTrace();
                     }
                     extras.putString(AbstractImageViewActivity.JSON_LIST, jsonList);
+                    extras.putString(QingImageViewActivity.QING_TITLE, mTitle);
 
                     mSelectItemEvent.source = QingTag;
                     mSelectItemEvent.extras = extras;
@@ -234,6 +235,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
                     extras.putString(AbstractImageViewActivity.JSON_LIST, jsonList);
                     extras.putString(QingImageViewActivity.QING_SOURCE,
                                      QingPage.toString());
+                    extras.putString(QingImageViewActivity.QING_TITLE, mTitle);
 
                     mSelectItemEvent.source = QingPage;
                     mSelectItemEvent.extras = extras;

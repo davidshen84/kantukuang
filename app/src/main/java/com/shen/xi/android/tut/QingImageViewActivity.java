@@ -17,6 +17,7 @@ import static com.shen.xi.android.tut.MainActivity.ImageSource.Unknown;
 public class QingImageViewActivity extends AbstractImageViewActivity {
 
     public static final String QING_SOURCE = "qing source";
+    public static final String QING_TITLE = "qing title";
     private List<ArticleInfo> mArticleInfoList;
     private MainActivity.ImageSource mSource = Unknown;
     private List<String> mImageUrlList;
@@ -34,6 +35,7 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
         int item = extras.getInt(ITEM_POSITION, 0);
         String sourceString = extras.getString(QING_SOURCE);
         String jsonList = extras.getString(JSON_LIST);
+        setTitle(extras.getString(QING_TITLE));
 
         if (!Strings.isNullOrEmpty(sourceString)) {
             try {

@@ -37,5 +37,6 @@
     <string name="no_image">No Image</string>
     <string name="disclaimer">All images are from network and belong to the original creator or uploader.</string>
     <string name="button_iagree">I Agree</string>
+    <string name="weibo_image_view">Weibo Image</string>
 
 </resources>
