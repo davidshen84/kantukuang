@@ -80,10 +80,10 @@ public class TuTModule extends AbstractModule {
         bind(new TypeLiteralCollectionString())
                 .annotatedWith(Names.named("scope"))
                 .toInstance(Arrays.asList("all"));
-        bind(String.class).annotatedWith(Names.named("authorization_server_encoded_url"))
+        bind(String.class)
+                .annotatedWith(Names.named("authorization_server_encoded_url"))
                 .toInstance("https://api.weibo.com/oauth2/authorize");
 
-        bind(String.class).annotatedWith(Names.named("redirect uri")).toInstance("kantukuang.com/");
         bind(HttpTransport.class).to(NetHttpTransport.class);
         bind(JsonFactory.class).to(JacksonFactory.class).in(Scopes.SINGLETON);
 

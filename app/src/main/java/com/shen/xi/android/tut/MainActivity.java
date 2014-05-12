@@ -2,8 +2,10 @@ package com.shen.xi.android.tut;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -37,6 +39,7 @@ import static com.shen.xi.android.tut.MainActivity.ImageSource.Weibo;
 
 public class MainActivity extends ActionBarActivity {
 
+    public static final String PREF_DISCLAIMER_AGREE = "agree to disclaimer";
     private static final String TAG = MainActivity.class.getName();
     private static final String STATE_DRAWER_SELECTED_ID = "selected navigation drawer position";
     private final RefreshCompleteEvent mRefreshCompleteEvent = new RefreshCompleteEvent();
@@ -85,9 +88,10 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
         mBus.register(this);
-        mHasAttachedSection = getSupportFragmentManager().findFragmentById(R.id.container) != null;
+
+        mHasAttachedSection = getSupportFragmentManager()
+                .findFragmentById(R.id.container) != null;
 
         // set up action bar title
         ActionBar actionBar = getSupportActionBar();
@@ -96,6 +100,16 @@ public class MainActivity extends ActionBarActivity {
         restoreNavigationDrawerState();
         if (mHasAttachedSection)
             findViewById(R.id.main_activity_message).setVisibility(View.GONE);
+        // switch to disclaimer
+        if (!PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean(PREF_DISCLAIMER_AGREE, false)) {
+            DisclaimerFragment fragment = DisclaimerFragment.newInstance();
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .add(R.id.container, fragment)
+                    .commit();
+        }
     }
 
     @Override
@@ -207,26 +221,32 @@ public class MainActivity extends ActionBarActivity {
     @Subscribe
     public void navigateSection(NavigationEvent event) {
         Fragment itemFragment;
-
+        String[] sections = getResources().getStringArray(R.array.default_sections);
         mCurrentDrawerSelectedId = event.getPosition();
+        String currentSectionName = sections[mCurrentDrawerSelectedId];
         switch (mCurrentDrawerSelectedId) {
 
             case 0:
                 // Weibo
-                itemFragment = WeiboItemFragment.newInstance(getString(
-                        R.string.section_name_weibo));
+                itemFragment = WeiboItemFragment.newInstance(currentSectionName);
 
                 break;
 
             case 1:
                 // Qing - Mao
-                itemFragment = QingItemFragment.newInstance("猫", false);
+                itemFragment = QingItemFragment.newInstance(currentSectionName, "猫", false);
 
                 break;
 
             case 2:
                 // Qing - Wei Mei
-                itemFragment = QingItemFragment.newInstance("唯美", true);
+                itemFragment = QingItemFragment.newInstance(currentSectionName, "唯美", true);
+
+                break;
+
+            case 3:
+                // Qing - Yi Shu
+                itemFragment = QingItemFragment.newInstance(currentSectionName, "艺术", true);
 
                 break;
 

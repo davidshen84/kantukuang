@@ -10,6 +10,7 @@ import com.google.ads.AdRequest;
 import com.google.ads.AdView;
 import com.google.api.client.json.JsonParser;
 import com.google.inject.Inject;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.shen.xi.android.tut.event.FilterStatusEvent;
 import com.shen.xi.android.tut.weibo.WeiboClient;
 import com.shen.xi.android.tut.weibo.WeiboStatus;
@@ -21,10 +22,12 @@ import java.util.List;
 public class WeiboImageViewActivity extends AbstractImageViewActivity {
     private static final String TAG = WeiboImageViewActivity.class.getName();
     private final FilterStatusEvent mFilterStatusEvent = new FilterStatusEvent();
+    private final ImageSaver mImageSaver = new ImageSaver();
     private List<WeiboStatus> mStatusList;
-
     @Inject
     private WeiboClient weiboClient;
+    @Inject
+    private ImageLoader mImageLoader;
 
 
     public WeiboImageViewActivity() {
@@ -112,9 +115,12 @@ public class WeiboImageViewActivity extends AbstractImageViewActivity {
                 blockAccount(uid);
 
                 return true;
+            case R.id.action_save_image:
+                mImageLoader.loadImage(getImageUrlByOrder(getCurrentItem()), mImageSaver);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
     private void blockAccount(long uid) {

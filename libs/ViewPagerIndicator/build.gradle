@@ -17,12 +17,12 @@ android {
 
     buildTypes{
         release {
+            debuggable false
+            jniDebugBuild false
             runProguard false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
         debug {
-            runProguard true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            runProguard false
         }
     }
 }

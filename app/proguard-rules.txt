@@ -1,18 +1,21 @@
 # Add project specific ProGuard rules here.
 # By default, the flags in this file are appended to flags specified
-# in C:/Users/shend/AppData/Local/Android/android-studio/sdk/tools/proguard/proguard-android.txt
+# in .../android-studio/sdk/tools/proguard/proguard-android.txt
 # You can edit the include path and order by changing the ProGuard
 # include property in project.properties.
 #
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
--dontobfuscate
+#-dontobfuscate
 
 # Add any project specific keep options here:
--keepattributes *Annotation*,Signature,Key,Named,Inject
+-keepattributes *Annotation*,Signature
 
 -keep public class com.google.inject.** { public *; }
+-keep public class android.support.v7.widget.ShareActionProvider { public *; }
+-keep public class android.support.v4.view.MenuItemCompat.* { public *; }
+-keep public class org.jsoup.** { public *; }
 -keep public class com.shen.xi.android.tut.** extends android.app.Activity
 -keep public class com.shen.xi.android.tut.** extends android.app.Application
 -keep public class com.shen.xi.android.tut.** extends android.view.View { *; }
