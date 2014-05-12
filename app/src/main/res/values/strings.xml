@@ -38,5 +38,7 @@
     <string name="disclaimer">All images are from network and belong to the original creator or uploader.</string>
     <string name="button_iagree">I Agree</string>
     <string name="weibo_image_view">Weibo Image</string>
+    <string name="action_save">Save</string>
+    <string name="message_error_save_image">Cannot save image.</string>
 
 </resources>

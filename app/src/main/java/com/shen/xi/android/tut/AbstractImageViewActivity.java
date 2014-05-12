@@ -1,8 +1,10 @@
 package com.shen.xi.android.tut;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -11,8 +13,11 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -20,15 +25,19 @@ import com.google.api.client.json.JsonFactory;
 import com.google.inject.Inject;
 import com.nostra13.universalimageloader.cache.disc.DiscCacheAware;
 import com.nostra13.universalimageloader.core.assist.DiscCacheUtil;
+import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.squareup.otto.Bus;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
 
 public abstract class AbstractImageViewActivity extends ActionBarActivity {
     public static final String ITEM_POSITION = "item position";
     public static final String JSON_LIST = "json list";
+    private static final String TAG = AbstractImageViewActivity.class.getName();
     @Inject
     protected Bus mBus;
     @Inject
@@ -146,6 +155,25 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
                 MenuItemCompat.getActionProvider(item);
     }
 
+    protected File getImageDirectory() {
+        File tutDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "TuT");
+
+        if (!tutDir.isDirectory()) {
+            if (!tutDir.delete()) {
+                Log.w(TAG, String.format("cannot remove %s", tutDir.toString()));
+                return null;
+            }
+            if (!tutDir.mkdir()) {
+                Log.w(TAG, String.format("cannot create %s", tutDir.toString()));
+                return null;
+            }
+        }
+
+        return tutDir;
+    }
+
+
     /**
      * A {@link android.support.v4.app.FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -175,4 +203,37 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
             return String.format(getString(R.string.format_info_page_order), position);
         }
     }
+
+    /**
+     * A {@link com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener}
+     * that saves the image to external storage
+     */
+    protected class ImageSaver extends SimpleImageLoadingListener {
+
+        @Override
+        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+            saveImage(imageUri, loadedImage);
+            Toast.makeText(AbstractImageViewActivity.this, R.string.message_info_success,
+                           Toast.LENGTH_SHORT).show();
+        }
+
+        private void saveImage(String imageUri, Bitmap loadedImage) {
+            File tutDir = getImageDirectory();
+            if (tutDir != null) {
+                try {
+                    File file = new File(tutDir, String.format("%s.png", Integer.toHexString(
+                            imageUri.hashCode())));
+                    FileOutputStream stream = new FileOutputStream(file);
+                    loadedImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Toast.makeText(AbstractImageViewActivity.this, R.string.message_error_save_image,
+                               Toast.LENGTH_LONG).show();
+            }
+        }
+
+    }
+
 }

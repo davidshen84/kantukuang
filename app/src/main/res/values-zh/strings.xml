@@ -1,4 +1,4 @@
-<resources>
+﻿<resources>
 
     <string name="app_name">优图</string>
     <string name="navigation_drawer_open">开启导航栏</string>
@@ -37,5 +37,7 @@
     <string name="disclaimer">所有图片都来之网络，版权都归属原作者。</string>
     <string name="button_iagree">同意</string>
     <string name="weibo_image_view">微图</string>
+    <string name="action_save">保存</string>
+    <string name="message_error_save_image">无法保存图片。</string>
 
 </resources>

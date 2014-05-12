@@ -5,6 +5,8 @@ import android.view.MenuItem;
 
 import com.google.api.client.json.JsonParser;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
+import com.google.inject.Inject;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.shen.xi.android.tut.sinablog.ArticleInfo;
 
 import java.io.IOException;
@@ -18,9 +20,12 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
 
     public static final String QING_SOURCE = "qing source";
     public static final String QING_TITLE = "qing title";
+    private final ImageSaver mImageSaver = new ImageSaver();
     private List<ArticleInfo> mArticleInfoList;
     private MainActivity.ImageSource mSource = Unknown;
     private List<String> mImageUrlList;
+    @Inject
+    private ImageLoader mImageLoader;
 
     public QingImageViewActivity() {
         super(R.menu.qing_image_view);
@@ -88,9 +93,15 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        return id == R.id.action_settings || super.onOptionsItemSelected(item);
+        switch (id) {
+            case R.id.action_settings:
+                return true;
+            case R.id.action_save_image:
+                mImageLoader.loadImage(getImageUrlByOrder(getCurrentItem()), mImageSaver);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
-
 
 }
