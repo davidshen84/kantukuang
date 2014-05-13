@@ -10,7 +10,7 @@ import android.widget.ImageView;
 
 import com.google.inject.Inject;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
+import com.shen.xi.android.tut.util.MySimpleImageLoadingListener;
 import com.squareup.otto.Bus;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -63,18 +63,17 @@ public class ImageViewFragment extends Fragment {
 
         ImageView imageView = (ImageView) view.findViewById(android.R.id.content);
 
-        mImageLoader.displayImage(((AbstractImageViewActivity) getActivity()).getImageUrlByOrder(
-                                          mOrder), imageView,
-                                  new SimpleImageLoadingListener() {
-                                      @Override
-                                      public void onLoadingComplete(String imageUri, View view,
-                                                                    Bitmap loadedImage) {
-                                          ImageView imageView = (ImageView) view;
-                                          imageView.setImageBitmap(loadedImage);
-
-                                          mPhotoViewAttacher = new PhotoViewAttacher(imageView);
-                                      }
-                                  }
+        mImageLoader.displayImage(
+                ((AbstractImageViewActivity) getActivity()).getImageUrlByOrder(mOrder),
+                imageView,
+                new MySimpleImageLoadingListener(container.getMeasuredWidth(),
+                                                 container.getMeasuredHeight()) {
+                    @Override
+                    public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                        super.onLoadingComplete(imageUri, view, loadedImage);
+                        mPhotoViewAttacher = new PhotoViewAttacher((ImageView) view);
+                    }
+                }
         );
 
         return view;
