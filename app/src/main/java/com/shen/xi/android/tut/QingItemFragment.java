@@ -55,6 +55,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     private final SelectItemEvent mSelectItemEvent = new SelectItemEvent();
     private final SectionAttachEvent mSectionAttachEvent = new SectionAttachEvent();
     private String mQingTag;
+    private MySimpleImageLoadingListener mImageLoadingListener;
     /**
      * The fragment's ListView/GridView.
      */
@@ -131,11 +132,17 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         mListView.setOnItemClickListener(this);
 
         mEmptyView = (TextView) view.findViewById(android.R.id.empty);
+
         // set up ads
         AdView adView = (AdView) view.findViewById(R.id.adView);
         adView.loadAd(new AdRequest.Builder()
                               .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
                               .build());
+
+        // initialize the image loading listener
+        mImageLoadingListener = new MySimpleImageLoadingListener(
+                container.getMeasuredWidth(),
+                getResources().getDimensionPixelSize(R.dimen.item_image_height));
 
         return view;
     }
@@ -307,10 +314,6 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
 
     }
 
-    public List<ArticleInfo> getImageUrlList() {
-        return mQingTagDriver.getArticleInfoList();
-    }
-
     private class ArticleInfoArrayAdapter extends ArrayAdapter<ArticleInfo> {
         @Inject
         private LayoutInflater mInflater;
@@ -328,23 +331,14 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            MySimpleImageLoadingListener listener = null;
-
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.item_image, parent, false);
             } else {
                 ((ImageView) convertView).setImageBitmap(null);
             }
 
-            if (listener == null) {
-                int maxWidth = QingItemFragment.this.getView().getWidth();
-                int maxHeight = getResources().getDimensionPixelSize(
-                        R.dimen.item_image_height);
-                listener = new MySimpleImageLoadingListener(maxWidth, maxHeight);
-            }
-
             mImageLoader.displayImage(getItem(position).imageSrc, (ImageView) convertView,
-                                      displayImageOptions, listener);
+                                      displayImageOptions, mImageLoadingListener);
 
             return convertView;
         }
