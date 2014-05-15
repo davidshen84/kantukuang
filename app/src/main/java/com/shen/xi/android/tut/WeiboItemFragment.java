@@ -20,8 +20,10 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.util.Lists;
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
@@ -37,6 +39,7 @@ import com.shen.xi.android.tut.util.MySimpleImageLoadingListener;
 import com.shen.xi.android.tut.util.Util;
 import com.shen.xi.android.tut.weibo.WeiboClient;
 import com.shen.xi.android.tut.weibo.WeiboStatus;
+import com.shen.xi.android.tut.weibo.WeiboThumbnail;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 
@@ -44,6 +47,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout;
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
@@ -270,13 +275,49 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         Bundle extras = new Bundle();
-        extras.putInt(AbstractImageViewActivity.ITEM_POSITION, i);
+
 
         String jsonList = "[]";
-        try {
-            jsonList = mJsonFactory.toString(mWeiboStatuses);
-        } catch (IOException e) {
-            e.printStackTrace();
+        List<WeiboThumbnail> picUrls = mWeiboStatuses.get(i).picUrls;
+        if (picUrls == null || picUrls.size() == 0) {
+            picUrls = mWeiboStatuses.get(i).repostedStatus.picUrls;
+        }
+
+        if (picUrls != null && picUrls.size() > 0) {
+            try {
+                Iterable<String> strings = Iterables
+                        .transform(picUrls,
+                                   new Function<WeiboThumbnail, String>() {
+                                       @Nullable
+                                       @Override
+                                       public String apply(@Nullable WeiboThumbnail input) {
+                                           return input.thumbnail_pic.replace("thumbnail", "large");
+                                       }
+                                   }
+                        );
+                jsonList = mJsonFactory.toString(strings);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            extras.putInt(AbstractImageViewActivity.ITEM_POSITION, 0);
+        } else {
+            try {
+                Iterable<String> strings = Iterables
+                        .transform(mWeiboStatuses,
+                                   new Function<WeiboStatus, String>() {
+                                       @Nullable
+                                       @Override
+                                       public String apply(
+                                               @Nullable WeiboStatus input) {
+                                           return input.getImageUrl();
+                                       }
+                                   }
+                        );
+                jsonList = mJsonFactory.toString(strings);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            extras.putInt(AbstractImageViewActivity.ITEM_POSITION, i);
         }
         extras.putString(AbstractImageViewActivity.JSON_LIST, jsonList);
 

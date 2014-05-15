@@ -11,7 +11,6 @@ import com.google.inject.Inject;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.shen.xi.android.tut.event.FilterStatusEvent;
 import com.shen.xi.android.tut.weibo.WeiboClient;
-import com.shen.xi.android.tut.weibo.WeiboStatus;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,7 +20,7 @@ public class WeiboImageViewActivity extends AbstractImageViewActivity {
     private static final String TAG = WeiboImageViewActivity.class.getName();
     private final FilterStatusEvent mFilterStatusEvent = new FilterStatusEvent();
     private final ImageSaver mImageSaver = new ImageSaver();
-    private List<WeiboStatus> mStatusList;
+    private List<String> mStatusList;
     @Inject
     private WeiboClient weiboClient;
     @Inject
@@ -45,7 +44,7 @@ public class WeiboImageViewActivity extends AbstractImageViewActivity {
 
         try {
             JsonParser jsonParser = mJsonFactory.createJsonParser(jsonList);
-            mStatusList = (List<WeiboStatus>) jsonParser.parseArray(List.class, WeiboStatus.class);
+            mStatusList = (List<String>) jsonParser.parseArray(List.class, String.class);
         } catch (IOException e) {
             e.printStackTrace();
             finish();
@@ -79,7 +78,7 @@ public class WeiboImageViewActivity extends AbstractImageViewActivity {
 
     @Override
     public String getImageUrlByOrder(int order) {
-        return mStatusList.get(order).getImageUrl();
+        return mStatusList.get(order);
     }
 
     @Override
@@ -97,20 +96,21 @@ public class WeiboImageViewActivity extends AbstractImageViewActivity {
                 return true;
 
             case R.id.action_weibo_add_blacklist:
-                long uid;
-                WeiboStatus status = mStatusList.get(getCurrentItem());
+/*                long uid;
+                String status = mStatusList.get(getCurrentItem());
                 if (status.repostedStatus != null) {
                     uid = status.repostedStatus.uid;
                 } else {
                     uid = status.uid;
                 }
 
-                blockAccount(uid);
-
+                blockAccount(uid);*/
                 return true;
+
             case R.id.action_save_image:
                 mImageLoader.loadImage(getImageUrlByOrder(getCurrentItem()), mImageSaver);
                 return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }

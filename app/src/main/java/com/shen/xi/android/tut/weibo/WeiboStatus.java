@@ -2,6 +2,8 @@ package com.shen.xi.android.tut.weibo;
 
 import com.google.api.client.util.Key;
 
+import java.util.List;
+
 public final class WeiboStatus {
 
     @Key("created_at")
@@ -16,6 +18,8 @@ public final class WeiboStatus {
     public String id;
     @Key("retweeted_status")
     public WeiboStatus repostedStatus;
+    @Key("pic_urls")
+    public List<WeiboThumbnail> picUrls;
 
     /**
      * the user id who authored this status
