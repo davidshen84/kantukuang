@@ -7,13 +7,8 @@
         android:title="@string/action_share"
         android:icon="@android:drawable/ic_menu_share"
         app:actionProviderClass="android.support.v7.widget.ShareActionProvider"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="always"/>
 
-    <item
-        android:id="@+id/action_save_image"
-        android:title="@string/action_save"
-        android:icon="@android:drawable/stat_sys_download"
-        app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/action_set_wallpaper"
@@ -22,10 +17,18 @@
         app:showAsAction="ifRoom"/>
 
     <item
-        android:id="@+id/action_weibo_add_blacklist"
-        android:title="@string/action_add_blacklist"
-        android:icon="@drawable/ic_action_rating_bad"
-        app:showAsAction="never"/>
+        android:id="@+id/action_save_image"
+        android:title="@string/action_save"
+        android:icon="@android:drawable/stat_sys_download"
+        app:showAsAction="ifRoom"/>
+
+    <!--
+        <item
+            android:id="@+id/action_weibo_add_blacklist"
+            android:title="@string/action_add_blacklist"
+            android:icon="@drawable/ic_action_rating_bad"
+            app:showAsAction="never"/>
+    -->
 
     <item
         android:id="@+id/menu_settings"

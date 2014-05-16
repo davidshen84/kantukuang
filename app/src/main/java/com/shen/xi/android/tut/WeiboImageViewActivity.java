@@ -90,8 +90,9 @@ public class WeiboImageViewActivity extends AbstractImageViewActivity {
                 this.finish();
                 return true;
 
+/*
             case R.id.action_weibo_add_blacklist:
-/*                long uid;
+                long uid;
                 String status = mStatusList.get(getCurrentItem());
                 if (status.repostedStatus != null) {
                     uid = status.repostedStatus.uid;
@@ -99,9 +100,9 @@ public class WeiboImageViewActivity extends AbstractImageViewActivity {
                     uid = status.uid;
                 }
 
-                blockAccount(uid);*/
+                blockAccount(uid);
                 return true;
-
+*/
             default:
                 return super.onOptionsItemSelected(item);
         }
