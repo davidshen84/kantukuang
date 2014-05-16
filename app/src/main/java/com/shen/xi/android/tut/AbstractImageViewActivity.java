@@ -252,6 +252,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
                             imageUri.hashCode())));
                     FileOutputStream stream = new FileOutputStream(file);
                     loadedImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                    Toast.makeText(AbstractImageViewActivity.this, R.string.message_info_success, Toast.LENGTH_SHORT).show();
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -277,6 +278,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
                 WallpaperManager.getInstance(AbstractImageViewActivity.this).setStream(
                         new ByteArrayInputStream(outputStream.toByteArray())
                 );
+                Toast.makeText(AbstractImageViewActivity.this, R.string.message_info_success, Toast.LENGTH_SHORT).show();
             } catch (IOException e) {
                 e.printStackTrace();
             }
