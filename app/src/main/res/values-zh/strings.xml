@@ -39,5 +39,6 @@
     <string name="weibo_image_view">微图</string>
     <string name="action_save">保存</string>
     <string name="message_error_save_image">无法保存图片。</string>
+    <string name="action_wallpaper">设为墙纸</string>
 
 </resources>

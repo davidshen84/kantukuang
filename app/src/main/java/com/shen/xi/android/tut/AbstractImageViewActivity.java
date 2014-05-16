@@ -1,5 +1,6 @@
 package com.shen.xi.android.tut;
 
+import android.app.WallpaperManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -24,20 +25,26 @@ import com.google.ads.AdView;
 import com.google.api.client.json.JsonFactory;
 import com.google.inject.Inject;
 import com.nostra13.universalimageloader.cache.disc.DiscCacheAware;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.DiscCacheUtil;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import com.squareup.otto.Bus;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 
 public abstract class AbstractImageViewActivity extends ActionBarActivity {
     public static final String ITEM_POSITION = "item position";
     public static final String JSON_LIST = "json list";
     private static final String TAG = AbstractImageViewActivity.class.getName();
+    private final ImageSaver mImageSaver = new ImageSaver();
+    private final WallpaperSaver mWallpaperSaver = new WallpaperSaver();
     @Inject
     protected Bus mBus;
     @Inject
@@ -50,6 +57,8 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
     private ShareActionProvider mActionProvider;
     @Inject
     private DiscCacheAware mDiscCache;
+    @Inject
+    private ImageLoader mImageLoader;
 
     public AbstractImageViewActivity(int menuId) {
         mMenuId = menuId;
@@ -120,6 +129,24 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
         doEasyShare(getCurrentItem());
 
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.action_save_image:
+                mImageLoader.loadImage(getImageUrlByOrder(getCurrentItem()), mImageSaver);
+                return true;
+
+            case R.id.action_set_wallpaper:
+                mImageLoader.loadImage(getImageUrlByOrder(getCurrentItem()),
+                                       mWallpaperSaver);
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     /**
@@ -207,7 +234,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
      * A {@link com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener}
      * that saves the image to external storage
      */
-    protected class ImageSaver extends SimpleImageLoadingListener {
+    private class ImageSaver extends SimpleImageLoadingListener {
 
         @Override
         public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
@@ -235,4 +262,23 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
 
     }
 
+    /**
+     * A {@link com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener}
+     * that set the image as wallpaper
+     */
+    private class WallpaperSaver extends SimpleImageLoadingListener {
+        @Override
+        public void onLoadingComplete(String imageUri, View view,
+                                      Bitmap loadedImage) {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            loadedImage.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
+            try {
+                WallpaperManager.getInstance(AbstractImageViewActivity.this).setStream(
+                        new ByteArrayInputStream(outputStream.toByteArray())
+                );
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }
