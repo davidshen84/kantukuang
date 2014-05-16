@@ -17,6 +17,12 @@
         app:showAsAction="ifRoom"/>
 
     <item
+        android:id="@+id/action_set_wallpaper"
+        android:title="@string/action_wallpaper"
+        android:icon="@android:drawable/ic_menu_crop"
+        app:showAsAction="ifRoom"/>
+
+    <item
         android:id="@+id/action_settings"
         android:title="@string/action_settings"
         android:orderInCategory="100"

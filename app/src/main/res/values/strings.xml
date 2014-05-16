@@ -40,5 +40,6 @@
     <string name="weibo_image_view">Weibo Image</string>
     <string name="action_save">Save</string>
     <string name="message_error_save_image">Cannot save image.</string>
+    <string name="action_wallpaper">Set as Wallpaper</string>
 
 </resources>

@@ -12,7 +12,13 @@
     <item
         android:id="@+id/action_save_image"
         android:title="@string/action_save"
-        android:icon="@android:drawable/ic_menu_save"
+        android:icon="@android:drawable/stat_sys_download"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/action_set_wallpaper"
+        android:title="@string/action_wallpaper"
+        android:icon="@android:drawable/ic_menu_crop"
         app:showAsAction="ifRoom"/>
 
     <item
