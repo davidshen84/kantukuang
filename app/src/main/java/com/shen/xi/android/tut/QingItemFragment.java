@@ -254,7 +254,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
                 }
             }
 
-        }.execute(mArticleInfoList.get(position).href);
+        }.execute(mArticleInfoList.get(position).href());
     }
 
     /**
@@ -300,6 +300,8 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
                 if (mPullToRefreshLayout.isRefreshing())
                     mPullToRefreshLayout.setRefreshComplete();
 
+                Log.d(TAG, "has article? " + (articleInfoList != null));
+                Log.d(TAG, "artile count = " + articleInfoList.size());
                 if (articleInfoList != null && articleInfoList.size() > 0) {
                     QingItemFragment.this.mArticleInfoList.addAll(0, articleInfoList);
                     mAdapter.notifyDataSetChanged();
@@ -337,7 +339,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
                 ((ImageView) convertView).setImageBitmap(null);
             }
 
-            mImageLoader.displayImage(getItem(position).imageSrc, (ImageView) convertView,
+            mImageLoader.displayImage(getItem(position).imageSrc(), (ImageView) convertView,
                                       displayImageOptions, mImageLoadingListener);
 
             return convertView;

@@ -78,7 +78,7 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
     protected String getImageUrlByOrder(int order) {
         return mSource == QingTag
                 // switch to the high-def version
-                ? mArticleInfoList.get(order).imageSrc.replace("mw205", "mw600")
+                ? mArticleInfoList.get(order).imageSrc().replace("mw205", "mw600")
                 : mImageUrlList.get(order);
     }
 
