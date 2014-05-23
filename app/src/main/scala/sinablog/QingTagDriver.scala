@@ -19,21 +19,14 @@ import java.util.Collection
 
 import scala.collection.JavaConversions._
 
-
-class QingTagDriver() {
+class QingTagDriver @Inject() (@Named("qing request factory") requestFactory: HttpRequestFactory) {
 
   val BASE_URI = "qing.blog.sina.com.cn"
   val TAG = classOf[QingTagDriver].getName
 
-  var mHttpRequestFactory: HttpRequestFactory = null
+  var mHttpRequestFactory: HttpRequestFactory = requestFactory
   var mTagResult: TagResult = null
   var mArticleInfoList: ArrayList[ArticleInfo] = null
-
-  @Inject
-  def this(@Named("qing request factory") requestFactory: HttpRequestFactory) = {
-    this()
-    mHttpRequestFactory = requestFactory
-  }
 
   /**
    * Helper method to build the URL object

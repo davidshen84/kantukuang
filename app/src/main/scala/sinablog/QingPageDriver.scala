@@ -16,13 +16,10 @@ import java.util.List
 import scala.collection.JavaConversions._
 
 
-class QingPageDriver {
+class QingPageDriver @Inject() {
 
   private val TAG = classOf[QingPageDriver].getName
   private val mImageUrlList: List[String] = new ArrayList[String]
-
-  @Inject
-  def QingTagDriver() = { this }
 
   def getImageUrlList: List[String] = mImageUrlList
 
