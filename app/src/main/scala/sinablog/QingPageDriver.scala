@@ -22,8 +22,7 @@ class QingPageDriver {
   private val mImageUrlList: List[String] = new ArrayList[String]
 
   @Inject
-  def QingPageDriver() = {
-  }
+  def QingTagDriver() = { this }
 
   def getImageUrlList: List[String] = mImageUrlList
 

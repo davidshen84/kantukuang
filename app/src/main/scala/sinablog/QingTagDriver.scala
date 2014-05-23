@@ -14,25 +14,24 @@ import org.jsoup.nodes.{Element, Document}
 import org.jsoup.select.Elements
 
 import java.io.IOException
-import java.util
 import java.util.ArrayList
 import java.util.Collection
 
 import scala.collection.JavaConversions._
-import scala.util.control.Breaks._
 
 
-class QingTagDriver {
+class QingTagDriver() {
 
   val BASE_URI = "qing.blog.sina.com.cn"
   val TAG = classOf[QingTagDriver].getName
 
   var mHttpRequestFactory: HttpRequestFactory = null
   var mTagResult: TagResult = null
-  var mArticleInfoList: util.ArrayList[ArticleInfo] = null
+  var mArticleInfoList: ArrayList[ArticleInfo] = null
 
   @Inject
-  def QingTagDriver(@Named("qing request factory") requestFactory: HttpRequestFactory) = {
+  def this(@Named("qing request factory") requestFactory: HttpRequestFactory) = {
+    this()
     mHttpRequestFactory = requestFactory
   }
 
