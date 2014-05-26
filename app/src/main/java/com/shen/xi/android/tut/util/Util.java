@@ -32,10 +32,10 @@ public final class Util {
             if (status == null)
                 return false;
 
-            if (status.repostedStatus != null) {
-                return !mBlackList.contains(status.repostedStatus.uid);
+            if (status.repostedStatus() != null) {
+                return !mBlackList.contains(status.repostedStatus().uid());
             } else {
-                return !mBlackList.contains(status.uid);
+                return !mBlackList.contains(status.uid());
             }
         }
     }

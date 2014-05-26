@@ -19,7 +19,7 @@ public class UtilTest extends TestCase {
         Predicate<WeiboStatus> predictor = Util.createBlacklistPredictor(blackList);
 
         WeiboStatus status = new WeiboStatus();
-        status.uid = 123L;
+        status.uid_$eq(123L);
         boolean apply = predictor.apply(status);
 
         assertFalse(apply);
@@ -27,13 +27,13 @@ public class UtilTest extends TestCase {
 
     public void testFilterRepostStatus() {
         Collection<Long> blackList = Lists.newArrayList();
-        blackList.add(123L);
+        blackList.add(new Long(123L));
         Predicate<WeiboStatus> predictor = Util.createBlacklistPredictor(blackList);
 
         WeiboStatus status = new WeiboStatus();
-        status.uid = 321L;
-        status.repostedStatus = new WeiboStatus();
-        status.repostedStatus.uid = 123L;
+        status.uid_$eq(321L);
+        status.repostedStatus_$eq(new WeiboStatus());
+        status.repostedStatus().uid_$eq(123L);
         boolean apply = predictor.apply(status);
 
         assertFalse(apply);
@@ -45,7 +45,7 @@ public class UtilTest extends TestCase {
         Predicate<WeiboStatus> predictor = Util.createBlacklistPredictor(blackList);
 
         WeiboStatus status = new WeiboStatus();
-        status.uid = 111L;
+        status.uid_$eq(111L);
         boolean apply = predictor.apply(status);
 
         assertTrue(apply);

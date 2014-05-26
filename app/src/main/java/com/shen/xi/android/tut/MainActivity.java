@@ -274,7 +274,7 @@ public class MainActivity extends ActionBarActivity {
             String message = getResources()
                     .getString(R.string.format_info_new_data, statusList.size());
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-            lastId = statusList.get(0).id;
+            lastId = statusList.get(0).id();
         }
         // update view
         mBus.post(mRefreshCompleteEvent

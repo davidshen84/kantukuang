@@ -2,6 +2,7 @@ package com.shen.xi.android.tut;
 
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -47,9 +48,10 @@ public class WeiboClientManager {
                     String sinceId = strings[0];
                     WeiboTimeline timeline = mClient.getHomeTimeline(sinceId);
 
-                    if (timeline != null && timeline.statuses.size() > 0) {
+                    if (timeline != null && timeline.statuses().size() > 0) {
                         Collection<WeiboStatus> statusCollection =
-                                Collections2.filter(timeline.statuses, Util.ImageUrlPredictor);
+                            Collections2.filter(timeline.statuses(), Util.ImageUrlPredictor);
+
                         statusList = Lists.newArrayList(statusCollection);
                     }
                 } catch (WeiboTimelineException e) {

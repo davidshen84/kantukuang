@@ -31,7 +31,7 @@ public class WeiboClientE2ETest extends TestCase {
         WeiboTimeline timeline = mClient.getHomeTimeline(null);
 
         assertNotNull(timeline);
-        assertTrue(timeline.statuses.size() > 0);
+        assertTrue(timeline.statuses().size() > 0);
     }
 
 }

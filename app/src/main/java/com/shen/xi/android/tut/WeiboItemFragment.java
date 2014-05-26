@@ -278,9 +278,9 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
 
 
         String jsonList = "[]";
-        List<WeiboThumbnail> picUrls = mWeiboStatuses.get(i).picUrls;
+        List<WeiboThumbnail> picUrls = mWeiboStatuses.get(i).picUrls();
         if (picUrls == null || picUrls.size() == 0) {
-            picUrls = mWeiboStatuses.get(i).repostedStatus.picUrls;
+            picUrls = mWeiboStatuses.get(i).repostedStatus().picUrls();
         }
 
         if (picUrls != null && picUrls.size() > 0) {
@@ -291,7 +291,7 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
                                        @Nullable
                                        @Override
                                        public String apply(@Nullable WeiboThumbnail input) {
-                                           return input.thumbnail_pic.replace("thumbnail", "large");
+                                           return input.thumbnail_pic().replace("thumbnail", "large");
                                        }
                                    }
                         );

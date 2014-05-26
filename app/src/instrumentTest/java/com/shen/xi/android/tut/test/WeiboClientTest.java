@@ -31,16 +31,16 @@ public class WeiboClientTest extends TestCase {
 
         assertNotNull(timeline);
 
-        assertTrue(timeline.statuses.size() > 0);
-        assertNotNull(timeline.statuses.get(0).imageUrl);
+        assertTrue(timeline.statuses().size() > 0);
+        assertNotNull(timeline.statuses().get(0).imageUrl());
     }
 
     public void testGetTimeline_uid() throws WeiboTimelineException {
         WeiboTimeline timeline = client.getPublicTimeline(null);
 
-        WeiboStatus status = timeline.statuses.get(0);
-        assertNotNull(status.uid);
-        assertFalse(0L == status.uid);
+        WeiboStatus status = timeline.statuses().get(0);
+        assertNotNull(status.uid());
+        assertFalse(0L == status.uid());
     }
 
 }
