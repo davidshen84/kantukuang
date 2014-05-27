@@ -22,14 +22,6 @@
         android:icon="@android:drawable/stat_sys_download"
         app:showAsAction="ifRoom"/>
 
-    <!--
-        <item
-            android:id="@+id/action_weibo_add_blacklist"
-            android:title="@string/action_add_blacklist"
-            android:icon="@drawable/ic_action_rating_bad"
-            app:showAsAction="never"/>
-    -->
-
     <item
         android:id="@+id/menu_settings"
         android:title="@string/menu_settings"

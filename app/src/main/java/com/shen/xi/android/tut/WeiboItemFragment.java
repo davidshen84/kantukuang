@@ -29,7 +29,7 @@ import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.shen.xi.android.tut.event.FilterStatusEvent;
 import com.shen.xi.android.tut.event.RefreshCompleteEvent;
 import com.shen.xi.android.tut.event.RefreshWeiboEvent;
@@ -81,7 +81,6 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
     @Inject
     private Bus mBus;
     private String mSectionName;
-    private boolean mFilterBlackList;
     @Inject
     private JsonFactory mJsonFactory;
 
@@ -115,7 +114,6 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
         mActivity = (MainActivity) activity;
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(activity);
-        mFilterBlackList = sp.getBoolean(PREF_FILTER_BLACKLIST, true);
     }
 
     @Override
@@ -222,8 +220,6 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
     public void refreshComplete(RefreshCompleteEvent event) {
         Collection<WeiboStatus> statusList = event.getStatusList();
         if (statusList != null && statusList.size() > 0) {
-            if (mFilterBlackList)
-                statusList = filterBlacklist(statusList);
             mWeiboStatuses.addAll(0, statusList);
             mWeiboItemViewArrayAdapter.notifyDataSetChanged();
 
