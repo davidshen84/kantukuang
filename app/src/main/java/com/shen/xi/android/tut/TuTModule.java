@@ -27,12 +27,12 @@ import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
-import com.nostra13.universalimageloader.cache.disc.DiscCacheAware;
+import com.nostra13.universalimageloader.cache.disc.DiskCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.squareup.otto.Bus;
 import com.shen.xi.android.tut.weibo.WeiboClient;
+import com.squareup.otto.Bus;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -94,7 +94,7 @@ public class TuTModule extends AbstractModule {
         // normal image resolution
         bind(DisplayImageOptions.class).toInstance(
                 new DisplayImageOptions.Builder()
-                        .cacheOnDisc(true)
+                        .cacheOnDisk(true)
                         .build()
         );
 
@@ -130,7 +130,7 @@ public class TuTModule extends AbstractModule {
     private DisplayImageOptions provideDisplayImageOptions(BitmapFactory.Options options) {
         return new DisplayImageOptions.Builder()
                 .decodingOptions(options)
-                .cacheOnDisc(true)
+                .cacheOnDisk(true)
                 .build();
     }
 
@@ -143,7 +143,8 @@ public class TuTModule extends AbstractModule {
     @Provides
     @Singleton
     private HttpExecuteInterceptor provideHttpExecuteInterceptor(
-            @Named("weibo client id") String clientId, @Named("weibo client secret") String clientSecret) {
+            @Named("weibo client id") String clientId,
+            @Named("weibo client secret") String clientSecret) {
         return new ClientParametersAuthentication(clientId, clientSecret);
     }
 
@@ -212,8 +213,8 @@ public class TuTModule extends AbstractModule {
 
     @Provides
     @Singleton
-    private DiscCacheAware provideDiscCacheAware(ImageLoader imageLoader) {
-        return imageLoader.getDiscCache();
+    private DiskCache provideDiscCacheAware(ImageLoader imageLoader) {
+        return imageLoader.getDiskCache();
     }
 
     private static class TypeLiteralCollectionString extends TypeLiteral<Collection<String>> {

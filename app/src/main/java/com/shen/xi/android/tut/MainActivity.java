@@ -35,8 +35,6 @@ import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
-import static com.shen.xi.android.tut.MainActivity.ImageSource.Weibo;
-
 public class MainActivity extends ActionBarActivity {
 
     public static final String PREF_DISCLAIMER_AGREE = "agree to disclaimer";
@@ -135,21 +133,17 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         if (!mNavigationDrawerFragment.isDrawerOpen()) {
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.main, menu);
-            if (mSectionType != Weibo)
-                menu.findItem(R.id.action_edit_blacklist).setVisible(false);
             restoreActionBar();
 
             return true;
         }
 
         return super.onCreateOptionsMenu(menu);
-
     }
 
     private void restoreNavigationDrawerState() {
@@ -181,13 +175,6 @@ public class MainActivity extends ActionBarActivity {
                 refreshListener.onRefreshStarted(null);
 
                 return true;
-
-            case R.id.action_edit_blacklist: {
-                Intent intent = new Intent(this, EditBlacklistActivity.class);
-                startActivity(intent);
-            }
-
-            return true;
         }
 
         return super.onOptionsItemSelected(item);
