@@ -24,7 +24,7 @@ scalaVersion := "2.10.3"
 libraryDependencies ++= Seq(
   "com.android.support" % "support-v4" % "19.1.0",
   aar("com.android.support" % "appcompat-v7" % "19.1.0"),
-  "com.nostra13.universalimageloader" % "universal-image-loader" % "1.9.1",
+  "com.nostra13.universalimageloader" % "universal-image-loader" % "1.9.2",
   apklib("com.viewpagerindicator" % "library" % "2.4.1"),
   "com.google.guava" % "guava" % "17.0",
   "com.squareup" % "otto" % "1.3.4",
