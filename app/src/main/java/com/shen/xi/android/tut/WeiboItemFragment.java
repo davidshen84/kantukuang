@@ -19,24 +19,19 @@ import android.widget.TextView;
 import com.google.ads.AdRequest;
 import com.google.ads.AdView;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.util.Lists;
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
-import com.shen.xi.android.tut.event.FilterStatusEvent;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.shen.xi.android.tut.event.RefreshCompleteEvent;
 import com.shen.xi.android.tut.event.RefreshWeiboEvent;
 import com.shen.xi.android.tut.event.SectionAttachEvent;
 import com.shen.xi.android.tut.event.SelectItemEvent;
 import com.shen.xi.android.tut.util.MySimpleImageLoadingListener;
-import com.shen.xi.android.tut.util.Util;
 import com.shen.xi.android.tut.weibo.WeiboClient;
 import com.shen.xi.android.tut.weibo.WeiboStatus;
 import com.shen.xi.android.tut.weibo.WeiboThumbnail;
@@ -62,7 +57,6 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
     private static final String ARG_TAG = "tag";
     private static final String TAG = WeiboItemFragment.class.getName();
     private static final String ARG_ID = "id";
-    private static final String PREF_FILTER_BLACKLIST = "filter blacklist";
     private final SectionAttachEvent mSectionAttachEvent = new SectionAttachEvent();
     private final RefreshWeiboEvent mRefreshWeiboEvent = new RefreshWeiboEvent();
     private final List<WeiboStatus> mWeiboStatuses = new ArrayList<WeiboStatus>();
@@ -81,7 +75,6 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
     @Inject
     private Bus mBus;
     private String mSectionName;
-    private boolean mFilterBlackList;
     @Inject
     private JsonFactory mJsonFactory;
 
@@ -115,7 +108,6 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
         mActivity = (MainActivity) activity;
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(activity);
-        mFilterBlackList = sp.getBoolean(PREF_FILTER_BLACKLIST, true);
     }
 
     @Override
@@ -221,8 +213,6 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
     public void refreshComplete(RefreshCompleteEvent event) {
         Collection<WeiboStatus> statusList = event.getStatusList();
         if (statusList != null && statusList.size() > 0) {
-            if (mFilterBlackList)
-                statusList = filterBlacklist(statusList);
             mWeiboStatuses.addAll(0, statusList);
             mWeiboItemViewArrayAdapter.notifyDataSetChanged();
 
@@ -233,38 +223,6 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
                              ? getResources().getString(R.string.message_info_empty_list)
                              : null);
         mPullToRefreshLayout.setRefreshComplete();
-    }
-
-    @Subscribe
-    public void filterStatus(FilterStatusEvent event) {
-        if (event.shouldFilter) {
-            List<WeiboStatus> statuses = Lists.newArrayList(mWeiboStatuses);
-            Collection<WeiboStatus> filteredStatuses = filterBlacklist(statuses);
-            mWeiboStatuses.clear();
-            mWeiboStatuses.addAll(filteredStatuses);
-            mWeiboItemViewArrayAdapter.notifyDataSetChanged();
-        }
-    }
-
-    private Collection<WeiboStatus> filterBlacklist(Collection<WeiboStatus> statusList) {
-        Collection<Long> blacklist = getBlacklist();
-        if (blacklist != null && blacklist.size() > 0) {
-            Predicate<WeiboStatus> blacklistPredictor =
-                    Util.createBlacklistPredictor(blacklist);
-            statusList = Collections2.filter(statusList, blacklistPredictor);
-        }
-
-        return statusList;
-    }
-
-    private Collection<Long> getBlacklist() {
-        BlacklistSQLiteOpenHelper sqLiteOpenHelper =
-                new BlacklistSQLiteOpenHelper(mActivity);
-
-        Collection<Long> blockedUIDs = sqLiteOpenHelper.getBlockedUIDs();
-        sqLiteOpenHelper.close();
-
-        return blockedUIDs;
     }
 
     public ArrayList<WeiboStatus> getStatuses() {

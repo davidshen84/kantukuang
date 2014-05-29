@@ -12,6 +12,7 @@ import com.google.api.client.util.Lists;
 import java.util.Collection;
 import java.util.List;
 
+@Deprecated
 class BlacklistSQLiteOpenHelper extends SQLiteOpenHelper {
 
     private static final String TABLE_NAME = "blacklist";

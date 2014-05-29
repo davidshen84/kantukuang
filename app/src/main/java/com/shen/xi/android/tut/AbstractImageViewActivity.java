@@ -24,10 +24,10 @@ import com.google.ads.AdRequest;
 import com.google.ads.AdView;
 import com.google.api.client.json.JsonFactory;
 import com.google.inject.Inject;
-import com.nostra13.universalimageloader.cache.disc.DiscCacheAware;
+import com.nostra13.universalimageloader.cache.disc.DiskCache;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.DiscCacheUtil;
-import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import com.nostra13.universalimageloader.utils.DiskCacheUtils;
 import com.squareup.otto.Bus;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
@@ -56,7 +56,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
     private int mMenuId;
     private ShareActionProvider mActionProvider;
     @Inject
-    private DiscCacheAware mDiscCache;
+    private DiskCache mDiscCache;
     @Inject
     private ImageLoader mImageLoader;
 
@@ -158,7 +158,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
         String imageUrl = getImageUrlByOrder(itemOrder);
         // this logic assume the user loaded the image first
         // so a copy can be found from the disk cache
-        File imageFile = DiscCacheUtil.findInCache(imageUrl, mDiscCache);
+        File imageFile = DiskCacheUtils.findInCache(imageUrl, mDiscCache);
         if (imageFile != null && imageFile.exists()) {
 
             Intent shareIntent = new Intent();
@@ -231,7 +231,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
     }
 
     /**
-     * A {@link com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener}
+     * A {@link com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener}
      * that saves the image to external storage
      */
     private class ImageSaver extends SimpleImageLoadingListener {
@@ -264,7 +264,7 @@ public abstract class AbstractImageViewActivity extends ActionBarActivity {
     }
 
     /**
-     * A {@link com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener}
+     * A {@link com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener}
      * that set the image as wallpaper
      */
     private class WallpaperSaver extends SimpleImageLoadingListener {

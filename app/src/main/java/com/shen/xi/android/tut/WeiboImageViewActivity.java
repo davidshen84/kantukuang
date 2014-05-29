@@ -1,16 +1,13 @@
 package com.shen.xi.android.tut;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.google.ads.AdRequest;
 import com.google.ads.AdView;
 import com.google.api.client.json.JsonParser;
 import com.google.inject.Inject;
-import com.shen.xi.android.tut.event.FilterStatusEvent;
 import com.shen.xi.android.tut.weibo.WeiboClient;
 
 import java.io.IOException;
@@ -19,7 +16,6 @@ import java.util.List;
 
 public class WeiboImageViewActivity extends AbstractImageViewActivity {
     private static final String TAG = WeiboImageViewActivity.class.getName();
-    private final FilterStatusEvent mFilterStatusEvent = new FilterStatusEvent();
     private List<String> mStatusList;
     @Inject
     private WeiboClient weiboClient;
@@ -65,20 +61,6 @@ public class WeiboImageViewActivity extends AbstractImageViewActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-        mFilterStatusEvent.shouldFilter = false;
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        mBus.post(mFilterStatusEvent);
-    }
-
-    @Override
     public String getImageUrlByOrder(int order) {
         return mStatusList.get(order);
     }
@@ -97,49 +79,9 @@ public class WeiboImageViewActivity extends AbstractImageViewActivity {
                 this.finish();
                 return true;
 
-/*
-            case R.id.action_weibo_add_blacklist:
-                long uid;
-                String status = mStatusList.get(getCurrentItem());
-                if (status.repostedStatus != null) {
-                    uid = status.repostedStatus.uid;
-                } else {
-                    uid = status.uid;
-                }
-
-                blockAccount(uid);
-                return true;
-*/
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    private void blockAccount(long uid) {
-
-        new AsyncTask<Long, Long, Long>() {
-
-            @Override
-            protected Long doInBackground(Long... longs) {
-                BlacklistSQLiteOpenHelper sqLiteOpenHelper =
-                        new BlacklistSQLiteOpenHelper(WeiboImageViewActivity.this);
-
-                Long uid = longs[0];
-                sqLiteOpenHelper.insert(uid);
-                sqLiteOpenHelper.close();
-
-                return uid;
-            }
-
-            @Override
-            protected void onPostExecute(Long uid) {
-                String text = String.format(getString(R.string.format_info_add_blacklist),
-                                            uid.intValue());
-                Toast.makeText(WeiboImageViewActivity.this, text, Toast.LENGTH_SHORT).show();
-                mFilterStatusEvent.shouldFilter = true;
-            }
-
-        }.execute(uid);
-
-    }
 }

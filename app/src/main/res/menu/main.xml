@@ -11,12 +11,6 @@
         app:showAsAction="ifRoom"/>
 
     <item
-        android:id="@+id/action_edit_blacklist"
-        android:title="@string/action_edit_blacklist"
-        android:icon="@drawable/ic_action_new"
-        app:showAsAction="never"/>
-
-    <item
         android:id="@+id/menu_settings"
         android:title="@string/menu_settings"
         android:orderInCategory="100"
