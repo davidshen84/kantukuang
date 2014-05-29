@@ -25,7 +25,9 @@
 -keep public class com.shen.xi.android.tut.weibo.* { public *; }
 
 -keep public class org.jsoup.* { public *; }
+
 -keep public class com.squareup.otto.* { public *; }
+
 -keep public class com.nostra13.universalimageloader.core.** { public *; }
 -keep public class com.nostra13.universalimageloader.cache.** { public *; }
 
