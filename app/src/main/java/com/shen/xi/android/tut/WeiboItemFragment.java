@@ -114,6 +114,7 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
         mActivity = (MainActivity) activity;
         SharedPreferences sp = PreferenceManager
                 .getDefaultSharedPreferences(activity);
+        mRefreshWeiboEvent.activity = mActivity;
     }
 
     @Override
@@ -192,7 +193,9 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
     public void onDetach() {
         // clean ref. to activity
         mActivity = null;
+        mRefreshWeiboEvent.activity = null;
         mBus.unregister(this);
+
         super.onDetach();
     }
 
