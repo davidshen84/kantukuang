@@ -49,4 +49,15 @@ public final class WeiboStatus {
 
         return null;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if ((o instanceof WeiboStatus)) {
+            WeiboStatus other = (WeiboStatus) o;
+
+            return other.getImageUrl().equalsIgnoreCase(this.getImageUrl());
+        }
+
+        return false;
+    }
 }
