@@ -10,7 +10,7 @@ import android.widget.ImageView;
 
 import com.google.inject.Inject;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.squareup.otto.Bus;
 
 import uk.co.senab.photoview.PhotoViewAttacher;

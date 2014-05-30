@@ -4,10 +4,7 @@ package com.shen.xi.android.tut;
 import android.os.AsyncTask;
 
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import com.squareup.otto.Bus;
-import com.squareup.otto.Subscribe;
 import com.shen.xi.android.tut.event.RefreshStatusCompleteEvent;
 import com.shen.xi.android.tut.event.RefreshWeiboEvent;
 import com.shen.xi.android.tut.util.Util;
@@ -15,7 +12,10 @@ import com.shen.xi.android.tut.weibo.WeiboClient;
 import com.shen.xi.android.tut.weibo.WeiboStatus;
 import com.shen.xi.android.tut.weibo.WeiboTimeline;
 import com.shen.xi.android.tut.weibo.WeiboTimelineException;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -50,7 +50,13 @@ public class WeiboClientManager {
                     if (timeline != null && timeline.statuses.size() > 0) {
                         Collection<WeiboStatus> statusCollection =
                                 Collections2.filter(timeline.statuses, Util.ImageUrlPredictor);
-                        statusList = Lists.newArrayList(statusCollection);
+                        statusList = new ArrayList<WeiboStatus>();
+
+                        // filter unique items
+                        for(WeiboStatus s: statusCollection) {
+                            if(!statusList.contains(s))
+                                statusList.add(s);
+                        }
                     }
                 } catch (WeiboTimelineException e) {
                     e.printStackTrace();
