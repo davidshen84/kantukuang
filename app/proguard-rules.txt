@@ -12,17 +12,26 @@
 # Add any project specific keep options here:
 -keepattributes Signature
 
--keep public class com.google.inject.** { public *; }
--keep public class com.google.android.gms.ads.** { public *; }
--keep public class com.google.ads.** { public *; }
--keep public class android.support.v7.widget.ShareActionProvider { public *; }
 -keep public class android.support.v4.view.MenuItemCompat.* { public *; }
--keep public class org.jsoup.** { public *; }
+-keep public class android.support.v7.widget.ShareActionProvider { public *; }
+
+-keep public class com.google.ads.** { public *; }
+-keep public class com.google.android.gms.ads.** { public *; }
+-keep public class com.google.inject.** { *; }
+
 -keep public class com.shen.xi.android.tut.** extends android.app.Application
 -keep public class com.shen.xi.android.tut.** extends com.google.inject.AbstractModule { *; }
 -keep public class com.shen.xi.android.tut.weibo.* { public *; }
 -keep public class com.shen.xi.android.tut.sinablog.* { public *; }
 
+-keepnames public class org.jsoup.** { public *; }
+
+-keep public class com.squareup.otto.* { public *; }
+
+-keep public class com.nostra13.universalimageloader.core.** { public *; }
+-keep public class com.nostra13.universalimageloader.cache.** { public *; }
+
+-keep class scala.collection.** { public *; }
 
 -keepclassmembers class ** {
     @com.squareup.otto.Subscribe public *;
@@ -31,11 +40,23 @@
     @com.google.api.client.util.Key *;
     @com.google.inject.Inject *;
     @com.google.inject.name.Named *;
-    @com.google.inject.name.Provides *;
+    @com.google.inject.Provides *;
 }
 
--dontwarn net.sf.cglib.**
 -dontwarn com.google.common.**
+-dontwarn com.google.inject.**
+-dontwarn net.sf.cglib.**
+-dontwarn org.apache.**
+-dontwarn scala.**
+
+-dontnote com.google.**
+-dontnote net.sf.cglib.**
+-dontnote org.apache.**
+-dontnote org.jsoup.**
+-dontnote scala.**
+
+#-dontnote **
+#-dontwarn **
 
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface

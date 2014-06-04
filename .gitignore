@@ -6,3 +6,6 @@ local.properties
 .idea/dictionaries/
 .idea/modules.xml
 *.iml
+target
+*~
+build/
