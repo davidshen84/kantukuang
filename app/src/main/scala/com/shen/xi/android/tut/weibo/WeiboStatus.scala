@@ -1,9 +1,8 @@
 package com.shen.xi.android.tut.weibo
 
 import com.google.api.client.util.Key
-
-import java.util.List
 import java.lang.{Long => JLong}
+import java.util
 
 
 final class WeiboStatus {
@@ -21,15 +20,15 @@ final class WeiboStatus {
   @Key("retweeted_status")
   var repostedStatus: WeiboStatus = null
   @Key("pic_urls")
-  var picUrls: List[WeiboThumbnail] = null
+  var picUrls: util.List[WeiboThumbnail] = null
 
   /**
-    * the user id who authored this status
-    */
+   * the user id who authored this status
+   */
   @Key
   var uid: JLong = null
 
-  def getImageUrl(): String = {
+  def getImageUrl: String = {
     // get self image url
     if (imageUrl != null && !imageUrl.equalsIgnoreCase(""))
       imageUrl
@@ -43,12 +42,19 @@ final class WeiboStatus {
       getThumbnailUrl
   }
 
-  private def getThumbnailUrl(): String = {
+  private def getThumbnailUrl: String = {
     if (thumbnailUrl != null && !thumbnailUrl.equalsIgnoreCase(""))
       thumbnailUrl
     else if (repostedStatus != null)
       repostedStatus.getThumbnailUrl
     else
-      return null
+      null
   }
+
+  override def equals(o: Any) = o match {
+    case other: WeiboStatus => other.getImageUrl.equalsIgnoreCase(this.getImageUrl)
+    case _ => false
+  }
+
+  override def hashCode = getImageUrl.hashCode
 }

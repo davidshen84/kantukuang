@@ -24,12 +24,14 @@
 -keep public class com.shen.xi.android.tut.weibo.* { public *; }
 -keep public class com.shen.xi.android.tut.sinablog.* { public *; }
 
--keep public class org.jsoup.* { public *; }
+-keepnames public class org.jsoup.** { public *; }
 
 -keep public class com.squareup.otto.* { public *; }
 
 -keep public class com.nostra13.universalimageloader.core.** { public *; }
 -keep public class com.nostra13.universalimageloader.cache.** { public *; }
+
+-keep class scala.collection.** { public *; }
 
 -keepclassmembers class ** {
     @com.squareup.otto.Subscribe public *;
@@ -45,12 +47,13 @@
 -dontwarn com.google.inject.**
 -dontwarn net.sf.cglib.**
 -dontwarn org.apache.**
+-dontwarn scala.**
 
 -dontnote com.google.**
 -dontnote net.sf.cglib.**
 -dontnote org.apache.**
 -dontnote org.jsoup.**
--dontnote scala.runtime.**
+-dontnote scala.**
 
 #-dontnote **
 #-dontwarn **

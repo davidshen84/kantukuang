@@ -10,23 +10,20 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 
 import org.jsoup.Jsoup
-import org.jsoup.nodes.{Element, Document}
-import org.jsoup.select.Elements
 
 import java.io.IOException
-import java.util.ArrayList
-import java.util.Collection
 
 import scala.collection.JavaConversions._
+import java.util
 
-class QingTagDriver @Inject() (@Named("qing request factory") requestFactory: HttpRequestFactory) {
+class QingTagDriver @Inject()(@Named("qing request factory") requestFactory: HttpRequestFactory) {
 
   val BASE_URI = "qing.blog.sina.com.cn"
   val TAG = classOf[QingTagDriver].getName
 
   var mHttpRequestFactory: HttpRequestFactory = requestFactory
   var mTagResult: TagResult = null
-  var mArticleInfoList: ArrayList[ArticleInfo] = null
+  var mArticleInfoList: util.ArrayList[ArticleInfo] = null
 
   /**
    * Helper method to build the URL object
@@ -43,15 +40,15 @@ class QingTagDriver @Inject() (@Named("qing request factory") requestFactory: Ht
     try {
       mHttpRequestFactory.buildGetRequest(url)
     } catch {
-      case e: IOException => { Log.d(TAG, e.getMessage()); null; }
+      case e: IOException => Log.d(TAG, e.getMessage()); null;
     }
   }
 
-  def hasLoaded(): Boolean = mTagResult != null
+  def hasLoaded: Boolean = mTagResult != null
 
-  def isLast(): Boolean = hasLoaded() && mTagResult.isLastPage
+  def isLast: Boolean = hasLoaded && mTagResult.isLastPage
 
-  def getArticleInfoList(): ArrayList[ArticleInfo] = mArticleInfoList
+  def getArticleInfoList: util.ArrayList[ArticleInfo] = mArticleInfoList
 
   /**
    * Execute the given request and pares the result
@@ -77,7 +74,7 @@ class QingTagDriver @Inject() (@Named("qing request factory") requestFactory: Ht
         Log.w(TAG, f"request to $mTagResult%s returns no result")
       }
     } catch {
-      case e: IOException => { e.printStackTrace(); false }
+      case e: IOException => e.printStackTrace(); false
     } finally {
       if (response != null) {
         try {
@@ -91,25 +88,15 @@ class QingTagDriver @Inject() (@Named("qing request factory") requestFactory: Ht
     true
   }
 
-  private def parseList(list: Collection[String]): Unit = {
-    mArticleInfoList = new ArrayList[ArticleInfo]()
+  private def parseList(list: util.Collection[String]): Unit = {
+    mArticleInfoList = new util.ArrayList[ArticleInfo]()
 
     val articles = for (i <- list) yield Jsoup.parse(i, BASE_URI)
-    for(article <- articles) {
-      //val articleInfoElements: Elements =
-
-      var imgs = article.select(".itemArticle > .itemInfo > :first-child")
-        .map( e => (e.attr("href"), e.select("img").headOption) ).filterNot( _._2 == None )
-        .map( e => {
-          val articleInfo = new ArticleInfo()
-
-          articleInfo.href = e._1
-          articleInfo.imageSrc = e._2.get.attr("src")
-
-          articleInfo
-        } )
-
-      mArticleInfoList.addAll(imgs)
+    for (article <- articles) {
+      mArticleInfoList.addAll(article.select(".itemArticle > .itemInfo > :first-child")
+        .map(e => (e.attr("href"), e.select("img").headOption)).filterNot(_._2 == None)
+        .map(e => new ArticleInfo() { href = e._1;
+        imageSrc = e._2.get.attr("src") }))
     }
 
   }

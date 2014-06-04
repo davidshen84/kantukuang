@@ -300,9 +300,9 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
                 if (mPullToRefreshLayout.isRefreshing())
                     mPullToRefreshLayout.setRefreshComplete();
 
-                Log.d(TAG, "has article? " + (articleInfoList != null));
-                Log.d(TAG, "artile count = " + articleInfoList.size());
                 if (articleInfoList != null && articleInfoList.size() > 0) {
+                    Log.i(TAG, "article count = " + articleInfoList.size());
+
                     QingItemFragment.this.mArticleInfoList.addAll(0, articleInfoList);
                     mAdapter.notifyDataSetChanged();
 

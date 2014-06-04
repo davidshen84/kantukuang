@@ -1,4 +1,5 @@
 apply plugin: 'android'
+apply plugin: 'android-scala'
 
 repositories {
     mavenCentral()
@@ -34,7 +35,7 @@ android {
         }
 
         debug {
-            runProguard false
+            runProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
@@ -54,6 +55,7 @@ dependencies {
     compile 'com.google.inject:guice:3.0:no_aop'
     compile 'com.mcxiaoke.viewpagerindicator:library:+'
     compile 'com.google.android.gms:play-services:+'
+    compile 'org.scala-lang:scala-library:2.11.0'
 
     androidTestCompile 'com.squareup:fest-android:1.0.+'
 }

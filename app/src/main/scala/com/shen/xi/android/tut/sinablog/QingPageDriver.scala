@@ -6,22 +6,19 @@ import com.google.inject.Inject
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
-import org.jsoup.select.Elements
 
 import java.io.{IOException, InputStream}
-import java.util.ArrayList
-import java.util.List
 
 import scala.collection.JavaConversions._
+import java.util
 
 
-class QingPageDriver @Inject() {
+class QingPageDriver @Inject() () {
 
   private val TAG = classOf[QingPageDriver].getName
-  private val mImageUrlList: List[String] = new ArrayList[String]
+  private val mImageUrlList: util.List[String] = new util.ArrayList[String]
 
-  def getImageUrlList: List[String] = mImageUrlList
+  def getImageUrlList: util.List[String] = mImageUrlList
 
   def load(url: String): Boolean = {
     var document: Document = null
@@ -29,7 +26,7 @@ class QingPageDriver @Inject() {
     try {
       document = Jsoup.connect(url).get()
     } catch {
-      case e: IOException => { Log.w(TAG, f"cannot load page $url%s"); false }
+      case e: IOException => Log.w(TAG, f"cannot load page $url%s"); false
     }
 
     parse(document)
@@ -43,7 +40,7 @@ class QingPageDriver @Inject() {
     try {
       document = Jsoup.parse(inputStream, "utf-8", "qing.blog.sina.com.cn")
     } catch {
-      case e: IOException => { Log.w(TAG, "cannot parse page"); false }
+      case e: IOException => Log.w(TAG, "cannot parse page"); false
     }
 
     parse(document)
@@ -54,7 +51,7 @@ class QingPageDriver @Inject() {
   private def parse(document: Document): Unit = {
     mImageUrlList.clear()
 
-    val urls = document select(".feedInfo .imgArea img") map(e => {
+    val urls = document select ".feedInfo .imgArea img" map(e => {
       if (e.hasAttr("real_src")) {
         e.attr("real_src")
       } else if (e.hasAttr("src")) {
