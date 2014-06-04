@@ -24,7 +24,8 @@
 -keep public class com.shen.xi.android.tut.weibo.* { public *; }
 -keep public class com.shen.xi.android.tut.sinablog.* { public *; }
 
--keepnames public class org.jsoup.** { public *; }
+-keep public class org.jsoup.** { public *; }
+-keepnames public class org.jsoup.nodes.** { public *; }
 
 -keep public class com.squareup.otto.* { public *; }
 
