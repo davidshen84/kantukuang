@@ -1,6 +1,6 @@
 package com.shen.xi.android.tut
 
-import android.app.WallpaperManager
+import android.app.{Activity, WallpaperManager}
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -26,16 +26,83 @@ import com.viewpagerindicator.UnderlinePageIndicator
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, FileNotFoundException, FileOutputStream, IOException}
 
+
 object AbstractImageViewActivity {
   val ITEM_POSITION = "item position"
   val JSON_LIST = "json list"
   val TAG = classOf[AbstractImageViewActivity].getName
+
+  /**
+   * A {@link com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener}
+   * that set the image as wallpaper
+   */
+  private class WallpaperSaver(activity: Activity) extends SimpleImageLoadingListener {
+
+    val mWallpaperManager: WallpaperManager = WallpaperManager.getInstance(activity)
+
+    override def onLoadingComplete(imageUri: String, view: View, loadedImage: Bitmap): Unit = {
+      val outputStream = new ByteArrayOutputStream()
+      loadedImage.compress(Bitmap.CompressFormat.PNG, 0, outputStream)
+      try {
+        mWallpaperManager.setStream(new ByteArrayInputStream(outputStream.toByteArray))
+        Toast.makeText(activity, R.string.message_info_success, Toast.LENGTH_SHORT).show()
+      } catch {
+        case e: IOException => e.printStackTrace()
+      }
+    }
+  }
+
+
+  /**
+   * A {@link com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener}
+   * that saves the image to external storage
+   */
+  private class ImageSaver(activity: Activity) extends SimpleImageLoadingListener {
+
+    override def onLoadingComplete(imageUri: String, view: View, loadedImage: Bitmap) = saveImage(imageUri, loadedImage)
+
+    private def saveImage(imageUri: String, loadedImage: Bitmap) = getImageDirectory match {
+      case Some(d) => try {
+        val filename: String = Integer.toHexString(imageUri.hashCode())
+        val file = new File(d, s"$filename.png")
+        val stream = new FileOutputStream(file)
+        loadedImage.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        Toast.makeText(activity, R.string.message_info_success, Toast.LENGTH_SHORT).show()
+      } catch {
+        case e: FileNotFoundException => e.printStackTrace()
+      }
+      case None =>
+        Toast.makeText(activity, R.string.message_error_save_image, Toast.LENGTH_LONG).show()
+    }
+
+    private def getImageDirectory: Option[File] = {
+      import Environment.{getExternalStoragePublicDirectory => espd, DIRECTORY_PICTURES}
+
+      val tutDir = new File(espd(DIRECTORY_PICTURES), "TuT")
+
+      if (!tutDir.isDirectory) {
+        if (!tutDir.delete()) {
+          Log.w(TAG, s"cannot remove ${tutDir.toString}")
+          return None
+        }
+        if (!tutDir.mkdir()) {
+          Log.w(TAG, s"cannot create ${tutDir.toString}")
+          return None
+        }
+      }
+
+      Some(tutDir)
+    }
+  }
+
 }
 
 abstract class AbstractImageViewActivity(menuId: Int) extends ActionBarActivity {
 
-  private val mImageSaver = new ImageSaver()
-  private val mWallpaperSaver = new WallpaperSaver()
+  import AbstractImageViewActivity.{WallpaperSaver, ImageSaver}
+
+  private var mImageSaver: ImageSaver = null
+  private var mWallpaperSaver: WallpaperSaver = null
   @Inject
   protected var mBus: Bus = null
   @Inject
@@ -85,6 +152,9 @@ abstract class AbstractImageViewActivity(menuId: Int) extends ActionBarActivity 
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_image_view)
     setUpActionBar()
+
+    mWallpaperSaver = new WallpaperSaver(this)
+    mImageSaver = new ImageSaver(this)
 
     // set up ads
     findViewById(R.id.adView).asInstanceOf[AdView]
@@ -162,69 +232,6 @@ abstract class AbstractImageViewActivity(menuId: Int) extends ActionBarActivity 
 
     def getPageTitle(position: Integer) = String.format(getString(R.string.format_info_page_order), position)
 
-  }
-
-  /**
-   * A {@link com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener}
-   * that saves the image to external storage
-   */
-  private class ImageSaver extends SimpleImageLoadingListener {
-
-    override def onLoadingComplete(imageUri: String, view: View, loadedImage: Bitmap) = saveImage(imageUri, loadedImage)
-
-    private def saveImage(imageUri: String, loadedImage: Bitmap) = getImageDirectory match {
-
-      case Some(d) => try {
-        val filename: String = Integer.toHexString(imageUri.hashCode())
-        val file = new File(d, s"$filename.png")
-        val stream = new FileOutputStream(file)
-        loadedImage.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        Toast.makeText(AbstractImageViewActivity.this, R.string.message_info_success, Toast.LENGTH_SHORT).show()
-      } catch {
-        case e: FileNotFoundException => e.printStackTrace()
-      }
-      case None =>
-        Toast.makeText(AbstractImageViewActivity.this, R.string.message_error_save_image, Toast.LENGTH_LONG).show()
-    }
-
-    private def getImageDirectory: Option[File] = {
-      import Environment.{getExternalStoragePublicDirectory => espd, DIRECTORY_PICTURES}
-
-      val tutDir = new File(espd(DIRECTORY_PICTURES), "TuT")
-
-      if (!tutDir.isDirectory) {
-        if (!tutDir.delete()) {
-          Log.w(AbstractImageViewActivity.TAG, s"cannot remove ${tutDir.toString}")
-          return None
-        }
-        if (!tutDir.mkdir()) {
-          Log.w(AbstractImageViewActivity.TAG, s"cannot create ${tutDir.toString}")
-          return None
-        }
-      }
-
-      Some(tutDir)
-    }
-  }
-
-  /**
-   * A {@link com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener}
-   * that set the image as wallpaper
-   */
-  private class WallpaperSaver extends SimpleImageLoadingListener {
-
-    val mWallpaperManager: WallpaperManager = WallpaperManager.getInstance(AbstractImageViewActivity.this)
-
-    override def onLoadingComplete(imageUri: String, view: View, loadedImage: Bitmap): Unit = {
-      val outputStream = new ByteArrayOutputStream()
-      loadedImage.compress(Bitmap.CompressFormat.PNG, 0, outputStream)
-      try {
-        mWallpaperManager.setStream(new ByteArrayInputStream(outputStream.toByteArray))
-        Toast.makeText(AbstractImageViewActivity.this, R.string.message_info_success, Toast.LENGTH_SHORT).show()
-      } catch {
-        case e: IOException => e.printStackTrace()
-      }
-    }
   }
 
 }
