@@ -79,7 +79,7 @@ abstract class AbstractImageViewActivity(menuId: Int) extends ActionBarActivity 
     })
   }
 
-  protected def getCurrentItem: Int = mViewPager.getCurrentItem
+  protected def getCurrentItem = mViewPager.getCurrentItem
 
   override protected def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
@@ -129,45 +129,22 @@ abstract class AbstractImageViewActivity(menuId: Int) extends ActionBarActivity 
    */
   protected def getImageUrlByOrder(order: Int): String
 
-  private def doEasyShare(itemOrder: Int): Unit = {
+  private def doEasyShare(itemOrder: Int) = {
     val imageUrl = getImageUrlByOrder(itemOrder)
     // this logic assume the user loaded the image first
     // so a copy can be found from the disk cache
     val imageFile = DiskCacheUtils.findInCache(imageUrl, mDiscCache)
-    if (imageFile != null && imageFile.exists()) {
-
-      val shareIntent = new Intent() {
-
+    if (imageFile != null && imageFile.exists())
+      mActionProvider.setShareIntent(new Intent() {
         setAction(Intent.ACTION_SEND)
         putExtra(Intent.EXTRA_STREAM, Uri.fromFile(imageFile))
         setType("image/*")
-      }
-      mActionProvider.setShareIntent(shareIntent)
-    }
+      })
   }
 
   private def setupShareActionProvider(menu: Menu) = menu.findItem(R.id.action_share) match {
     case i: MenuItem => mActionProvider = MenuItemCompat.getActionProvider(i).asInstanceOf[ShareActionProvider]
-    case _ => throw new IllegalStateException()
-  }
-
-  protected def getImageDirectory: Option[File] = {
-    import Environment.{getExternalStoragePublicDirectory, DIRECTORY_PICTURES}
-
-    val tutDir = new File(getExternalStoragePublicDirectory(DIRECTORY_PICTURES), "TuT")
-
-    if (!tutDir.isDirectory) {
-      if (!tutDir.delete()) {
-        Log.w(AbstractImageViewActivity.TAG, s"cannot remove ${tutDir.toString}")
-        return None
-      }
-      if (!tutDir.mkdir()) {
-        Log.w(AbstractImageViewActivity.TAG, s"cannot create ${tutDir.toString}")
-        return None
-      }
-    }
-
-    Some(tutDir)
+    case null => throw new IllegalStateException()
   }
 
   /**
@@ -210,6 +187,24 @@ abstract class AbstractImageViewActivity(menuId: Int) extends ActionBarActivity 
         Toast.makeText(AbstractImageViewActivity.this, R.string.message_error_save_image, Toast.LENGTH_LONG).show()
     }
 
+    private def getImageDirectory: Option[File] = {
+      import Environment.{getExternalStoragePublicDirectory => espd, DIRECTORY_PICTURES}
+
+      val tutDir = new File(espd(DIRECTORY_PICTURES), "TuT")
+
+      if (!tutDir.isDirectory) {
+        if (!tutDir.delete()) {
+          Log.w(AbstractImageViewActivity.TAG, s"cannot remove ${tutDir.toString}")
+          return None
+        }
+        if (!tutDir.mkdir()) {
+          Log.w(AbstractImageViewActivity.TAG, s"cannot create ${tutDir.toString}")
+          return None
+        }
+      }
+
+      Some(tutDir)
+    }
   }
 
   /**
@@ -218,13 +213,13 @@ abstract class AbstractImageViewActivity(menuId: Int) extends ActionBarActivity 
    */
   private class WallpaperSaver extends SimpleImageLoadingListener {
 
+    val mWallpaperManager: WallpaperManager = WallpaperManager.getInstance(AbstractImageViewActivity.this)
+
     override def onLoadingComplete(imageUri: String, view: View, loadedImage: Bitmap): Unit = {
       val outputStream = new ByteArrayOutputStream()
       loadedImage.compress(Bitmap.CompressFormat.PNG, 0, outputStream)
       try {
-        WallpaperManager.getInstance(AbstractImageViewActivity.this).setStream(
-          new ByteArrayInputStream(outputStream.toByteArray)
-        )
+        mWallpaperManager.setStream(new ByteArrayInputStream(outputStream.toByteArray))
         Toast.makeText(AbstractImageViewActivity.this, R.string.message_info_success, Toast.LENGTH_SHORT).show()
       } catch {
         case e: IOException => e.printStackTrace()

@@ -60,9 +60,10 @@ class QingPageDriver @Inject()() {
         e.attr("src")
       } else {
         Log.w(QingPageDriver.TAG, "img tag without src attribute")
-        ""
+        null
       }
-    }) filterNot (_ == "")
+    }) filterNot (_ == null)
+
     mImageUrlList.addAll(urls)
   }
 
