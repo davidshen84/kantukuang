@@ -24,6 +24,8 @@ object QingTagDriver {
 
 class QingTagDriver @Inject()(@Named("qing request factory") requestFactory: HttpRequestFactory) {
 
+  import QingTagDriver._
+
   var mHttpRequestFactory: HttpRequestFactory = requestFactory
   var mTagResult: TagResult = null
   var mArticleInfoList: util.ArrayList[ArticleInfo] = null
@@ -43,7 +45,7 @@ class QingTagDriver @Inject()(@Named("qing request factory") requestFactory: Htt
     try {
       mHttpRequestFactory.buildGetRequest(url)
     } catch {
-      case e: IOException => Log.d(QingTagDriver.TAG, e.getMessage); null;
+      case e: IOException => Log.d(TAG, e.getMessage); null;
     }
   }
 
@@ -68,13 +70,13 @@ class QingTagDriver @Inject()(@Named("qing request factory") requestFactory: Htt
         val tagResponse: TagResponse = response.parseAs(classOf[TagResponse])
         mTagResult = tagResponse.data
       } else {
-        Log.w(QingTagDriver.TAG, s"request to ${request.getUrl} failed")
+        Log.w(TAG, s"request to ${request.getUrl} failed")
       }
 
       if (mTagResult != null && mTagResult.cnt > 0) {
         parseList(mTagResult.list)
       } else {
-        Log.w(QingTagDriver.TAG, s"request to $mTagResult returns no result")
+        Log.w(TAG, s"request to $mTagResult returns no result")
       }
     } catch {
       case e: IOException => e.printStackTrace(); false
@@ -94,7 +96,7 @@ class QingTagDriver @Inject()(@Named("qing request factory") requestFactory: Htt
   private def parseList(list: util.Collection[String]): Unit = {
     mArticleInfoList = new util.ArrayList[ArticleInfo]()
 
-    val articles = for (i <- list) yield Jsoup.parse(i, QingTagDriver.BASE_URI)
+    val articles = for (i <- list) yield Jsoup.parse(i, BASE_URI)
     for (article <- articles) {
       mArticleInfoList.addAll(article.select(".itemArticle > .itemInfo > :first-child")
         .map(e => (e.attr("href"), e.select("img").headOption)).filterNot(_._2 == None)

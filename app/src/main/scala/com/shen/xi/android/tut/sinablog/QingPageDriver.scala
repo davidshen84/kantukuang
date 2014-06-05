@@ -18,6 +18,8 @@ object QingPageDriver {
 
 class QingPageDriver @Inject()() {
 
+  import QingPageDriver.TAG
+
   private val mImageUrlList: util.List[String] = new util.ArrayList[String]
 
   def getImageUrlList: util.List[String] = mImageUrlList
@@ -28,7 +30,7 @@ class QingPageDriver @Inject()() {
     try {
       document = Jsoup.connect(url).get()
     } catch {
-      case e: IOException => Log.w(QingPageDriver.TAG, s"cannot load page $url%s"); false
+      case e: IOException => Log.w(TAG, s"cannot load page $url%s"); false
     }
 
     parse(document)
@@ -42,7 +44,7 @@ class QingPageDriver @Inject()() {
     try {
       document = Jsoup.parse(inputStream, "utf-8", "qing.blog.sina.com.cn")
     } catch {
-      case e: IOException => Log.w(QingPageDriver.TAG, "cannot parse page"); false
+      case e: IOException => Log.w(TAG, "cannot parse page"); false
     }
 
     parse(document)
@@ -59,7 +61,7 @@ class QingPageDriver @Inject()() {
       } else if (e.hasAttr("src")) {
         e.attr("src")
       } else {
-        Log.w(QingPageDriver.TAG, "img tag without src attribute")
+        Log.w(TAG, "img tag without src attribute")
         null
       }
     }) filterNot (_ == null)
