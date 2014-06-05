@@ -8,11 +8,11 @@ import javax.annotation.Nullable;
 
 public final class Util {
 
-    public static final Predicate<WeiboStatus> ImageUrlPredictor = new Predicate<WeiboStatus>() {
-        @Override
-        public boolean apply(@Nullable WeiboStatus status) {
-            return status != null && status.getImageUrl() != null;
-        }
-    };
+  public static final Predicate<WeiboStatus> ImageUrlPredictor = new Predicate<WeiboStatus>() {
+    @Override
+    public boolean apply(@Nullable WeiboStatus status) {
+      return status != null && status.getImageUrl() != null;
+    }
+  };
 
 }

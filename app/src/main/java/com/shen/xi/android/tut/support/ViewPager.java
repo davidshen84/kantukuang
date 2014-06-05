@@ -7,39 +7,39 @@ import android.view.MotionEvent;
 
 /**
  * Fix to issue https://github.com/chrisbanes/PhotoView/issues/31
- *
+ * <p/>
  * intercept the exception and ignore it
  */
 public class ViewPager extends android.support.v4.view.ViewPager {
-    private static final String TAG = ViewPager.class.getCanonicalName();
+  private static final String TAG = ViewPager.class.getCanonicalName();
 
-    public ViewPager(Context context) {
-        super(context);
+  public ViewPager(Context context) {
+    super(context);
+  }
+
+  public ViewPager(Context context, AttributeSet attrs) {
+    super(context, attrs);
+  }
+
+  @Override
+  public boolean onInterceptTouchEvent(MotionEvent ev) {
+    try {
+      return super.onInterceptTouchEvent(ev);
+    } catch (IllegalArgumentException ignored) {
+      Log.v(TAG, "oops...ignored");
     }
 
-    public ViewPager(Context context, AttributeSet attrs) {
-        super(context, attrs);
+    return false;
+  }
+
+  @Override
+  public boolean onTouchEvent(MotionEvent ev) {
+    try {
+      return super.onTouchEvent(ev);
+    } catch (IllegalArgumentException ignored) {
+      Log.v(TAG, "oops...ignored");
     }
 
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        try {
-            return super.onInterceptTouchEvent(ev);
-        } catch (IllegalArgumentException ignored) {
-            Log.v(TAG, "oops...ignored");
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        try {
-            return super.onTouchEvent(ev);
-        } catch (IllegalArgumentException ignored) {
-            Log.v(TAG, "oops...ignored");
-        }
-
-        return false;
-    }
+    return false;
+  }
 }

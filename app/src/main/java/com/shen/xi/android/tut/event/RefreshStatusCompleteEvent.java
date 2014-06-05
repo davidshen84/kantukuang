@@ -6,15 +6,15 @@ import java.util.List;
 
 
 public class RefreshStatusCompleteEvent {
-    private List<WeiboStatus> mStatusList;
+  private List<WeiboStatus> mStatusList;
 
-    public List<WeiboStatus> getStatus() {
-        return mStatusList;
-    }
+  public List<WeiboStatus> getStatus() {
+    return mStatusList;
+  }
 
-    public RefreshStatusCompleteEvent setStatus(List<WeiboStatus> status) {
-        this.mStatusList = status;
+  public RefreshStatusCompleteEvent setStatus(List<WeiboStatus> status) {
+    this.mStatusList = status;
 
-        return this;
-    }
+    return this;
+  }
 }

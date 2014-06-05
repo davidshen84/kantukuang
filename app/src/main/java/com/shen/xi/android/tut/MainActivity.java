@@ -37,246 +37,246 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
 public class MainActivity extends ActionBarActivity {
 
-    public static final String PREF_DISCLAIMER_AGREE = "agree to disclaimer";
-    private static final String TAG = MainActivity.class.getName();
-    private static final String STATE_DRAWER_SELECTED_ID = "selected navigation drawer position";
-    private final RefreshCompleteEvent mRefreshCompleteEvent = new RefreshCompleteEvent();
-    @Inject
-    private Bus mBus;
-    @Inject
-    private JsonFactory mJsonFactory;
-    @Inject
-    private WeiboClient mWeiboClient;
-    private NavigationDrawerFragment mNavigationDrawerFragment;
-    private int mCurrentDrawerSelectedId;
-    private boolean mHasAttachedSection = false;
-    @Inject
-    @Named("qing request factory")
-    private HttpRequestFactory mHttpRequestFactory;
-    @Inject
-    private QingPageDriver mQingPageDriver;
-    private ImageSource mSectionType;
+  public static final String PREF_DISCLAIMER_AGREE = "agree to disclaimer";
+  private static final String TAG = MainActivity.class.getName();
+  private static final String STATE_DRAWER_SELECTED_ID = "selected navigation drawer position";
+  private final RefreshCompleteEvent mRefreshCompleteEvent = new RefreshCompleteEvent();
+  @Inject
+  private Bus mBus;
+  @Inject
+  private JsonFactory mJsonFactory;
+  @Inject
+  private WeiboClient mWeiboClient;
+  private NavigationDrawerFragment mNavigationDrawerFragment;
+  private int mCurrentDrawerSelectedId;
+  private boolean mHasAttachedSection = false;
+  @Inject
+  @Named("qing request factory")
+  private HttpRequestFactory mHttpRequestFactory;
+  @Inject
+  private QingPageDriver mQingPageDriver;
+  private ImageSource mSectionType;
 
-    public MainActivity() {
-        Injector mInjector = TuTModule.getInjector();
-        mInjector.injectMembers(this);
+  public MainActivity() {
+    Injector mInjector = TuTModule.getInjector();
+    mInjector.injectMembers(this);
+  }
+
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+
+    setContentView(R.layout.activity_main);
+
+    if (savedInstanceState != null) {
+      mCurrentDrawerSelectedId = savedInstanceState.getInt(STATE_DRAWER_SELECTED_ID, 0);
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    // Fragment managing the behaviours, interactions and presentation of the navigation drawer.
+    FragmentManager supportFragmentManager = getSupportFragmentManager();
+    mNavigationDrawerFragment = (NavigationDrawerFragment)
+      supportFragmentManager.findFragmentById(R.id.navigation_drawer);
 
-        setContentView(R.layout.activity_main);
+    // Set up the drawer.
+    mNavigationDrawerFragment.setUp(
+      R.id.navigation_drawer,
+      (DrawerLayout) findViewById(R.id.drawer_layout));
+  }
 
-        if (savedInstanceState != null) {
-            mCurrentDrawerSelectedId = savedInstanceState.getInt(STATE_DRAWER_SELECTED_ID, 0);
-        }
+  @Override
+  protected void onResume() {
+    super.onResume();
+    mBus.register(this);
 
-        // Fragment managing the behaviours, interactions and presentation of the navigation drawer.
-        FragmentManager supportFragmentManager = getSupportFragmentManager();
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                supportFragmentManager.findFragmentById(R.id.navigation_drawer);
+    mHasAttachedSection = getSupportFragmentManager()
+      .findFragmentById(R.id.container) != null;
 
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
+    // set up action bar title
+    ActionBar actionBar = getSupportActionBar();
+    actionBar.setTitle(getTitle());
+
+    restoreNavigationDrawerState();
+    if (mHasAttachedSection)
+      findViewById(R.id.main_activity_message).setVisibility(View.GONE);
+    // switch to disclaimer
+    if (!PreferenceManager.getDefaultSharedPreferences(this)
+      .getBoolean(PREF_DISCLAIMER_AGREE, false)) {
+      DisclaimerFragment fragment = DisclaimerFragment.newInstance();
+      getSupportFragmentManager()
+        .beginTransaction()
+        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+        .add(R.id.container, fragment)
+        .commit();
+    }
+  }
+
+  @Override
+  protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+
+    outState.putInt(STATE_DRAWER_SELECTED_ID, mCurrentDrawerSelectedId);
+  }
+
+  @Override
+  protected void onPause() {
+    mBus.unregister(this);
+
+    super.onPause();
+  }
+
+  private void restoreActionBar() {
+    ActionBar actionBar = getSupportActionBar();
+    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+    actionBar.setDisplayShowTitleEnabled(true);
+    actionBar.setTitle(getTitle());
+  }
+
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    if (!mNavigationDrawerFragment.isDrawerOpen()) {
+      // Only show items in the action bar relevant to this screen
+      // if the drawer is not showing. Otherwise, let the drawer
+      // decide what to show in the action bar.
+      getMenuInflater().inflate(R.menu.main, menu);
+      restoreActionBar();
+
+      return true;
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mBus.register(this);
+    return super.onCreateOptionsMenu(menu);
+  }
 
-        mHasAttachedSection = getSupportFragmentManager()
-                .findFragmentById(R.id.container) != null;
+  private void restoreNavigationDrawerState() {
+    mNavigationDrawerFragment.initItems();
 
-        // set up action bar title
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle(getTitle());
-
-        restoreNavigationDrawerState();
-        if (mHasAttachedSection)
-            findViewById(R.id.main_activity_message).setVisibility(View.GONE);
-        // switch to disclaimer
-        if (!PreferenceManager.getDefaultSharedPreferences(this)
-                .getBoolean(PREF_DISCLAIMER_AGREE, false)) {
-            DisclaimerFragment fragment = DisclaimerFragment.newInstance();
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .add(R.id.container, fragment)
-                    .commit();
-        }
+    if (!mHasAttachedSection) {
+      mNavigationDrawerFragment.selectItem(mCurrentDrawerSelectedId);
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
+    findViewById(R.id.main_activity_message).setVisibility(View.GONE);
+  }
 
-        outState.putInt(STATE_DRAWER_SELECTED_ID, mCurrentDrawerSelectedId);
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    // Handle action bar item clicks here. The action bar will
+    // automatically handle clicks on the Home/Up button, so long
+    // as you specify a parent activity in AndroidManifest.xml.
+    int id = item.getItemId();
+    switch (id) {
+      case R.id.menu_settings:
+        Log.v(TAG, getString(R.string.menu_settings));
+
+        return true;
+
+      case R.id.action_refresh:
+        OnRefreshListener refreshListener = (OnRefreshListener)
+          getSupportFragmentManager().findFragmentById(
+            R.id.container);
+        refreshListener.onRefreshStarted(null);
+
+        return true;
     }
 
-    @Override
-    protected void onPause() {
-        mBus.unregister(this);
+    return super.onOptionsItemSelected(item);
+  }
 
-        super.onPause();
+  @Subscribe
+  public void itemSelected(SelectItemEvent event) {
+    Intent intent = null;
+    switch (event.source) {
+      case Weibo:
+        intent = new Intent(this, WeiboImageViewActivity.class);
+        break;
+
+      case QingTag:
+        intent = new Intent(this, QingImageViewActivity.class);
+        break;
+
+      case QingPage:
+
+        intent = new Intent(this, QingImageViewActivity.class);
+
+        break;
     }
 
-    private void restoreActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(getTitle());
+    if (intent != null) {
+      intent.putExtras(event.extras);
+      startActivity(intent);
+    }
+  }
+
+  @Subscribe
+  public void navigateSection(NavigationEvent event) {
+    Fragment itemFragment;
+    String[] sections = getResources().getStringArray(R.array.default_sections);
+    mCurrentDrawerSelectedId = event.getPosition();
+    String currentSectionName = sections[mCurrentDrawerSelectedId];
+    switch (mCurrentDrawerSelectedId) {
+
+      case 0:
+        // Weibo
+        itemFragment = WeiboItemFragment.newInstance(currentSectionName);
+
+        break;
+
+      case 1:
+        // Qing - Mao
+        itemFragment = QingItemFragment.newInstance(currentSectionName, "猫", false);
+
+        break;
+
+      case 2:
+        // Qing - Wei Mei
+        itemFragment = QingItemFragment.newInstance(currentSectionName, "唯美", true);
+
+        break;
+
+      case 3:
+        // Qing - Yi Shu
+        itemFragment = QingItemFragment.newInstance(currentSectionName, "艺术", true);
+
+        break;
+
+      default:
+        Log.d(TAG, String.format("%d not ready", mCurrentDrawerSelectedId));
+
+        return;
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.main, menu);
-            restoreActionBar();
-
-            return true;
-        }
-
-        return super.onCreateOptionsMenu(menu);
+    // update the main content by replacing fragments
+    if (itemFragment != null) {
+      getSupportFragmentManager().beginTransaction()
+        .replace(R.id.container, itemFragment, "Section")
+        .commit();
     }
+  }
 
-    private void restoreNavigationDrawerState() {
-        mNavigationDrawerFragment.initItems();
-
-        if (!mHasAttachedSection) {
-            mNavigationDrawerFragment.selectItem(mCurrentDrawerSelectedId);
-        }
-
-        findViewById(R.id.main_activity_message).setVisibility(View.GONE);
+  @Subscribe
+  public void refreshStatusComplete(RefreshStatusCompleteEvent event) {
+    List<WeiboStatus> statusList = event.getStatus();
+    String lastId = null;
+    if (statusList == null || statusList.size() == 0) {
+      Toast.makeText(this, R.string.message_info_no_update, Toast.LENGTH_SHORT).show();
+    } else {
+      String message = getResources()
+        .getString(R.string.format_info_new_data, statusList.size());
+      Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+      lastId = statusList.get(0).id();
     }
+    // update view
+    mBus.post(mRefreshCompleteEvent
+                .setStatusList(statusList)
+                .setLastId(lastId));
+  }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        switch (id) {
-            case R.id.menu_settings:
-                Log.v(TAG, getString(R.string.menu_settings));
+  @Subscribe
+  public void sectionAttach(SectionAttachEvent event) {
+    mSectionType = event.source;
+    setTitle(event.sectionName);
+  }
 
-                return true;
-
-            case R.id.action_refresh:
-                OnRefreshListener refreshListener = (OnRefreshListener)
-                        getSupportFragmentManager().findFragmentById(
-                                R.id.container);
-                refreshListener.onRefreshStarted(null);
-
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Subscribe
-    public void itemSelected(SelectItemEvent event) {
-        Intent intent = null;
-        switch (event.source) {
-            case Weibo:
-                intent = new Intent(this, WeiboImageViewActivity.class);
-                break;
-
-            case QingTag:
-                intent = new Intent(this, QingImageViewActivity.class);
-                break;
-
-            case QingPage:
-
-                intent = new Intent(this, QingImageViewActivity.class);
-
-                break;
-        }
-
-        if (intent != null) {
-            intent.putExtras(event.extras);
-            startActivity(intent);
-        }
-    }
-
-    @Subscribe
-    public void navigateSection(NavigationEvent event) {
-        Fragment itemFragment;
-        String[] sections = getResources().getStringArray(R.array.default_sections);
-        mCurrentDrawerSelectedId = event.getPosition();
-        String currentSectionName = sections[mCurrentDrawerSelectedId];
-        switch (mCurrentDrawerSelectedId) {
-
-            case 0:
-                // Weibo
-                itemFragment = WeiboItemFragment.newInstance(currentSectionName);
-
-                break;
-
-            case 1:
-                // Qing - Mao
-                itemFragment = QingItemFragment.newInstance(currentSectionName, "猫", false);
-
-                break;
-
-            case 2:
-                // Qing - Wei Mei
-                itemFragment = QingItemFragment.newInstance(currentSectionName, "唯美", true);
-
-                break;
-
-            case 3:
-                // Qing - Yi Shu
-                itemFragment = QingItemFragment.newInstance(currentSectionName, "艺术", true);
-
-                break;
-
-            default:
-                Log.d(TAG, String.format("%d not ready", mCurrentDrawerSelectedId));
-
-                return;
-        }
-
-        // update the main content by replacing fragments
-        if (itemFragment != null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, itemFragment, "Section")
-                    .commit();
-        }
-    }
-
-    @Subscribe
-    public void refreshStatusComplete(RefreshStatusCompleteEvent event) {
-        List<WeiboStatus> statusList = event.getStatus();
-        String lastId = null;
-        if (statusList == null || statusList.size() == 0) {
-            Toast.makeText(this, R.string.message_info_no_update, Toast.LENGTH_SHORT).show();
-        } else {
-            String message = getResources()
-                    .getString(R.string.format_info_new_data, statusList.size());
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-            lastId = statusList.get(0).id();
-        }
-        // update view
-        mBus.post(mRefreshCompleteEvent
-                          .setStatusList(statusList)
-                          .setLastId(lastId));
-    }
-
-    @Subscribe
-    public void sectionAttach(SectionAttachEvent event) {
-        mSectionType = event.source;
-        setTitle(event.sectionName);
-    }
-
-    public enum ImageSource {
-        Unknown, Weibo, QingTag, QingPage
-    }
+  public enum ImageSource {
+    Unknown, Weibo, QingTag, QingPage
+  }
 
 }

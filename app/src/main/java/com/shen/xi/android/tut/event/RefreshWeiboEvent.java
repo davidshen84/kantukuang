@@ -4,6 +4,6 @@ import android.app.Activity;
 
 
 public class RefreshWeiboEvent {
-    public String sinceId;
-    public Activity activity;
+  public String sinceId;
+  public Activity activity;
 }

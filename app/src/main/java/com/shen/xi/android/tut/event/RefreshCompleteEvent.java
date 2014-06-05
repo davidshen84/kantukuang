@@ -6,26 +6,26 @@ import java.util.List;
 
 
 public class RefreshCompleteEvent {
-    private List<WeiboStatus> mStatusList;
-    private String mLastId;
+  private List<WeiboStatus> mStatusList;
+  private String mLastId;
 
-    public List<WeiboStatus> getStatusList() {
-        return mStatusList;
-    }
+  public List<WeiboStatus> getStatusList() {
+    return mStatusList;
+  }
 
-    public RefreshCompleteEvent setStatusList(List<WeiboStatus> statusList) {
-        this.mStatusList = statusList;
+  public RefreshCompleteEvent setStatusList(List<WeiboStatus> statusList) {
+    this.mStatusList = statusList;
 
-        return this;
-    }
+    return this;
+  }
 
-    public String getLastId() {
-        return mLastId;
-    }
+  public String getLastId() {
+    return mLastId;
+  }
 
-    public RefreshCompleteEvent setLastId(String lastId) {
-        this.mLastId = lastId;
+  public RefreshCompleteEvent setLastId(String lastId) {
+    this.mLastId = lastId;
 
-        return this;
-    }
+    return this;
+  }
 }

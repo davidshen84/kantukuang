@@ -6,16 +6,16 @@ import com.google.inject.Inject;
 
 public final class MyApplication extends Application {
 
-    @Inject
-    private WeiboClientManager weiboClientManager;
+  @Inject
+  private WeiboClientManager weiboClientManager;
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
+  @Override
+  public void onCreate() {
+    super.onCreate();
 
-        // initialize Guice injector
-        TuTModule.initialize(this);
+    // initialize Guice injector
+    TuTModule.initialize(this);
 
-        TuTModule.getInjector().injectMembers(this);
-    }
+    TuTModule.getInjector().injectMembers(this);
+  }
 }
