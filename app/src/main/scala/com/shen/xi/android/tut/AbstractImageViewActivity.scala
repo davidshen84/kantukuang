@@ -31,9 +31,10 @@ object AbstractImageViewActivity {
   val ITEM_POSITION = "item position"
   val JSON_LIST = "json list"
   val TAG = classOf[AbstractImageViewActivity].getName
+  val TestDevice: String = "3D3B40496EA6FF9FDA8215AEE90C0808"
 
   /**
-   * A {@link com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener}
+   * A [[com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener]]
    * that set the image as wallpaper
    */
   private class WallpaperSaver(activity: Activity) extends SimpleImageLoadingListener {
@@ -54,7 +55,7 @@ object AbstractImageViewActivity {
 
 
   /**
-   * A {@link com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener}
+   * A [[com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener]]
    * that saves the image to external storage
    */
   private class ImageSaver(activity: Activity) extends SimpleImageLoadingListener {
@@ -99,7 +100,7 @@ object AbstractImageViewActivity {
 
 abstract class AbstractImageViewActivity(menuId: Int) extends ActionBarActivity {
 
-  import AbstractImageViewActivity.{WallpaperSaver, ImageSaver}
+  import AbstractImageViewActivity.{WallpaperSaver, ImageSaver, TestDevice}
 
   private var mImageSaver: ImageSaver = null
   private var mWallpaperSaver: WallpaperSaver = null
@@ -109,7 +110,7 @@ abstract class AbstractImageViewActivity(menuId: Int) extends ActionBarActivity 
   protected var mJsonFactory: JsonFactory = null
 
   /**
-   * The {@link android.support.v4.view.ViewPager} that will host the section contents.
+   * The [[android.support.v4.view.ViewPager]] that will host the section contents.
    */
   private var mViewPager: ViewPager = null
   private val mMenuId = menuId
@@ -159,7 +160,7 @@ abstract class AbstractImageViewActivity(menuId: Int) extends ActionBarActivity 
     // set up ads
     findViewById(R.id.adView).asInstanceOf[AdView]
       .loadAd(new AdRequest.Builder()
-      .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
+      .addTestDevice(TestDevice)
       .build())
   }
 
@@ -218,7 +219,7 @@ abstract class AbstractImageViewActivity(menuId: Int) extends ActionBarActivity 
   }
 
   /**
-   * A {@link android.support.v4.app.FragmentPagerAdapter} that returns a fragment corresponding to
+   * A [[android.support.v4.app.FragmentPagerAdapter]] that returns a fragment corresponding to
    * one of the sections/tabs/pages.
    */
   class ImagePagerAdapter(fm: FragmentManager, pageCount: Int) extends FragmentPagerAdapter(fm) {

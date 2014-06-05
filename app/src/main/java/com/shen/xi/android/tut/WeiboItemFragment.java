@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -28,6 +29,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.shen.xi.android.tut.event.RefreshCompleteEvent;
+import com.shen.xi.android.tut.event.RefreshStatusCompleteEvent;
 import com.shen.xi.android.tut.event.RefreshWeiboEvent;
 import com.shen.xi.android.tut.event.SectionAttachEvent;
 import com.shen.xi.android.tut.event.SelectItemEvent;
@@ -59,8 +61,10 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
   private static final String ARG_ID = "id";
   private final SectionAttachEvent mSectionAttachEvent = new SectionAttachEvent();
   private final RefreshWeiboEvent mRefreshWeiboEvent = new RefreshWeiboEvent();
+  private final RefreshCompleteEvent mRefreshCompleteEvent = new RefreshCompleteEvent();
   private final List<WeiboStatus> mWeiboStatuses = new ArrayList<WeiboStatus>();
   private final SelectItemEvent mSelectItemEvent = new SelectItemEvent();
+
   /**
    * The fragment's ListView/GridView.
    */
@@ -211,6 +215,25 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
 
     mRefreshWeiboEvent.sinceId = mLastId;
     mBus.post(mRefreshWeiboEvent);
+  }
+
+  @Subscribe
+  public void refreshStatusComplete(RefreshStatusCompleteEvent event) {
+    List<WeiboStatus> statusList = event.getStatus();
+    String lastId = null;
+    if (statusList == null || statusList.size() == 0) {
+      Toast.makeText(mActivity, R.string.message_info_no_update, Toast.LENGTH_SHORT).show();
+    } else {
+      String message = getResources()
+        .getString(R.string.format_info_new_data, statusList.size());
+      Toast.makeText(mActivity, message, Toast.LENGTH_SHORT).show();
+      lastId = statusList.get(0).id();
+    }
+
+    // update view
+    mBus.post(mRefreshCompleteEvent
+                .setStatusList(statusList)
+                .setLastId(lastId));
   }
 
   @Subscribe

@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.json.JsonFactory;
@@ -21,17 +20,12 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import com.shen.xi.android.tut.event.NavigationEvent;
-import com.shen.xi.android.tut.event.RefreshCompleteEvent;
-import com.shen.xi.android.tut.event.RefreshStatusCompleteEvent;
 import com.shen.xi.android.tut.event.SectionAttachEvent;
 import com.shen.xi.android.tut.event.SelectItemEvent;
 import com.shen.xi.android.tut.sinablog.QingPageDriver;
 import com.shen.xi.android.tut.weibo.WeiboClient;
-import com.shen.xi.android.tut.weibo.WeiboStatus;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
-
-import java.util.List;
 
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
@@ -40,7 +34,7 @@ public class MainActivity extends ActionBarActivity {
   public static final String PREF_DISCLAIMER_AGREE = "agree to disclaimer";
   private static final String TAG = MainActivity.class.getName();
   private static final String STATE_DRAWER_SELECTED_ID = "selected navigation drawer position";
-  private final RefreshCompleteEvent mRefreshCompleteEvent = new RefreshCompleteEvent();
+
   @Inject
   private Bus mBus;
   @Inject
@@ -249,24 +243,6 @@ public class MainActivity extends ActionBarActivity {
         .replace(R.id.container, itemFragment, "Section")
         .commit();
     }
-  }
-
-  @Subscribe
-  public void refreshStatusComplete(RefreshStatusCompleteEvent event) {
-    List<WeiboStatus> statusList = event.getStatus();
-    String lastId = null;
-    if (statusList == null || statusList.size() == 0) {
-      Toast.makeText(this, R.string.message_info_no_update, Toast.LENGTH_SHORT).show();
-    } else {
-      String message = getResources()
-        .getString(R.string.format_info_new_data, statusList.size());
-      Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-      lastId = statusList.get(0).id();
-    }
-    // update view
-    mBus.post(mRefreshCompleteEvent
-                .setStatusList(statusList)
-                .setLastId(lastId));
   }
 
   @Subscribe

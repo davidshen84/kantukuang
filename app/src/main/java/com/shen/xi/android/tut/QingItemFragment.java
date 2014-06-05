@@ -227,7 +227,6 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
 
       @Override
       protected void onPostExecute(List<String> strings) {
-        mPullToRefreshLayout.setRefreshComplete();
         if (strings != null && strings.size() > 0) {
           Bundle extras = new Bundle();
           extras.putInt(AbstractImageViewActivity.ITEM_POSITION(), 0);
@@ -252,6 +251,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
           Toast.makeText(getActivity(), R.string.no_image,
                          Toast.LENGTH_SHORT).show();
         }
+        mPullToRefreshLayout.setRefreshComplete();
       }
 
     }.execute(mArticleInfoList.get(position).href());
