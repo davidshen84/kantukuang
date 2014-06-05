@@ -36,9 +36,10 @@ android {
 
         debug {
             runProguard true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt', 'proguard-rules-test.txt'
         }
     }
+
 }
 
 dependencies {

@@ -1,0 +1,5 @@
+-keep public class com.shen.xi.android.tut.test.** { *; }
+-keep public class com.google.api.** { *; }
+-keep public class com.google.common.io.** { *; }
+
+-dontwarn org.fest.**

@@ -1,9 +1,6 @@
 package com.shen.xi.android.tut.test
 
 import junit.framework.TestCase
-
-import com.google.api.client.http.HttpRequest
-import com.google.api.client.http.HttpRequestFactory
 import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.json.Json
 import com.google.api.client.json.JsonObjectParser
@@ -11,16 +8,12 @@ import com.google.api.client.testing.http.MockLowLevelHttpResponse
 import com.google.common.io.CharStreams
 import com.google.inject.Guice
 import com.google.inject.Inject
-import com.google.inject.Injector
 
-import com.shen.xi.android.tut.sinablog.ArticleInfo
 import com.shen.xi.android.tut.sinablog.QingTagDriver
 import com.shen.xi.android.tut.sinablog.TagResultUrl
 
 import java.io.IOException
-import java.io.InputStream
 import java.io.InputStreamReader
-import java.util.ArrayList
 
 
 class QingTagDriverTest extends TestCase {
@@ -69,25 +62,23 @@ class QingTagDriverTest extends TestCase {
     val httpRequest = mDriver.buildTagRequest("", 1)
     assertTrue(mDriver.load(httpRequest))
 
-    val articleInfoList = mDriver.getArticleInfoList()
+    val articleInfoList = mDriver.getArticleInfoList
     assertNotNull(articleInfoList)
   }
 
   def testParseArticleInfo() {
     mDriver.load(mDriver.buildTagRequest("", 1))
-    val articleInfoList = mDriver.getArticleInfoList()
+    val articleInfoList = mDriver.getArticleInfoList
 
     assertEquals(10, articleInfoList.size())
 
     val info1 = articleInfoList.get(0)
     assertEquals("http://qing.blog.sina.com.cn/tj/8e18904032004q8g.html", info1.href)
-    assertEquals("http://ww3.sinaimg.cn/mw205/8e189040jw1edkautot30j20ij0ijta2.jpg",
-      info1.imageSrc)
+    assertEquals("http://ww3.sinaimg.cn/mw205/8e189040jw1edkautot30j20ij0ijta2.jpg", info1.imageSrc)
 
     val info2 = articleInfoList.get(9)
     assertEquals("http://qing.blog.sina.com.cn/tj/5c3aa1ba32004o92.html", info2.href)
-    assertEquals("http://ww4.sinaimg.cn/mw205/5c3aa1bajw1ecjapp17pej20dw0kudgo.jpg",
-      info2.imageSrc)
+    assertEquals("http://ww4.sinaimg.cn/mw205/5c3aa1bajw1ecjapp17pej20dw0kudgo.jpg", info2.imageSrc)
   }
 
 }
