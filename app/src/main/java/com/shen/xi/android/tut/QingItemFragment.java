@@ -190,7 +190,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
             switch (mPageType) {
                 case QingTag:
                     Bundle extras = new Bundle();
-                    extras.putInt(AbstractImageViewActivity.ITEM_POSITION, position);
+                    extras.putInt(AbstractImageViewActivity.ITEM_POSITION(), position);
                     extras.putString(QingImageViewActivity.QING_SOURCE, QingTag.toString());
                     String jsonList = "[]";
                     try {
@@ -198,7 +198,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    extras.putString(AbstractImageViewActivity.JSON_LIST, jsonList);
+                    extras.putString(AbstractImageViewActivity.JSON_LIST(), jsonList);
                     extras.putString(QingImageViewActivity.QING_TITLE, mTitle);
 
                     mSelectItemEvent.source = QingTag;
@@ -230,7 +230,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
                 mPullToRefreshLayout.setRefreshComplete();
                 if (strings != null && strings.size() > 0) {
                     Bundle extras = new Bundle();
-                    extras.putInt(AbstractImageViewActivity.ITEM_POSITION, 0);
+                    extras.putInt(AbstractImageViewActivity.ITEM_POSITION(), 0);
 
                     String jsonList = "[]";
                     try {
@@ -238,8 +238,8 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    extras.putInt(AbstractImageViewActivity.ITEM_POSITION, 0);
-                    extras.putString(AbstractImageViewActivity.JSON_LIST, jsonList);
+                    extras.putInt(AbstractImageViewActivity.ITEM_POSITION(), 0);
+                    extras.putString(AbstractImageViewActivity.JSON_LIST(), jsonList);
                     extras.putString(QingImageViewActivity.QING_SOURCE,
                                      QingPage.toString());
                     extras.putString(QingImageViewActivity.QING_TITLE, mTitle);

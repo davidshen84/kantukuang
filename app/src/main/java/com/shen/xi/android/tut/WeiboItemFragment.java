@@ -260,7 +260,7 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            extras.putInt(AbstractImageViewActivity.ITEM_POSITION, 0);
+            extras.putInt(AbstractImageViewActivity.ITEM_POSITION(), 0);
         } else {
             try {
                 Iterable<String> strings = Iterables
@@ -278,9 +278,9 @@ public class WeiboItemFragment extends Fragment implements AbsListView.OnItemCli
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            extras.putInt(AbstractImageViewActivity.ITEM_POSITION, i);
+            extras.putInt(AbstractImageViewActivity.ITEM_POSITION(), i);
         }
-        extras.putString(AbstractImageViewActivity.JSON_LIST, jsonList);
+        extras.putString(AbstractImageViewActivity.JSON_LIST(), jsonList);
 
         mSelectItemEvent.extras = extras;
         mSelectItemEvent.source = Weibo;

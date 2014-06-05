@@ -24,17 +24,17 @@ public class WeiboImageViewActivity extends AbstractImageViewActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         Intent intent = getIntent();
-        int item = intent.getIntExtra(ITEM_POSITION, 0);
-        String jsonList = intent.getStringExtra(JSON_LIST);
+        int item = intent.getIntExtra(ITEM_POSITION(), 0);
+        String jsonList = intent.getStringExtra(JSON_LIST());
 
         try {
-            JsonParser jsonParser = mJsonFactory.createJsonParser(jsonList);
+            JsonParser jsonParser = mJsonFactory().createJsonParser(jsonList);
             mStatusList = (List<String>) jsonParser.parseArray(List.class, String.class);
         } catch (IOException e) {
             e.printStackTrace();

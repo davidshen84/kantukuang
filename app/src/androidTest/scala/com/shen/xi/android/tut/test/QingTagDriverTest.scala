@@ -41,7 +41,7 @@ class QingTagDriverTest extends TestCase {
   override def setUp() {
     super.setUp()
 
-    val resourceAsStream = this.getClass().getClassLoader()
+    val resourceAsStream = this.getClass.getClassLoader
       .getResourceAsStream("assets/tagresult.json")
     val sampleContent = CharStreams.toString(new InputStreamReader(resourceAsStream))
     resourceAsStream.close()

@@ -16,10 +16,13 @@ import java.io.IOException
 import scala.collection.JavaConversions._
 import java.util
 
-class QingTagDriver @Inject()(@Named("qing request factory") requestFactory: HttpRequestFactory) {
 
+object QingTagDriver {
   val BASE_URI = "qing.blog.sina.com.cn"
   val TAG = classOf[QingTagDriver].getName
+}
+
+class QingTagDriver @Inject()(@Named("qing request factory") requestFactory: HttpRequestFactory) {
 
   var mHttpRequestFactory: HttpRequestFactory = requestFactory
   var mTagResult: TagResult = null
@@ -40,7 +43,7 @@ class QingTagDriver @Inject()(@Named("qing request factory") requestFactory: Htt
     try {
       mHttpRequestFactory.buildGetRequest(url)
     } catch {
-      case e: IOException => Log.d(TAG, e.getMessage()); null;
+      case e: IOException => Log.d(QingTagDriver.TAG, e.getMessage); null;
     }
   }
 
@@ -65,13 +68,13 @@ class QingTagDriver @Inject()(@Named("qing request factory") requestFactory: Htt
         val tagResponse: TagResponse = response.parseAs(classOf[TagResponse])
         mTagResult = tagResponse.data
       } else {
-        Log.w(TAG, "request to " + request.getUrl + "failed")
+        Log.w(QingTagDriver.TAG, s"request to ${request.getUrl} failed")
       }
 
       if (mTagResult != null && mTagResult.cnt > 0) {
         parseList(mTagResult.list)
       } else {
-        Log.w(TAG, f"request to $mTagResult%s returns no result")
+        Log.w(QingTagDriver.TAG, s"request to $mTagResult returns no result")
       }
     } catch {
       case e: IOException => e.printStackTrace(); false
@@ -91,14 +94,14 @@ class QingTagDriver @Inject()(@Named("qing request factory") requestFactory: Htt
   private def parseList(list: util.Collection[String]): Unit = {
     mArticleInfoList = new util.ArrayList[ArticleInfo]()
 
-    val articles = for (i <- list) yield Jsoup.parse(i, BASE_URI)
+    val articles = for (i <- list) yield Jsoup.parse(i, QingTagDriver.BASE_URI)
     for (article <- articles) {
       mArticleInfoList.addAll(article.select(".itemArticle > .itemInfo > :first-child")
         .map(e => (e.attr("href"), e.select("img").headOption)).filterNot(_._2 == None)
-        .map(e => new ArticleInfo() { href = e._1;
-        imageSrc = e._2.get.attr("src") }))
+        .map(e => new ArticleInfo() {
+        href = e._1; imageSrc = e._2.get.attr("src")
+      }))
     }
-
   }
 
 }

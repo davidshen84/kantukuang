@@ -14,10 +14,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Success, Failure}
 import scala.collection.JavaConversions._
 
+object WeiboClientManager {
+  val TAG = classOf[WeiboClientManager].getName
+}
 
 class WeiboClientManager @Inject()(bus: Bus, client: WeiboClient) {
 
-  private val TAG = classOf[WeiboClientManager].getName
   private val mClient = client
   private val mBus = bus
 
@@ -31,20 +33,19 @@ class WeiboClientManager @Inject()(bus: Bus, client: WeiboClient) {
 
       val timeline = mClient.getHomeTimeline(event.sinceId)
       if (timeline != null && timeline.statuses.size > 0) {
-        bufferAsJavaList(timeline.statuses filter(_.getImageUrl != null) distinct)
+        bufferAsJavaList(timeline.statuses filter (_.getImageUrl != null) distinct)
       } else null
 
     } onComplete {
 
-      case Success(statuses) => {
+      case Success(statuses) =>
         event.activity.runOnUiThread(new Runnable() {
           def run() {
             mBus.post(completeEvent.setStatus(statuses))
           }
         })
-      }
 
-      case Failure(e) => {
+      case Failure(e) =>
         e.printStackTrace()
 
         event.activity.runOnUiThread(new Runnable() {
@@ -52,7 +53,6 @@ class WeiboClientManager @Inject()(bus: Bus, client: WeiboClient) {
             mBus.post(completeEvent.setStatus(null))
           }
         })
-      }
 
     }
   }

@@ -28,13 +28,13 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         Bundle extras = getIntent().getExtras();
-        int item = extras.getInt(ITEM_POSITION, 0);
+        int item = extras.getInt(ITEM_POSITION(), 0);
         String sourceString = extras.getString(QING_SOURCE);
-        String jsonList = extras.getString(JSON_LIST);
+        String jsonList = extras.getString(JSON_LIST());
         setTitle(extras.getString(QING_TITLE));
 
         if (!Strings.isNullOrEmpty(sourceString)) {
@@ -48,7 +48,7 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
         ImagePagerAdapter imagePagerAdapter;
         int size = 0;
         try {
-            JsonParser jsonParser = mJsonFactory.createJsonParser(jsonList);
+            JsonParser jsonParser = mJsonFactory().createJsonParser(jsonList);
             switch (mSource) {
                 case QingTag:
                     mArticleInfoList = (List<ArticleInfo>)
@@ -75,7 +75,7 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
     }
 
     @Override
-    protected String getImageUrlByOrder(int order) {
+    public String getImageUrlByOrder(int order) {
         return mSource == QingTag
                 // switch to the high-def version
                 ? mArticleInfoList.get(order).imageSrc().replace("mw205", "mw600")

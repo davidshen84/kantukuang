@@ -19,8 +19,8 @@ class QingPageDriverTest extends TestCase {
   override def setUp() {
     super.setUp()
 
-    val resourceAsStream = this.getClass()
-      .getClassLoader()
+    val resourceAsStream = this.getClass
+      .getClassLoader
       .getResourceAsStream("assets/qingPage.html")
     mDrive.load(resourceAsStream)
     resourceAsStream.close()

@@ -2,8 +2,7 @@ package com.shen.xi.android.tut.sinablog
 
 
 import com.google.api.client.util.Key
-
-import java.util.ArrayList
+import java.util
 
 class TagResult {
   @Key
@@ -11,7 +10,7 @@ class TagResult {
   @Key
   var cnt: Int = 0
   @Key
-  var list: ArrayList[String] = null
+  var list: util.ArrayList[String] = null
   @Key
   var isLastPage: Boolean = false
 }
