@@ -48,7 +48,7 @@ public class DisclaimerFragment extends Fragment {
         public void onClick(View view) {
           PreferenceManager.getDefaultSharedPreferences(getActivity())
             .edit()
-            .putBoolean(MainActivity.PREF_DISCLAIMER_AGREE, true)
+            .putBoolean(MainActivity.PREF_DISCLAIMER_AGREE(), true)
             .commit();
 
           getFragmentManager().beginTransaction()

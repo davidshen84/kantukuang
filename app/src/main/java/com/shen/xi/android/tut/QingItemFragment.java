@@ -41,10 +41,11 @@ import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
-import static com.shen.xi.android.tut.MainActivity.ImageSource.QingPage;
-import static com.shen.xi.android.tut.MainActivity.ImageSource.QingTag;
+import static com.shen.xi.android.tut.ImageSource.QingPage;
+import static com.shen.xi.android.tut.ImageSource.QingTag;
 
-public class QingItemFragment extends Fragment implements AbsListView.OnItemClickListener, OnRefreshListener {
+
+public class QingItemFragment extends Fragment implements AdapterView.OnItemClickListener, OnRefreshListener {
 
   // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
   private static final String ARG_TAG = "Qing Tag";
@@ -71,7 +72,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
   @Inject
   private Bus mBus;
   private int mPage = 1;
-  private MainActivity.ImageSource mPageType;
+  private ImageSource mPageType;
   private TextView mEmptyView;
   @Inject
   private JsonFactory mJsonFactory;
@@ -136,8 +137,8 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
     // set up ads
     AdView adView = (AdView) view.findViewById(R.id.adView);
     adView.loadAd(new AdRequest.Builder()
-                    .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
-                    .build());
+      .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
+      .build());
 
     // initialize the image loading listener
     mImageLoadingListener = new MySimpleImageLoadingListener(
@@ -240,7 +241,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
           extras.putInt(AbstractImageViewActivity.ITEM_POSITION(), 0);
           extras.putString(AbstractImageViewActivity.JSON_LIST(), jsonList);
           extras.putString(QingImageViewActivity.QING_SOURCE,
-                           QingPage.toString());
+            QingPage.toString());
           extras.putString(QingImageViewActivity.QING_TITLE, mTitle);
 
           mSelectItemEvent.source = QingPage;
@@ -249,7 +250,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
         } else {
           Log.w(TAG, "no images");
           Toast.makeText(getActivity(), R.string.no_image,
-                         Toast.LENGTH_SHORT).show();
+            Toast.LENGTH_SHORT).show();
         }
         mPullToRefreshLayout.setRefreshComplete();
       }
@@ -340,7 +341,7 @@ public class QingItemFragment extends Fragment implements AbsListView.OnItemClic
       }
 
       mImageLoader.displayImage(getItem(position).imageSrc(), (ImageView) convertView,
-                                displayImageOptions, mImageLoadingListener);
+        displayImageOptions, mImageLoadingListener);
 
       return convertView;
     }

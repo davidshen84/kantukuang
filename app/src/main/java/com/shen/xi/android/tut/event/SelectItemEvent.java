@@ -1,10 +1,10 @@
 package com.shen.xi.android.tut.event;
 
-
 import android.os.Bundle;
 
-import static com.shen.xi.android.tut.MainActivity.ImageSource;
-import static com.shen.xi.android.tut.MainActivity.ImageSource.Unknown;
+import com.shen.xi.android.tut.ImageSource;
+import static com.shen.xi.android.tut.ImageSource.Unknown;
+
 
 public class SelectItemEvent {
   public Bundle extras;

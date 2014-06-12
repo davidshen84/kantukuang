@@ -10,8 +10,8 @@ import com.shen.xi.android.tut.sinablog.ArticleInfo;
 import java.io.IOException;
 import java.util.List;
 
-import static com.shen.xi.android.tut.MainActivity.ImageSource.QingTag;
-import static com.shen.xi.android.tut.MainActivity.ImageSource.Unknown;
+import static com.shen.xi.android.tut.ImageSource.QingTag;
+import static com.shen.xi.android.tut.ImageSource.Unknown;
 
 
 public class QingImageViewActivity extends AbstractImageViewActivity {
@@ -19,7 +19,7 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
   public static final String QING_SOURCE = "qing source";
   public static final String QING_TITLE = "qing title";
   private List<ArticleInfo> mArticleInfoList;
-  private MainActivity.ImageSource mSource = Unknown;
+  private ImageSource mSource = Unknown;
   private List<String> mImageUrlList;
 
   public QingImageViewActivity() {
@@ -39,7 +39,7 @@ public class QingImageViewActivity extends AbstractImageViewActivity {
 
     if (!Strings.isNullOrEmpty(sourceString)) {
       try {
-        mSource = MainActivity.ImageSource.valueOf(sourceString);
+        mSource = ImageSource.valueOf(sourceString);
       } catch (IllegalArgumentException e) {
         mSource = Unknown;
       }

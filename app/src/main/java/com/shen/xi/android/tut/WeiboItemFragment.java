@@ -51,10 +51,10 @@ import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLa
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 
-import static com.shen.xi.android.tut.MainActivity.ImageSource.Weibo;
+import static com.shen.xi.android.tut.ImageSource.Weibo;
 
 
-public class WeiboItemFragment extends Fragment implements AbsListView.OnItemClickListener, OnRefreshListener {
+public class WeiboItemFragment extends Fragment implements AdapterView.OnItemClickListener, OnRefreshListener {
 
   private static final String ARG_TAG = "tag";
   private static final String TAG = WeiboItemFragment.class.getName();
