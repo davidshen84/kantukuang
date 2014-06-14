@@ -3,10 +3,10 @@ package com.shen.xi.android.tut.util
 import android.graphics.Bitmap
 import android.view.View
 import android.widget.ImageView
-
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener
 
-class MySimpleImageLoadingListener(maxWidth: Int, maxHeight: Int) extends SimpleImageLoadingListener {
+class MySimpleImageLoadingListener(maxWidth: Int, maxHeight: Int, loadingComplete: (String, View, Bitmap) => Unit = null)
+  extends SimpleImageLoadingListener {
 
   override def onLoadingComplete(imageUri: String, view: View, loadedImage: Bitmap): Unit = {
     val imageWidth = loadedImage.getWidth
@@ -23,6 +23,8 @@ class MySimpleImageLoadingListener(maxWidth: Int, maxHeight: Int) extends Simple
     } else {
       view.asInstanceOf[ImageView].setImageBitmap(loadedImage)
     }
+
+    if (loadingComplete != null) loadingComplete(imageUri, view, loadedImage)
   }
 
 }

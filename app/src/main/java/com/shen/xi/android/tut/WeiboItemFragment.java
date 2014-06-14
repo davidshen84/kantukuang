@@ -152,8 +152,8 @@ public class WeiboItemFragment extends Fragment implements AdapterView.OnItemCli
     // set up ads
     AdView adView = (AdView) view.findViewById(R.id.adView);
     adView.loadAd(new AdRequest.Builder()
-                    .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
-                    .build());
+      .addTestDevice("3D3B40496EA6FF9FDA8215AEE90C0808")
+      .build());
 
     return view;
   }
@@ -232,8 +232,8 @@ public class WeiboItemFragment extends Fragment implements AdapterView.OnItemCli
 
     // update view
     mBus.post(mRefreshCompleteEvent
-                .setStatusList(statusList)
-                .setLastId(lastId));
+      .setStatusList(statusList)
+      .setLastId(lastId));
   }
 
   @Subscribe
@@ -247,8 +247,8 @@ public class WeiboItemFragment extends Fragment implements AdapterView.OnItemCli
     }
 
     setEmptyText(mWeiboStatuses.size() == 0
-                   ? getResources().getString(R.string.message_info_empty_list)
-                   : null);
+      ? getResources().getString(R.string.message_info_empty_list)
+      : null);
     mPullToRefreshLayout.setRefreshComplete();
   }
 
@@ -271,14 +271,14 @@ public class WeiboItemFragment extends Fragment implements AdapterView.OnItemCli
       try {
         Iterable<String> strings = Iterables
           .transform(picUrls,
-                     new Function<WeiboThumbnail, String>() {
-                       @Nullable
-                       @Override
-                       public String apply(@Nullable WeiboThumbnail input) {
-                         return input.thumbnail_pic().replace("thumbnail",
-                                                              "large");
-                       }
-                     }
+            new Function<WeiboThumbnail, String>() {
+              @Nullable
+              @Override
+              public String apply(@Nullable WeiboThumbnail input) {
+                return input.thumbnail_pic().replace("thumbnail",
+                  "large");
+              }
+            }
           );
         jsonList = mJsonFactory.toString(strings);
       } catch (IOException e) {
@@ -289,14 +289,14 @@ public class WeiboItemFragment extends Fragment implements AdapterView.OnItemCli
       try {
         Iterable<String> strings = Iterables
           .transform(mWeiboStatuses,
-                     new Function<WeiboStatus, String>() {
-                       @Nullable
-                       @Override
-                       public String apply(
-                         @Nullable WeiboStatus input) {
-                         return input.getImageUrl();
-                       }
-                     }
+            new Function<WeiboStatus, String>() {
+              @Nullable
+              @Override
+              public String apply(
+                @Nullable WeiboStatus input) {
+                return input.getImageUrl();
+              }
+            }
           );
         jsonList = mJsonFactory.toString(strings);
       } catch (IOException e) {
@@ -340,12 +340,11 @@ public class WeiboItemFragment extends Fragment implements AdapterView.OnItemCli
         int maxWidth = WeiboItemFragment.this.getView().getWidth();
         int maxHeight = getResources().getDimensionPixelSize(
           R.dimen.item_image_height);
-        mListener = new MySimpleImageLoadingListener(maxWidth,
-                                                     maxHeight);
+        mListener = new MySimpleImageLoadingListener(maxWidth, maxHeight, null);
       }
 
       mImageLoader.displayImage(getItem(position).getImageUrl(), (ImageView) convertView,
-                                displayImageOptions, mListener);
+        displayImageOptions, mListener);
 
       return convertView;
     }

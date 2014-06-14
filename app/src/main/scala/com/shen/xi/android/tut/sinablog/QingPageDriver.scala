@@ -1,55 +1,49 @@
 package com.shen.xi.android.tut.sinablog
 
+import java.io.{IOException, InputStream}
+import java.util
+
 import android.util.Log
-
 import com.google.inject.Inject
-
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
-import java.io.{IOException, InputStream}
-
 import scala.collection.JavaConversions._
-import java.util
 
 object QingPageDriver {
   val TAG = classOf[QingPageDriver].getName
 }
 
+object ExtensionMethod {
+
+  implicit class Pipe[L](val l: L) extends AnyVal {
+    def |>[R](f: L => R) = if (l != null) f(l)
+  }
+
+}
+
 class QingPageDriver @Inject()() {
 
-  import QingPageDriver.TAG
+  import com.shen.xi.android.tut.sinablog.ExtensionMethod._
+  import com.shen.xi.android.tut.sinablog.QingPageDriver.TAG
+
 
   private val mImageUrlList: util.List[String] = new util.ArrayList[String]
 
   def getImageUrlList: util.List[String] = mImageUrlList
 
-  def load(url: String): Boolean = {
-    var document: Document = null
-
-    try {
-      document = Jsoup.connect(url).get()
-    } catch {
-      case e: IOException => Log.w(TAG, s"cannot load page $url%s"); false
-    }
-
-    parse(document)
-
+  def load(url: String): Boolean = try {
+    Jsoup.connect(url).get() |> parse
     true
+  } catch {
+    case e: IOException => Log.w(TAG, s"cannot load page $url%s"); false
   }
 
-  def load(inputStream: InputStream): Boolean = {
-    var document: Document = null
-
-    try {
-      document = Jsoup.parse(inputStream, "utf-8", "qing.blog.sina.com.cn")
-    } catch {
-      case e: IOException => Log.w(TAG, "cannot parse page"); false
-    }
-
-    parse(document)
-
+  def load(inputStream: InputStream): Boolean = try {
+    Jsoup.parse(inputStream, "utf-8", "qing.blog.sina.com.cn") |> parse
     true
+  } catch {
+    case e: IOException => Log.w(TAG, "cannot parse page"); false
   }
 
   private def parse(document: Document): Unit = {

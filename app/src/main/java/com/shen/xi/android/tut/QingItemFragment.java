@@ -143,7 +143,7 @@ public class QingItemFragment extends Fragment implements AdapterView.OnItemClic
     // initialize the image loading listener
     mImageLoadingListener = new MySimpleImageLoadingListener(
       container.getMeasuredWidth(),
-      getResources().getDimensionPixelSize(R.dimen.item_image_height));
+      getResources().getDimensionPixelSize(R.dimen.item_image_height), null);
 
     return view;
   }

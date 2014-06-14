@@ -198,7 +198,7 @@ abstract class AbstractImageViewActivity(menuId: Int) extends ActionBarActivity 
   /**
    * Delegate to derivative class to implement how to retrieve image url
    */
-  protected def getImageUrlByOrder(order: Int): String
+  protected[tut] def getImageUrlByOrder(order: Int): String
 
   private def doEasyShare(itemOrder: Int) = {
     val imageUrl = getImageUrlByOrder(itemOrder)
