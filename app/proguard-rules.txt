@@ -49,6 +49,7 @@
 -dontwarn net.sf.cglib.**
 -dontwarn org.apache.**
 -dontwarn scala.**
+-dontwarn org.json4s.**
 
 -dontnote com.google.**
 -dontnote net.sf.cglib.**

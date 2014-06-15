@@ -1,19 +1,19 @@
 package com.shen.xi.android.tut
 
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, FileNotFoundException, FileOutputStream, IOException}
+
 import android.app.{Activity, WallpaperManager}
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.support.v4.app.{FragmentManager, FragmentPagerAdapter}
-import android.support.v4.view.{ViewPager, MenuItemCompat}
+import android.support.v4.view.{MenuItemCompat, ViewPager}
 import android.support.v7.app.{ActionBar, ActionBarActivity}
 import android.support.v7.widget.ShareActionProvider
 import android.util.Log
 import android.view.{Menu, MenuItem, View}
 import android.widget.Toast
-
 import com.google.android.gms.ads.{AdRequest, AdView}
 import com.google.api.client.json.JsonFactory
 import com.google.inject.Inject
@@ -24,14 +24,12 @@ import com.nostra13.universalimageloader.utils.DiskCacheUtils
 import com.squareup.otto.Bus
 import com.viewpagerindicator.UnderlinePageIndicator
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, FileNotFoundException, FileOutputStream, IOException}
-
 
 object AbstractImageViewActivity {
   val ITEM_POSITION = "item position"
   val JSON_LIST = "json list"
   val TAG = classOf[AbstractImageViewActivity].getName
-  val TestDevice: String = "3D3B40496EA6FF9FDA8215AEE90C0808"
+  val TestDevice: String = "32668407B2DA8E501AA7066FD541EB61"
 
   /**
    * A [[com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener]]
@@ -77,7 +75,7 @@ object AbstractImageViewActivity {
     }
 
     private def getImageDirectory: Option[File] = {
-      import Environment.{getExternalStoragePublicDirectory => espd, DIRECTORY_PICTURES}
+      import android.os.Environment.{DIRECTORY_PICTURES, getExternalStoragePublicDirectory => espd}
 
       val tutDir = new File(espd(DIRECTORY_PICTURES), "TuT")
 
@@ -100,7 +98,7 @@ object AbstractImageViewActivity {
 
 abstract class AbstractImageViewActivity(menuId: Int) extends ActionBarActivity {
 
-  import AbstractImageViewActivity.{WallpaperSaver, ImageSaver, TestDevice}
+  import AbstractImageViewActivity._
 
   private var mImageSaver: ImageSaver = null
   private var mWallpaperSaver: WallpaperSaver = null
@@ -158,10 +156,11 @@ abstract class AbstractImageViewActivity(menuId: Int) extends ActionBarActivity 
     mImageSaver = new ImageSaver(this)
 
     // set up ads
-    findViewById(R.id.adView).asInstanceOf[AdView]
-      .loadAd(new AdRequest.Builder()
-      .addTestDevice(TestDevice)
-      .build())
+    val adRequest = new AdRequest.Builder()
+
+    if (BuildConfig.DEBUG)
+      adRequest.addTestDevice(TestDevice)
+    findViewById(R.id.adView).asInstanceOf[AdView].loadAd(adRequest.build())
   }
 
   override protected def onResume(): Unit = {
