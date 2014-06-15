@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import com.google.inject.Inject
 import com.shen.xi.android.tut.weibo.WeiboClient
-
+import scala.collection.JavaConversions.seqAsJavaList
 
 object WeiboImageViewActivity {
   private val TAG = classOf[WeiboImageViewActivity].getName
@@ -18,7 +18,6 @@ class WeiboImageViewActivity extends AbstractImageViewActivity(R.menu.weibo_imag
   import org.json4s._
   import org.json4s.native.JsonMethods._
 
-import scala.collection.JavaConversions.seqAsJavaList
 
   private var mStatusList: JList[String] = null
   @Inject

@@ -5,12 +5,10 @@ import java.util.{ArrayList => JArrayList, List => JList}
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.support.v4.app.Fragment
 import android.view.{LayoutInflater, View, ViewGroup}
 import android.widget.{AbsListView, AdapterView, ArrayAdapter, ImageView, ListAdapter, TextView, Toast}
 import com.google.android.gms.ads.{AdRequest, AdView}
-import com.google.api.client.json.JsonFactory
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener

@@ -2,17 +2,14 @@ package com.shen.xi.android.tut
 
 
 import com.google.inject.Inject
-import com.squareup.otto.{Bus, Subscribe}
-
 import com.shen.xi.android.tut.event.{RefreshStatusCompleteEvent, RefreshWeiboEvent}
 import com.shen.xi.android.tut.weibo.WeiboClient
+import com.squareup.otto.{Bus, Subscribe}
 
-import java.lang.Runnable
-
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Success, Failure}
 import scala.collection.JavaConversions._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 object WeiboClientManager {
   val TAG = classOf[WeiboClientManager].getName
