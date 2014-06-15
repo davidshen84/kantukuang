@@ -156,7 +156,7 @@ class NavigationDrawerFragment extends Fragment {
     if (mDrawerLayout != null)
       mDrawerLayout.closeDrawer(mFragmentContainerView)
 
-    mEvent.setPosition(position)
+    mEvent.position =position
     mBus.post(mEvent)
   }
 

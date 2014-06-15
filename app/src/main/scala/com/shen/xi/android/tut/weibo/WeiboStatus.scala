@@ -5,7 +5,7 @@ import java.lang.{Long => JLong}
 import java.util
 
 
-final class WeiboStatus {
+class WeiboStatus {
 
   @Key("created_at")
   var createdAt: String = null

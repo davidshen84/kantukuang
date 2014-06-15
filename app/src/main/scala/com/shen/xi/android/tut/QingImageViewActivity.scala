@@ -21,7 +21,7 @@ class QingImageViewActivity extends AbstractImageViewActivity(R.menu.qing_image_
 
 
   private var mArticleInfoList: List[(String, String)] = null
-  private var mSource = Unknown
+  private var mSource:ImageSource = Unknown
   private var mImageUrlList: List[String] = null
 
   TuTModule.getInjector.injectMembers(this)
@@ -37,7 +37,7 @@ class QingImageViewActivity extends AbstractImageViewActivity(R.menu.qing_image_
 
     if (!Strings.isNullOrEmpty(sourceString)) {
       try {
-        mSource = ImageSource.valueOf(sourceString)
+        mSource = ImageSource.fromName(sourceString)
       } catch {
         case e: IllegalArgumentException => mSource = Unknown
       }

@@ -178,7 +178,7 @@ class MainActivity extends ActionBarActivity {
   @Subscribe
   def navigateSection(event: NavigationEvent) = {
     val sections = getResources.getStringArray(R.array.default_sections)
-    mCurrentDrawerSelectedId = event.getPosition
+    mCurrentDrawerSelectedId = event.position
     val currentSectionName = sections(mCurrentDrawerSelectedId)
     val itemFragment = mCurrentDrawerSelectedId match {
 

@@ -172,6 +172,7 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
         case QingTag =>
           val extras = new Bundle()
           extras.putInt(ITEM_POSITION, position)
+          
           extras.putString(QING_SOURCE, QingTag.toString)
           val list = (for (a <- mArticleInfoList) yield ("href" -> a.href) ~ ("imageSrc" -> a.imageSrc)).toList
           val jsonList = compact(render(list))

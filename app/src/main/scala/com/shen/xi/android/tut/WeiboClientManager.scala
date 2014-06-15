@@ -38,7 +38,8 @@ class WeiboClientManager @Inject()(bus: Bus, client: WeiboClient) {
       case Success(statuses) =>
         event.activity.runOnUiThread(new Runnable() {
           def run() {
-            mBus.post(completeEvent.setStatus(statuses))
+            completeEvent.statusList = statuses.toList
+            mBus.post(completeEvent)
           }
         })
 
@@ -47,7 +48,8 @@ class WeiboClientManager @Inject()(bus: Bus, client: WeiboClient) {
 
         event.activity.runOnUiThread(new Runnable() {
           def run() {
-            mBus.post(completeEvent.setStatus(null))
+            completeEvent.statusList = null
+            mBus.post(completeEvent)
           }
         })
 

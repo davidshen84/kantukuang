@@ -44,7 +44,6 @@ object WeiboItemFragment {
 
 class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener with OnRefreshListener {
 
-  import com.shen.xi.android.tut.ImageSource.Weibo
   import com.shen.xi.android.tut.WeiboItemFragment._
   import org.json4s.JsonDSL._
   import org.json4s.native.JsonMethods._
@@ -182,31 +181,31 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
 
   @Subscribe
   def refreshStatusComplete(event: RefreshStatusCompleteEvent) = {
-    val statusList = event.getStatus
+    val statusList = event.statusList
     var lastId: String = null
 
-    if (statusList == null || statusList.size() == 0) {
+    if (statusList == null || statusList.size == 0) {
       Toast.makeText(mMainActivity, R.string.message_info_no_update, Toast.LENGTH_SHORT).show()
     } else {
-      val message = getResources.getString(R.string.format_info_new_data, int2Integer(statusList.size()))
+      val message = getResources.getString(R.string.format_info_new_data, int2Integer(statusList.size))
       Toast.makeText(mMainActivity, message, Toast.LENGTH_SHORT).show()
-      lastId = statusList.get(0).id
+      lastId = statusList(0).id
     }
 
     // update view
-    mBus.post(mRefreshCompleteEvent
-      .setStatusList(statusList)
-      .setLastId(lastId))
+    mRefreshCompleteEvent.statusList = statusList
+    mRefreshCompleteEvent.lastId = lastId
+    mBus.post(mRefreshCompleteEvent)
   }
 
   @Subscribe
   def refreshComplete(event: RefreshCompleteEvent) = {
-    val statusList = event.getStatusList
-    if (statusList != null && statusList.size() > 0) {
+    val statusList = event.statusList
+    if (statusList != null && statusList.size > 0) {
       mWeiboStatuses.addAll(0, statusList)
       mWeiboItemViewArrayAdapter.notifyDataSetChanged()
 
-      mLastId = event.getLastId
+      mLastId = event.lastId
     }
 
     setEmptyText(if (mWeiboStatuses.size() == 0)
