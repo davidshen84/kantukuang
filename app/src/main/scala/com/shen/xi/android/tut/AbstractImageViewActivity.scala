@@ -98,7 +98,7 @@ object AbstractImageViewActivity {
 
 abstract class AbstractImageViewActivity(menuId: Int) extends ActionBarActivity {
 
-  import AbstractImageViewActivity._
+  import com.shen.xi.android.tut.AbstractImageViewActivity._
 
   private var mImageSaver: ImageSaver = null
   private var mWallpaperSaver: WallpaperSaver = null

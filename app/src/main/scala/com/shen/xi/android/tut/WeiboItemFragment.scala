@@ -3,7 +3,7 @@ package com.shen.xi.android.tut
 import java.util.{ArrayList => JArrayList, List => JList}
 
 import android.app.Activity
-import android.content.Context
+import android.content.{Context, Intent}
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.{LayoutInflater, View, ViewGroup}
@@ -13,15 +13,18 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener
 import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader}
-import com.shen.xi.android.tut.event.{RefreshCompleteEvent, RefreshStatusCompleteEvent, RefreshWeiboEvent, SectionAttachEvent, SelectItemEvent}
+import com.shen.xi.android.tut.event.SectionAttachEvent
 import com.shen.xi.android.tut.util.MySimpleImageLoadingListener
 import com.shen.xi.android.tut.weibo.{WeiboClient, WeiboStatus}
-import com.squareup.otto.{Bus, Subscribe}
+import com.squareup.otto.Bus
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener
 
 import scala.collection.JavaConversions._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 
 object WeiboItemFragment {
@@ -44,15 +47,13 @@ object WeiboItemFragment {
 
 class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener with OnRefreshListener {
 
+  import com.shen.xi.android.tut.AbstractImageViewActivity.JSON_LIST
   import com.shen.xi.android.tut.WeiboItemFragment._
   import org.json4s.JsonDSL._
   import org.json4s.native.JsonMethods._
 
   private val mSectionAttachEvent = new SectionAttachEvent()
-  private val mRefreshWeiboEvent = new RefreshWeiboEvent()
-  private val mRefreshCompleteEvent = new RefreshCompleteEvent()
   private val mWeiboStatuses = new JArrayList[WeiboStatus]()
-  private val mSelectItemEvent = new SelectItemEvent()
 
   /**
    * The fragment's ListView/GridView.
@@ -75,13 +76,11 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
    */
 
   TuTModule.getInjector.injectMembers(this)
-  mSelectItemEvent.source = Weibo
 
   override def onAttach(activity: Activity) = {
     super.onAttach(activity)
 
     mMainActivity = activity.asInstanceOf[MainActivity]
-    mRefreshWeiboEvent.activity = mMainActivity
   }
 
   override def onCreate(savedInstanceState: Bundle) = {
@@ -142,19 +141,14 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
 
     mBus.register(this)
     // trigger refresh
-    if (mWeiboStatuses.size() == 0) {
-      mBus.post(mRefreshWeiboEvent)
-      mPullToRefreshLayout.post(new Runnable() {
-        override def run() = mPullToRefreshLayout.setRefreshing(true)
+    if (mWeiboStatuses.size() == 0)
+      onRefreshStarted(null)
 
-      })
-    }
   }
 
   override def onDetach() = {
     // clean ref. to activity
     mMainActivity = null
-    mRefreshWeiboEvent.activity = null
     mBus.unregister(this)
 
     super.onDetach()
@@ -175,50 +169,54 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
     if (!mPullToRefreshLayout.isRefreshing)
       mPullToRefreshLayout.setRefreshing(true)
 
-    mRefreshWeiboEvent.sinceId = mLastId
-    mBus.post(mRefreshWeiboEvent)
-  }
+    Future {
 
-  @Subscribe
-  def refreshStatusComplete(event: RefreshStatusCompleteEvent) = {
-    val statusList = event.statusList
-    var lastId: String = null
+      val timeline = mWeiboClient.getHomeTimeline(mLastId)
+      if (timeline != null && timeline.statuses.size > 0) {
+        (timeline.statuses filter (_.getImageUrl != null)).distinct
+      } else null
 
-    if (statusList == null || statusList.size == 0) {
-      Toast.makeText(mMainActivity, R.string.message_info_no_update, Toast.LENGTH_SHORT).show()
-    } else {
-      val message = getResources.getString(R.string.format_info_new_data, int2Integer(statusList.size))
-      Toast.makeText(mMainActivity, message, Toast.LENGTH_SHORT).show()
-      lastId = statusList(0).id
+    } onComplete {
+
+      case Success(statuses) =>
+
+        if (statuses == null || statuses.size == 0) {
+          Toast.makeText(mMainActivity, R.string.message_info_no_update, Toast.LENGTH_SHORT).show()
+        } else {
+          mLastId = statuses(0).id
+          getActivity.runOnUiThread(new Runnable {
+            override def run(): Unit = {
+              val message = getResources.getString(R.string.format_info_new_data, int2Integer(statuses.size))
+              Toast.makeText(mMainActivity, message, Toast.LENGTH_SHORT).show()
+
+              mWeiboStatuses.addAll(0, statuses)
+              mWeiboItemViewArrayAdapter.notifyDataSetChanged()
+            }
+          })
+        }
+
+        refreshComplete()
+
+      case Failure(e) =>
+        e.printStackTrace()
+        refreshComplete()
     }
 
-    // update view
-    mRefreshCompleteEvent.statusList = statusList
-    mRefreshCompleteEvent.lastId = lastId
-    mBus.post(mRefreshCompleteEvent)
-  }
+    def refreshComplete() = getActivity.runOnUiThread(new Runnable {
+      override def run(): Unit = {
+        setEmptyText(
+          if (mWeiboStatuses.size() == 0)
+            getResources.getString(R.string.message_info_empty_list)
+          else null)
+        mPullToRefreshLayout.setRefreshComplete()
+      }
+    })
 
-  @Subscribe
-  def refreshComplete(event: RefreshCompleteEvent) = {
-    val statusList = event.statusList
-    if (statusList != null && statusList.size > 0) {
-      mWeiboStatuses.addAll(0, statusList)
-      mWeiboItemViewArrayAdapter.notifyDataSetChanged()
-
-      mLastId = event.lastId
-    }
-
-    setEmptyText(if (mWeiboStatuses.size() == 0)
-      getResources.getString(R.string.message_info_empty_list)
-    else null)
-    mPullToRefreshLayout.setRefreshComplete()
   }
 
   def getStatuses = mWeiboStatuses.asInstanceOf[JArrayList[WeiboStatus]]
 
-
   override def onItemClick(adapterView: AdapterView[_], view: View, i: Int, l: Long): Unit = {
-    val extras = new Bundle()
     var jsonList = "[]"
     var picUrls = mWeiboStatuses.get(i).picUrls
 
@@ -229,19 +227,14 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
     if (picUrls != null && picUrls.size() > 0) {
       val strings = (picUrls map (t => t.thumbnail_pic.replace("thumbnail", "large"))).toList
       jsonList = compact(render(strings))
-
-      extras.putInt(AbstractImageViewActivity.ITEM_POSITION, 0)
     } else {
       val strings = (mWeiboStatuses map (s => s.getImageUrl)).toList
       jsonList = compact(render(strings))
-
-      extras.putInt(AbstractImageViewActivity.ITEM_POSITION, i)
     }
-    extras.putString(AbstractImageViewActivity.JSON_LIST, jsonList)
 
-    mSelectItemEvent.extras = extras
-    mSelectItemEvent.source = Weibo
-    mBus.post(mSelectItemEvent)
+    val intent = new Intent(getActivity, classOf[WeiboImageViewActivity])
+    intent.putExtra(JSON_LIST, jsonList)
+    startActivity(intent)
   }
 
   private class WeiboItemViewArrayAdapter(context: Context, statuses: JList[WeiboStatus])

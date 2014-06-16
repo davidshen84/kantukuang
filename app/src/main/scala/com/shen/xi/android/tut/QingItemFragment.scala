@@ -2,7 +2,7 @@ package com.shen.xi.android.tut
 
 import java.util.{ArrayList => JArrayList, List => JList}
 
-import android.content.Context
+import android.content.{Context, Intent}
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
@@ -13,7 +13,7 @@ import com.google.api.client.http.HttpRequest
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader}
-import com.shen.xi.android.tut.event.{SectionAttachEvent, SelectItemEvent}
+import com.shen.xi.android.tut.event.SectionAttachEvent
 import com.shen.xi.android.tut.sinablog.{ArticleInfo, QingPageDriver, QingTagDriver}
 import com.shen.xi.android.tut.util.MySimpleImageLoadingListener
 import com.squareup.otto.Bus
@@ -48,7 +48,6 @@ object QingItemFragment {
 class QingItemFragment extends Fragment with AdapterView.OnItemClickListener with OnRefreshListener {
 
   import com.shen.xi.android.tut.AbstractImageViewActivity.{ITEM_POSITION, JSON_LIST, TestDevice}
-  import com.shen.xi.android.tut.ImageSource._
   import com.shen.xi.android.tut.QingImageViewActivity.{QING_SOURCE, QING_TITLE}
   import com.shen.xi.android.tut.QingItemFragment._
   import org.json4s.JsonDSL._
@@ -57,7 +56,6 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
 
   // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
   private val mArticleInfoList = new JArrayList[ArticleInfo]()
-  private val mSelectItemEvent = new SelectItemEvent()
   private val mSectionAttachEvent = new SectionAttachEvent()
   private var mQingTag: String = null
   private var mImageLoadingListener: MySimpleImageLoadingListener = null
@@ -90,7 +88,6 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
    */
 
   TuTModule.getInjector.injectMembers(this)
-  mSelectItemEvent.source = QingTag
 
   override def onCreate(savedInstanceState: Bundle) = {
     super.onCreate(savedInstanceState)
@@ -166,68 +163,63 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
   }
 
   override def onItemClick(parent: AdapterView[_], view: View, position: Int, id: Long) = {
+
     // do not post when loading
     if (!mPullToRefreshLayout.isRefreshing) {
       mPageType match {
         case QingTag =>
-          val extras = new Bundle()
-          extras.putInt(ITEM_POSITION, position)
-          
-          extras.putString(QING_SOURCE, QingTag.toString)
           val list = (for (a <- mArticleInfoList) yield ("href" -> a.href) ~ ("imageSrc" -> a.imageSrc)).toList
-          val jsonList = compact(render(list))
 
-          extras.putString(AbstractImageViewActivity.JSON_LIST, jsonList)
-          extras.putString(QingImageViewActivity.QING_TITLE, mTitle)
-
-          mSelectItemEvent.source = QingTag
-          mSelectItemEvent.extras = extras
-          mBus.post(mSelectItemEvent)
+          startActivity(new Intent(getActivity, classOf[QingImageViewActivity]) {
+            putExtra(AbstractImageViewActivity.JSON_LIST, compact(render(list)))
+            putExtra(QingImageViewActivity.QING_TITLE, mTitle)
+            putExtra(ITEM_POSITION, position)
+            putExtra(QING_SOURCE, QingTag.toString)
+          })
 
         case QingPage => loadQingPage(position)
       }
     }
+
   }
 
   def loadQingPage(position: Int) = {
     mPullToRefreshLayout.setRefreshing(true)
 
     Future {
+
       if (mQingPageDriver.load(mArticleInfoList.get(position).href))
         mQingPageDriver.getImageUrlList
       else null
+
     } onComplete {
+
       case Success(strings) =>
         if (strings != null && strings.size() > 0) {
-          val extras = new Bundle()
-          extras.putInt(ITEM_POSITION, 0)
-
-          val jsonList = compact(render(strings.toList))
-
-          extras.putInt(ITEM_POSITION, 0)
-          extras.putString(JSON_LIST, jsonList)
-          extras.putString(QING_SOURCE, QingPage.toString)
-          extras.putString(QING_TITLE, mTitle)
-
-          mSelectItemEvent.source = QingPage
-          mSelectItemEvent.extras = extras
-
-          getActivity.runOnUiThread(new Runnable {
-            override def run(): Unit = mBus.post(mSelectItemEvent)
+          startActivity(new Intent(getActivity, classOf[QingImageViewActivity]) {
+            putExtra(ITEM_POSITION, 0)
+            putExtra(JSON_LIST, compact(render(strings.toList)))
+            putExtra(QING_TITLE, mTitle)
+            putExtra(QING_SOURCE, QingPage.toString)
           })
-
         } else {
           Log.w(TAG, "no images")
-          Toast.makeText(getActivity, R.string.no_image, Toast.LENGTH_SHORT).show()
+          getActivity.runOnUiThread(new Runnable {
+            override def run(): Unit = Toast.makeText(getActivity, R.string.no_image, Toast.LENGTH_SHORT).show()
+          })
         }
 
-      case Failure(e) => e.printStackTrace()
+        onComplete()
 
-      case _ => getActivity.runOnUiThread(new Runnable {
-        override def run(): Unit = mPullToRefreshLayout.setRefreshComplete()
-      })
+      case Failure(e) =>
+        e.printStackTrace()
+        onComplete()
 
     }
+
+    def onComplete() = getActivity.runOnUiThread(new Runnable {
+      override def run(): Unit = mPullToRefreshLayout.setRefreshComplete()
+    })
   }
 
   /**

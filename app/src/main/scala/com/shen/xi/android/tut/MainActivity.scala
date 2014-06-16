@@ -1,6 +1,5 @@
 package com.shen.xi.android.tut
 
-import android.content.Intent
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.v4.app.FragmentTransaction
@@ -12,22 +11,24 @@ import com.google.api.client.http.HttpRequestFactory
 import com.google.api.client.json.JsonFactory
 import com.google.inject.Inject
 import com.google.inject.name.Named
-import com.shen.xi.android.tut.event.{NavigationEvent, SectionAttachEvent, SelectItemEvent}
+import com.shen.xi.android.tut.event.{NavigationEvent, SectionAttachEvent}
 import com.shen.xi.android.tut.sinablog.QingPageDriver
 import com.shen.xi.android.tut.weibo.WeiboClient
 import com.squareup.otto.{Bus, Subscribe}
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener
 
+
 object MainActivity {
+
   val PREF_DISCLAIMER_AGREE = "agree to disclaimer"
   val TAG = classOf[MainActivity].getName
   val STATE_DRAWER_SELECTED_ID = "selected navigation drawer position"
+
 }
 
 class MainActivity extends ActionBarActivity {
 
-  import MainActivity._
-  import ImageSource._
+  import com.shen.xi.android.tut.MainActivity._
 
   @Inject
   private var mBus: Bus = null
@@ -158,24 +159,6 @@ class MainActivity extends ActionBarActivity {
     }
 
   @Subscribe
-  def itemSelected(event: SelectItemEvent) = {
-    val intent = event.source match {
-      case Weibo => new Intent(this, classOf[WeiboImageViewActivity])
-
-      case QingTag => new Intent(this, classOf[QingImageViewActivity])
-
-      case QingPage => new Intent(this, classOf[QingImageViewActivity])
-
-      case _ => null
-    }
-
-    if (intent != null) {
-      intent.putExtras(event.extras)
-      startActivity(intent)
-    }
-  }
-
-  @Subscribe
   def navigateSection(event: NavigationEvent) = {
     val sections = getResources.getStringArray(R.array.default_sections)
     mCurrentDrawerSelectedId = event.position
@@ -186,13 +169,13 @@ class MainActivity extends ActionBarActivity {
       case 0 => WeiboItemFragment.newInstance(currentSectionName)
 
       // Qing - Mao
-      case 1 => QingItemFragment.newInstance(currentSectionName, "猫", false)
+      case 1 => QingItemFragment.newInstance(currentSectionName, "猫", parsePage = false)
 
       // Qing - Wei Mei
-      case 2 => QingItemFragment.newInstance(currentSectionName, "唯美", true)
+      case 2 => QingItemFragment.newInstance(currentSectionName, "唯美", parsePage = true)
 
       // Qing - Yi Shu
-      case 3 => QingItemFragment.newInstance(currentSectionName, "艺术", true)
+      case 3 => QingItemFragment.newInstance(currentSectionName, "艺术", parsePage = true)
 
       case _ => Log.d(TAG, s"$mCurrentDrawerSelectedId not ready")
         null
