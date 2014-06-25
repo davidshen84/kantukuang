@@ -1,10 +1,12 @@
 package com.shen.xi.android.tut
 
 
+import java.util.{List => JList}
+
 import android.os.Bundle
 import android.view.MenuItem
-import com.google.api.client.repackaged.com.google.common.base.Strings
-import com.shen.xi.android.tut.ImageSource._
+import com.google.common.base.Strings
+import com.shen.xi.android.tut.sinablog.ArticleInfo
 
 
 object QingImageViewActivity {
@@ -16,13 +18,10 @@ class QingImageViewActivity extends AbstractImageViewActivity(R.menu.qing_image_
 
   import com.shen.xi.android.tut.AbstractImageViewActivity._
   import com.shen.xi.android.tut.QingImageViewActivity._
-  import org.json4s._
-  import org.json4s.native.JsonMethods._
 
-
-  private var mArticleInfoList: List[(String, String)] = null
-  private var mSource:ImageSource = Unknown
-  private var mImageUrlList: List[String] = null
+  private var mArticleInfoList: JList[ArticleInfo] = null
+  private var mSource: ImageSource = Unknown
+  private var mImageUrlList: JList[String] = null
 
   TuTModule.getInjector.injectMembers(this)
 
@@ -33,6 +32,8 @@ class QingImageViewActivity extends AbstractImageViewActivity(R.menu.qing_image_
     val item = extras.getInt(ITEM_POSITION, 0)
     val sourceString = extras.getString(QING_SOURCE)
     val jsonList = extras.getString(JSON_LIST)
+    val jsonParser = mJsonFactory.createJsonParser(jsonList)
+    var size = 0
     setTitle(extras.getString(QING_TITLE))
 
     if (!Strings.isNullOrEmpty(sourceString)) {
@@ -43,37 +44,31 @@ class QingImageViewActivity extends AbstractImageViewActivity(R.menu.qing_image_
       }
     }
 
-    var imagePagerAdapter: ImagePagerAdapter = null
-    var size = 0
+
 
     mSource match {
       case QingTag =>
-        mArticleInfoList =
-          for {JObject(o) <- parse(jsonList)
-               JField("href", JString(href)) <- o
-               JField("imageSrc", JString(imageSrc)) <- o} yield (href, imageSrc)
-
+        mArticleInfoList = jsonParser.parseArray[ArticleInfo](classOf[JList[ArticleInfo]], classOf[ArticleInfo]).asInstanceOf[JList[ArticleInfo]]
         size = mArticleInfoList.size
 
       case QingPage =>
-        mImageUrlList = for {JString(s) <- parse(jsonList)} yield s
+        mImageUrlList = jsonParser.parseArray[String](classOf[JList[String]], classOf[String]).asInstanceOf[JList[String]]
         size = mImageUrlList.size
     }
 
     if (size != 0) {
-      imagePagerAdapter = new ImagePagerAdapter(getSupportFragmentManager, size)
+      val imagePagerAdapter = new ImagePagerAdapter(getSupportFragmentManager, size)
       setupPager(imagePagerAdapter, item)
     } else {
       finish()
     }
   }
 
-  override def getImageUrlByOrder(order: Int) =
-    if (mSource == QingTag)
+  override def getImageUrlByOrder(order: Int) = mSource match {
     // switch to the high-def version
-      mArticleInfoList(order)._2.asInstanceOf[String].replace("mw205", "mw600")
-    else
-      mImageUrlList(order)
+    case QingTag => mArticleInfoList.get(order).href.replace("mw205", "mw600")
+    case QingPage => mImageUrlList.get(order)
+  }
 
   // Handle action bar item clicks here. The action bar will
   // automatically handle clicks on the Home/Up button, so long
