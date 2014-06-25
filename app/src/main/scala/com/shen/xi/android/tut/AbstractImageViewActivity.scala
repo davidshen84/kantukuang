@@ -51,7 +51,6 @@ object AbstractImageViewActivity {
     }
   }
 
-
   /**
    * A [[com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener]]
    * that saves the image to external storage
@@ -204,7 +203,7 @@ abstract class AbstractImageViewActivity(menuId: Int) extends ActionBarActivity 
     // this logic assume the user loaded the image first
     // so a copy can be found from the disk cache
     val imageFile = DiskCacheUtils.findInCache(imageUrl, mDiscCache)
-    if (imageFile != null && imageFile.exists())
+    if (mActionProvider != null && imageFile != null && imageFile.exists())
       mActionProvider.setShareIntent(new Intent() {
         setAction(Intent.ACTION_SEND)
         putExtra(Intent.EXTRA_STREAM, Uri.fromFile(imageFile))
