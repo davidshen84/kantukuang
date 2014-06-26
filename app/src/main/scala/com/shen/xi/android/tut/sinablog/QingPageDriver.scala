@@ -5,6 +5,7 @@ import java.util
 
 import android.util.Log
 import com.google.inject.Inject
+import com.shen.xi.android.tut.util.ExtensionMethods
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
@@ -14,17 +15,9 @@ object QingPageDriver {
   val TAG = classOf[QingPageDriver].getName
 }
 
-object ExtensionMethod {
-
-  implicit class Pipe[L](val l: L) extends AnyVal {
-    def |>[R](f: L => R) = if (l != null) f(l)
-  }
-
-}
-
 class QingPageDriver @Inject()() {
 
-  import com.shen.xi.android.tut.sinablog.ExtensionMethod._
+  import ExtensionMethods._
   import com.shen.xi.android.tut.sinablog.QingPageDriver.TAG
 
 
@@ -33,14 +26,14 @@ class QingPageDriver @Inject()() {
   def getImageUrlList: util.List[String] = mImageUrlList
 
   def load(url: String): Boolean = try {
-    Jsoup.connect(url).get() |> parse
+    Jsoup.connect(url).get() |> { l => if (l!=null) parse(l) }
     true
   } catch {
     case e: IOException => Log.w(TAG, s"cannot load page $url%s"); false
   }
 
   def load(inputStream: InputStream): Boolean = try {
-    Jsoup.parse(inputStream, "utf-8", "qing.blog.sina.com.cn") |> parse
+    Jsoup.parse(inputStream, "utf-8", "qing.blog.sina.com.cn") |> { l => if (l != null) parse(l) }
     true
   } catch {
     case e: IOException => Log.w(TAG, "cannot parse page"); false
