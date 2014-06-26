@@ -23,6 +23,7 @@ object MainActivity {
   val PREF_DISCLAIMER_AGREE = "agree to disclaimer"
   val TAG = classOf[MainActivity].getName
   val STATE_DRAWER_SELECTED_ID = "selected navigation drawer position"
+  val sectionMatcher = """(qingPage|qingTag|weibo)\((([^\|]+)\|?([^\|]*))\)""".r
 
 }
 
@@ -160,26 +161,17 @@ class MainActivity extends ActionBarActivity {
 
   @Subscribe
   def navigateSection(event: NavigationEvent) = {
-    val sections = getResources.getStringArray(R.array.default_sections)
     mCurrentDrawerSelectedId = event.position
-    val currentSectionName = sections(mCurrentDrawerSelectedId)
-    val itemFragment = mCurrentDrawerSelectedId match {
+    val sections = getResources.getStringArray(R.array.sections)
+    val itemFragment = sectionMatcher.findFirstMatchIn(sections(mCurrentDrawerSelectedId)) match {
+      case Some(m) => m.subgroups match {
+        case List("weibo", p, _*) => WeiboItemFragment.newInstance(p)
+        case List("qingPage", _, p, q) => QingItemFragment.newInstance(p, q, parsePage = true)
+        case List("qingTag", _, p, q) => QingItemFragment.newInstance(p, q, parsePage = false)
+        case _ => throw new IllegalArgumentException(m.matched)
+      }
 
-      // Weibo
-      case 0 => WeiboItemFragment.newInstance(currentSectionName)
-
-      // Qing - Mao
-      case 1 => QingItemFragment.newInstance(currentSectionName, "猫", parsePage = false)
-
-      // Qing - Wei Mei
-      case 2 => QingItemFragment.newInstance(currentSectionName, "唯美", parsePage = true)
-
-      // Qing - Yi Shu
-      case 3 => QingItemFragment.newInstance(currentSectionName, "艺术", parsePage = true)
-
-      case _ => Log.d(TAG, s"$mCurrentDrawerSelectedId not ready")
-        null
-
+      case None => null
     }
 
     // update the main content by replacing fragments

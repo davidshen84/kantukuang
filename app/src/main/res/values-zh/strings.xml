@@ -9,11 +9,11 @@
     <string name="message_info_no_update">无更新</string>
     <string name="format_info_new_data">加载了 %d 条</string>
 
-    <string-array name="default_sections">
-        <item>微博</item>
-        <item>猫</item>
-        <item>唯美</item>
-        <item>艺术</item>
+    <string-array name="sections">
+        <item>weibo(微博)</item>
+        <item>qingTag(猫|猫)</item>
+        <item>qingPage(唯美|唯美)</item>
+        <item>qingPage(艺术|艺术)</item>
     </string-array>
 
     <string name="action_refresh">刷新</string>

@@ -10,11 +10,11 @@
     <string name="message_info_no_update">No update</string>
     <string name="format_info_new_data">loaded %d items</string>
 
-    <string-array name="default_sections">
-        <item>Weibo</item>
-        <item>Cat</item>
-        <item>Beauty</item>
-        <item>Art</item>
+    <string-array name="sections">
+        <item>weibo(Weibo)</item>
+        <item>qingTag(Cat|猫)</item>
+        <item>qingPage(Beauty|唯美)</item>
+        <item>qingPage(Art|艺术)</item>
     </string-array>
 
     <string name="action_refresh">Refresh</string>

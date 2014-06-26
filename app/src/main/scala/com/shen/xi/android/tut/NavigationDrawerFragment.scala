@@ -17,8 +17,6 @@ import com.google.inject.Inject
 import com.shen.xi.android.tut.event.NavigationEvent
 import com.squareup.otto.Bus
 
-import scala.collection.JavaConversions._
-
 
 object NavigationDrawerFragment {
   private val PREF_USER_LEARNED_DRAWER = "navigation_drawer_learned"
@@ -32,6 +30,7 @@ object NavigationDrawerFragment {
 
 class NavigationDrawerFragment extends Fragment {
 
+  import com.shen.xi.android.tut.MainActivity.sectionMatcher
   import com.shen.xi.android.tut.NavigationDrawerFragment.PREF_USER_LEARNED_DRAWER
 
   /**
@@ -156,10 +155,9 @@ class NavigationDrawerFragment extends Fragment {
     if (mDrawerLayout != null)
       mDrawerLayout.closeDrawer(mFragmentContainerView)
 
-    mEvent.position =position
+    mEvent.position = position
     mBus.post(mEvent)
   }
-
 
   override def onDetach() = super.onDetach()
 
@@ -195,12 +193,23 @@ class NavigationDrawerFragment extends Fragment {
   private def getActionBar = getActivity.asInstanceOf[ActionBarActivity].getSupportActionBar
 
   def initItems() = {
-    val defaultSections = getResources.getStringArray(R.array.default_sections)
+    val sections = getResources.getStringArray(R.array.sections)
 
     mTitleSectionList.clear()
+    sections foreach { s =>
 
-    mTitleSectionList.addAll(defaultSections.toSeq)
-    mTitleSectionListAdapter.notifyDataSetChanged()
+      sectionMatcher findFirstMatchIn s match {
+
+        case Some(m) => m.subgroups match {
+          case List("weibo", p, _*) => mTitleSectionList.add(p)
+          case List("qingTag", _, p, q) => mTitleSectionList.add(p)
+          case List("qingPage", _, p, q) => mTitleSectionList.add(p)
+        }
+
+        case None => throw new IllegalArgumentException(s)
+
+      }
+
+    }
   }
-
 }
