@@ -12,7 +12,7 @@
 
     <string-array name="sections">
         <item>weibo(Weibo)</item>
-        <item>qingTag(Cat|猫)</item>
+        <item>qingPage(Cat|猫)</item>
         <item>qingPage(Beauty|唯美)</item>
         <item>qingPage(Art|艺术)</item>
     </string-array>

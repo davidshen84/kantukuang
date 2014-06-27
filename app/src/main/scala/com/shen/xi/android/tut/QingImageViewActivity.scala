@@ -44,8 +44,6 @@ class QingImageViewActivity extends AbstractImageViewActivity(R.menu.qing_image_
       }
     }
 
-
-
     mSource match {
       case QingTag =>
         mArticleInfoList = jsonParser.parseArray[ArticleInfo](classOf[JList[ArticleInfo]], classOf[ArticleInfo]).asInstanceOf[JList[ArticleInfo]]
@@ -66,7 +64,7 @@ class QingImageViewActivity extends AbstractImageViewActivity(R.menu.qing_image_
 
   override def getImageUrlByOrder(order: Int) = mSource match {
     // switch to the high-def version
-    case QingTag => mArticleInfoList.get(order).href.replace("mw205", "mw600")
+    case QingTag => mArticleInfoList.get(order).imageSrc
     case QingPage => mImageUrlList.get(order)
   }
 
