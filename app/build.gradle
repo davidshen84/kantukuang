@@ -35,8 +35,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt', 'proguard-rules-test.txt'
         }
     }
+
     productFlavors {
     }
+
     packagingOptions {
         exclude 'rootdoc.txt'
         exclude 'decoder.properties'
@@ -44,19 +46,21 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:19+'
-    compile 'com.android.support:appcompat-v7:+'
+    compile 'com.android.support:support-v4:19.+'
+    compile 'com.android.support:appcompat-v7:19.+'
     compile 'com.nostra13.universalimageloader:universal-image-loader:+'
     compile 'com.google.guava:guava:+'
     compile 'com.squareup:otto:+'
-    compile 'com.github.chrisbanes.actionbarpulltorefresh:extra-abc:+'
+    compile('com.github.chrisbanes.actionbarpulltorefresh:extra-abc:+') {
+        exclude module: 'appcompat-v7'
+    }
     compile 'com.github.chrisbanes.photoview:library:+'
     compile 'org.jsoup:jsoup:1.7.+'
     compile 'com.google.oauth-client:google-oauth-client:1.17.0-rc'
     compile 'com.google.http-client:google-http-client-jackson2:1.17.0-rc'
     compile 'com.google.inject:guice:3.0:no_aop'
     compile 'com.mcxiaoke.viewpagerindicator:library:+'
-    compile 'com.google.android.gms:play-services:+'
+    compile 'com.google.android.gms:play-services:5.+'
     compile 'org.scala-lang:scala-library:2.11.+'
     compile 'org.json4s:json4s-native_2.11:+'
 
