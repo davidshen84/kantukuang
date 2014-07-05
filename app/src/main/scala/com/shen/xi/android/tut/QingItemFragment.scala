@@ -106,7 +106,7 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
 
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle) = {
 
-    val view = inflater.inflate(R.layout.fragment_qing_item, container, false)
+    val view = inflater.inflate(R.layout.fragment_item, container, false)
 
     // Set the adapter
     mListView = view.findViewById(android.R.id.list).asInstanceOf[AbsListView]
@@ -278,7 +278,7 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
   }
 
   private class ArticleInfoArrayAdapter(context: Context, list: JList[ArticleInfo])
-    extends ArrayAdapter[ArticleInfo](context, R.layout.fragment_qing_item, list) {
+    extends ArrayAdapter[ArticleInfo](context, R.layout.fragment_item, list) {
 
     @Inject
     private var mInflater: LayoutInflater = null

@@ -97,7 +97,7 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
   }
 
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle) = {
-    val view = inflater.inflate(R.layout.fragment_weibo_item, container, false)
+    val view = inflater.inflate(R.layout.fragment_item, container, false)
 
     // Set the adapter
     mPullToRefreshLayout = view.findViewById(R.id.ptr_layout).asInstanceOf[PullToRefreshLayout]
