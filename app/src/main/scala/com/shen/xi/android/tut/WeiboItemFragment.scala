@@ -1,20 +1,18 @@
 package com.shen.xi.android.tut
 
-import java.util.{ArrayList => JArrayList, List => JList}
+import java.util.{ArrayList => JArrayList}
 
 import android.app.Activity
-import android.content.{Context, Intent}
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.{LayoutInflater, View, ViewGroup}
-import android.widget.{AbsListView, AdapterView, ArrayAdapter, ImageView, ListAdapter, TextView, Toast}
+import android.widget.{AbsListView, AdapterView, ListAdapter, TextView, Toast}
 import com.google.android.gms.ads.{AdRequest, AdView}
 import com.google.inject.Inject
-import com.google.inject.name.Named
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener
-import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader}
 import com.shen.xi.android.tut.event.SectionAttachEvent
-import com.shen.xi.android.tut.util.{AdapterModifier, MySimpleImageLoadingListener}
+import com.shen.xi.android.tut.util.{ArrayBufferAdapter, MySimpleImageLoadingListener}
 import com.shen.xi.android.tut.weibo.{WeiboClient, WeiboStatus}
 import com.squareup.otto.Bus
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout
@@ -53,7 +51,6 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
   import org.json4s.native.JsonMethods._
 
   private val mSectionAttachEvent = new SectionAttachEvent()
-  private val mWeiboStatuses = new JArrayList[WeiboStatus]()
 
   /**
    * The fragment's ListView/GridView.
@@ -61,7 +58,7 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
   private var mListView: AbsListView = null
   @Inject
   private var mWeiboClient: WeiboClient = null
-  private var mWeiboItemViewArrayAdapter: WeiboItemArrayAdapter = null
+  private var mAdapter: ArrayBufferAdapter[WeiboStatus] = null
   private var mEmptyView: View = null
   private var mPullToRefreshLayout: PullToRefreshLayout = null
   private var mMainActivity: MainActivity = null
@@ -69,6 +66,7 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
   @Inject
   private var mBus: Bus = null
   private var mSectionName: String = null
+  private var mImageLoadingListener: SimpleImageLoadingListener = null
 
   /**
    * Mandatory empty constructor for the fragment manager to instantiate the
@@ -99,16 +97,21 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle) = {
     val view = inflater.inflate(R.layout.fragment_item, container, false)
 
+    // initialize the image loading listener
+    mImageLoadingListener = new MySimpleImageLoadingListener(
+      container.getMeasuredWidth,
+      getResources.getDimensionPixelSize(R.dimen.item_image_height), null)
+
     // Set the adapter
     mPullToRefreshLayout = view.findViewById(R.id.ptr_layout).asInstanceOf[PullToRefreshLayout]
     mListView = view.findViewById(android.R.id.list).asInstanceOf[AbsListView]
     mEmptyView = view.findViewById(android.R.id.empty)
     // set up data adapter
-    mWeiboItemViewArrayAdapter = new WeiboItemArrayAdapter(mMainActivity, mWeiboStatuses)
-    mListView.asInstanceOf[AdapterView[ListAdapter]].setAdapter(mWeiboItemViewArrayAdapter)
+    mAdapter = new ArrayBufferAdapter[WeiboStatus](mImageLoadingListener, _.getImageUrl)
+    mListView.asInstanceOf[AdapterView[ListAdapter]].setAdapter(mAdapter)
 
     // update empty view
-    if (mWeiboStatuses.size() > 0) {
+    if (mAdapter.size > 0) {
       setEmptyText(null)
     }
 
@@ -141,7 +144,7 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
 
     mBus.register(this)
     // trigger refresh
-    if (mWeiboStatuses.size() == 0)
+    if (mAdapter.size == 0)
       onRefreshStarted(null)
 
   }
@@ -192,7 +195,8 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
               val message = getResources.getString(R.string.format_info_new_data, int2Integer(statuses.size))
               Toast.makeText(mMainActivity, message, Toast.LENGTH_SHORT).show()
 
-              mWeiboItemViewArrayAdapter += asJavaCollection(statuses)
+              statuses ++=: mAdapter
+              setEmptyText(null)
             }
           })
         }
@@ -207,7 +211,7 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
     def refreshComplete() = getActivity.runOnUiThread(new Runnable {
       override def run(): Unit = {
         setEmptyText(
-          if (mWeiboStatuses.size() == 0)
+          if (mAdapter.size == 0)
             getResources.getString(R.string.message_info_empty_list)
           else null)
         mPullToRefreshLayout.setRefreshComplete()
@@ -216,64 +220,26 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
 
   }
 
-  def getStatuses = mWeiboStatuses.asInstanceOf[JArrayList[WeiboStatus]]
+  def getStatuses = mAdapter.asInstanceOf[JArrayList[WeiboStatus]]
 
   override def onItemClick(adapterView: AdapterView[_], view: View, i: Int, l: Long): Unit = {
-    var jsonList = "[]"
-    var picUrls = mWeiboStatuses.get(i).picUrls
+    var picUrls = mAdapter(i).picUrls
 
     if (picUrls == null || picUrls.size() == 0) {
-      picUrls = mWeiboStatuses.get(i).repostedStatus.picUrls
+      picUrls = mAdapter(i).repostedStatus.picUrls
     }
 
-    if (picUrls != null && picUrls.size() > 0) {
-      val strings = (picUrls map (t => t.thumbnail_pic.replace("thumbnail", "large"))).toList
-      jsonList = compact(render(strings))
+    val jsonString = if (picUrls != null && picUrls.size() > 0) {
+      val json = (picUrls map (t => t.thumbnail_pic.replace("thumbnail", "large"))).toList
+      compact(render(json))
     } else {
-      val strings = (mWeiboStatuses map (s => s.getImageUrl)).toList
-      jsonList = compact(render(strings))
+      val json = (mAdapter map (_.getImageUrl)).toList
+      compact(render(json))
     }
 
     val intent = new Intent(getActivity, classOf[WeiboImageViewActivity])
-    intent.putExtra(JSON_LIST, jsonList)
+    intent.putExtra(JSON_LIST, jsonString)
     startActivity(intent)
-  }
-
-  private class WeiboItemArrayAdapter(context: Context, override val list: JList[WeiboStatus])
-    extends ArrayAdapter[WeiboStatus](context, R.layout.item_image, list)
-    with AdapterModifier[WeiboStatus] {
-
-    @Inject
-    @Named("low resolution")
-    private var displayImageOptions: DisplayImageOptions = null
-    @Inject
-    private var mInflater: LayoutInflater = null
-    @Inject
-    private var mImageLoader: ImageLoader = null
-    private var mListener: SimpleImageLoadingListener = null
-
-    TuTModule.getInjector.injectMembers(this)
-
-    override def getView(position: Int, convertView: View, container: ViewGroup) = {
-      var newView: View = null
-      if (convertView == null) {
-        newView = mInflater.inflate(R.layout.item_image, container, false)
-      } else {
-        convertView.asInstanceOf[ImageView].setImageBitmap(null)
-        newView = convertView
-      }
-
-      if (mListener == null) {
-        val maxWidth = WeiboItemFragment.this.getView.getWidth
-        val maxHeight = getResources.getDimensionPixelSize(R.dimen.item_image_height)
-        mListener = new MySimpleImageLoadingListener(maxWidth, maxHeight)
-      }
-
-      mImageLoader.displayImage(getItem(position).getImageUrl, newView.asInstanceOf[ImageView],
-        displayImageOptions, mListener)
-
-      newView
-    }
   }
 
 }

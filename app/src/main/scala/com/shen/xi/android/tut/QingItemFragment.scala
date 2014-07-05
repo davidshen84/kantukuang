@@ -1,8 +1,7 @@
 package com.shen.xi.android.tut
 
-import java.util.{ArrayList => JArrayList, List => JList}
 
-import android.content.{Context, Intent}
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.util.Log
@@ -11,11 +10,9 @@ import android.widget._
 import com.google.android.gms.ads.{AdRequest, AdView}
 import com.google.api.client.http.HttpRequest
 import com.google.inject.Inject
-import com.google.inject.name.Named
-import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader}
 import com.shen.xi.android.tut.event.SectionAttachEvent
 import com.shen.xi.android.tut.sinablog.{ArticleInfo, QingPageDriver, QingTagDriver}
-import com.shen.xi.android.tut.util.{AdapterModifier, MySimpleImageLoadingListener}
+import com.shen.xi.android.tut.util.{ArrayBufferAdapter, MySimpleImageLoadingListener}
 import com.squareup.otto.Bus
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener
 import uk.co.senab.actionbarpulltorefresh.library.{ActionBarPullToRefresh, PullToRefreshLayout}
@@ -54,8 +51,6 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
   import org.json4s.native.JsonMethods._
 
 
-  // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-  private val mArticleInfoList = new JArrayList[ArticleInfo]()
   private val mSectionAttachEvent = new SectionAttachEvent()
   private var mQingTag: String = null
   private var mImageLoadingListener: MySimpleImageLoadingListener = null
@@ -64,11 +59,13 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
    * The fragment's ListView/GridView.
    */
   private var mListView: AbsListView = null
+
   /**
    * The Adapter which will be used to populate the ListView/GridView with
    * Views.
    */
-  private var mAdapter: ArticleInfoArrayAdapter = null
+  private var mAdapter: ArrayBufferAdapter[ArticleInfo] = null
+
   @Inject
   private var mQingTagDriver: QingTagDriver = null
   private var mPullToRefreshLayout: PullToRefreshLayout = null
@@ -108,10 +105,15 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
 
     val view = inflater.inflate(R.layout.fragment_item, container, false)
 
+    // initialize the image loading listener
+    mImageLoadingListener = new MySimpleImageLoadingListener(
+      container.getMeasuredWidth,
+      getResources.getDimensionPixelSize(R.dimen.item_image_height), null)
+
     // Set the adapter
     mListView = view.findViewById(android.R.id.list).asInstanceOf[AbsListView]
     mPullToRefreshLayout = view.findViewById(R.id.ptr_layout).asInstanceOf[PullToRefreshLayout]
-    mAdapter = new ArticleInfoArrayAdapter(getActivity, mArticleInfoList)
+    mAdapter = new ArrayBufferAdapter[ArticleInfo](mImageLoadingListener, _.imageSrc)
     mListView.asInstanceOf[AdapterView[ListAdapter]].setAdapter(mAdapter)
 
     // Set OnItemClickListener so we can be notified on item clicks
@@ -126,11 +128,6 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
       adRequest.addTestDevice(TestDevice)
 
     adView.loadAd(adRequest.build())
-
-    // initialize the image loading listener
-    mImageLoadingListener = new MySimpleImageLoadingListener(
-      container.getMeasuredWidth,
-      getResources.getDimensionPixelSize(R.dimen.item_image_height), null)
 
     view
   }
@@ -168,7 +165,7 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
     if (!mPullToRefreshLayout.isRefreshing) {
       mPageType match {
         case QingTag =>
-          val list = (for (a <- mArticleInfoList) yield ("href" -> a.href) ~ ("imageSrc" -> a.imageSrc)).toList
+          val list = (for (a <- mAdapter) yield ("href" -> a.href) ~ ("imageSrc" -> a.imageSrc)).toList
 
           startActivity(new Intent(getActivity, classOf[QingImageViewActivity]) {
             putExtra(AbstractImageViewActivity.JSON_LIST, compact(render(list)))
@@ -188,7 +185,7 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
 
     Future {
 
-      if (mQingPageDriver.load(mArticleInfoList.get(position).href))
+      if (mQingPageDriver.load(mAdapter(position).href))
         mQingPageDriver.getImageUrlList
       else null
 
@@ -262,7 +259,7 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
           if (articleInfoList != null && articleInfoList.size > 0) {
             Log.i(TAG, s"article count = ${articleInfoList.size}")
 
-            mAdapter += articleInfoList
+            articleInfoList ++=: mAdapter
             setEmptyText(null)
           } else {
             if (mAdapter.getCount == 0)
@@ -272,37 +269,6 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
       })
 
       case Failure(e) => e.printStackTrace()
-    }
-  }
-
-  private class ArticleInfoArrayAdapter(context: Context, override val list: JList[ArticleInfo])
-    extends ArrayAdapter[ArticleInfo](context, R.layout.fragment_item, list)
-    with AdapterModifier[ArticleInfo] {
-
-    @Inject
-    private var mInflater: LayoutInflater = null
-    @Inject
-    private var mImageLoader: ImageLoader = null
-    @Inject
-    @Named("low resolution")
-    private var displayImageOptions: DisplayImageOptions = null
-
-    TuTModule.getInjector.injectMembers(this)
-
-    override def getView(position: Int, convertView: View, parent: ViewGroup) = {
-      var newView: View = null
-
-      if (convertView == null) {
-        newView = mInflater.inflate(R.layout.item_image, parent, false)
-      } else {
-        convertView.asInstanceOf[ImageView].setImageBitmap(null)
-        newView = convertView
-      }
-
-      mImageLoader.displayImage(getItem(position).imageSrc, newView.asInstanceOf[ImageView],
-        displayImageOptions, mImageLoadingListener)
-
-      newView
     }
   }
 
