@@ -14,7 +14,7 @@ import com.google.inject.name.Named
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener
 import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader}
 import com.shen.xi.android.tut.event.SectionAttachEvent
-import com.shen.xi.android.tut.util.MySimpleImageLoadingListener
+import com.shen.xi.android.tut.util.{AdapterModifier, MySimpleImageLoadingListener}
 import com.shen.xi.android.tut.weibo.{WeiboClient, WeiboStatus}
 import com.squareup.otto.Bus
 import uk.co.senab.actionbarpulltorefresh.extras.actionbarcompat.PullToRefreshLayout
@@ -61,7 +61,7 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
   private var mListView: AbsListView = null
   @Inject
   private var mWeiboClient: WeiboClient = null
-  private var mWeiboItemViewArrayAdapter: ArrayAdapter[WeiboStatus] = null
+  private var mWeiboItemViewArrayAdapter: WeiboItemArrayAdapter = null
   private var mEmptyView: View = null
   private var mPullToRefreshLayout: PullToRefreshLayout = null
   private var mMainActivity: MainActivity = null
@@ -104,7 +104,7 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
     mListView = view.findViewById(android.R.id.list).asInstanceOf[AbsListView]
     mEmptyView = view.findViewById(android.R.id.empty)
     // set up data adapter
-    mWeiboItemViewArrayAdapter = new WeiboItemViewArrayAdapter(mMainActivity, mWeiboStatuses)
+    mWeiboItemViewArrayAdapter = new WeiboItemArrayAdapter(mMainActivity, mWeiboStatuses)
     mListView.asInstanceOf[AdapterView[ListAdapter]].setAdapter(mWeiboItemViewArrayAdapter)
 
     // update empty view
@@ -181,7 +181,10 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
       case Success(statuses) =>
 
         if (statuses == null || statuses.size == 0) {
-          Toast.makeText(mMainActivity, R.string.message_info_no_update, Toast.LENGTH_SHORT).show()
+          getActivity.runOnUiThread(new Runnable {
+            override def run(): Unit =
+              Toast.makeText(mMainActivity, R.string.message_info_no_update, Toast.LENGTH_SHORT).show()
+          })
         } else {
           mLastId = statuses(0).id
           getActivity.runOnUiThread(new Runnable {
@@ -189,8 +192,7 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
               val message = getResources.getString(R.string.format_info_new_data, int2Integer(statuses.size))
               Toast.makeText(mMainActivity, message, Toast.LENGTH_SHORT).show()
 
-              mWeiboStatuses.addAll(0, statuses)
-              mWeiboItemViewArrayAdapter.notifyDataSetChanged()
+              mWeiboItemViewArrayAdapter += asJavaCollection(statuses)
             }
           })
         }
@@ -237,8 +239,9 @@ class WeiboItemFragment extends Fragment with AdapterView.OnItemClickListener wi
     startActivity(intent)
   }
 
-  private class WeiboItemViewArrayAdapter(context: Context, statuses: JList[WeiboStatus])
-    extends ArrayAdapter[WeiboStatus](context, R.layout.item_image, statuses) {
+  private class WeiboItemArrayAdapter(context: Context, override val list: JList[WeiboStatus])
+    extends ArrayAdapter[WeiboStatus](context, R.layout.item_image, list)
+    with AdapterModifier[WeiboStatus] {
 
     @Inject
     @Named("low resolution")

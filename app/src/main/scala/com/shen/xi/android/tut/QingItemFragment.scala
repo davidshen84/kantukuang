@@ -15,7 +15,7 @@ import com.google.inject.name.Named
 import com.nostra13.universalimageloader.core.{DisplayImageOptions, ImageLoader}
 import com.shen.xi.android.tut.event.SectionAttachEvent
 import com.shen.xi.android.tut.sinablog.{ArticleInfo, QingPageDriver, QingTagDriver}
-import com.shen.xi.android.tut.util.MySimpleImageLoadingListener
+import com.shen.xi.android.tut.util.{AdapterModifier, MySimpleImageLoadingListener}
 import com.squareup.otto.Bus
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener
 import uk.co.senab.actionbarpulltorefresh.library.{ActionBarPullToRefresh, PullToRefreshLayout}
@@ -68,7 +68,7 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
    * The Adapter which will be used to populate the ListView/GridView with
    * Views.
    */
-  private var mAdapter: ArrayAdapter[_] = null
+  private var mAdapter: ArticleInfoArrayAdapter = null
   @Inject
   private var mQingTagDriver: QingTagDriver = null
   private var mPullToRefreshLayout: PullToRefreshLayout = null
@@ -262,9 +262,7 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
           if (articleInfoList != null && articleInfoList.size > 0) {
             Log.i(TAG, s"article count = ${articleInfoList.size}")
 
-            mArticleInfoList.addAll(0, articleInfoList)
-            mAdapter.notifyDataSetChanged()
-
+            mAdapter += articleInfoList
             setEmptyText(null)
           } else {
             if (mAdapter.getCount == 0)
@@ -277,8 +275,9 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
     }
   }
 
-  private class ArticleInfoArrayAdapter(context: Context, list: JList[ArticleInfo])
-    extends ArrayAdapter[ArticleInfo](context, R.layout.fragment_item, list) {
+  private class ArticleInfoArrayAdapter(context: Context, override val list: JList[ArticleInfo])
+    extends ArrayAdapter[ArticleInfo](context, R.layout.fragment_item, list)
+    with AdapterModifier[ArticleInfo] {
 
     @Inject
     private var mInflater: LayoutInflater = null
@@ -305,7 +304,6 @@ class QingItemFragment extends Fragment with AdapterView.OnItemClickListener wit
 
       newView
     }
-
   }
 
 }
